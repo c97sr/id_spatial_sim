@@ -1,5 +1,8 @@
 rm(list=ls(all=TRUE))
-# setwd("~/Dropbox/svneclipse/spatialsim/spatialsim/src/rcode")
+# setwd("~/Dropbox/git/id_spatial_sim/src/R")
+require("raster")
+
+r <- raster("~/Dropbox/tmp/Spatial_Data/AllCountries/AllCountriesOutline.sbx")
 
 # options(error=recover)
 # options(error=NULL)

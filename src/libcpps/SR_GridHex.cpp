@@ -103,6 +103,7 @@ SR::Node** SR::Hexagon::LastOfChar(int i) {
 };
 
 SR::GridHex::GridHex(SR::ParameterSet& p, SR::Hexagon tmphex, SR::DensityField& homes) {
+
 	sizeVecHexagons = p.GetIntValue("intMaxNoHexagons");
 	sizeVecNodes = p.GetIntValue("intNoNodes");
 	vecNodes = new SR::Node[sizeVecNodes];
@@ -147,7 +148,7 @@ SR::GridHex::GridHex(SR::ParameterSet& p, SR::Hexagon tmphex, SR::DensityField& 
 			if (vecNodes+sizeVecNodes > tmpPtNode+intHouseholdCounter) tmpPtNodeEndHouse = (tmpPtNode + intHouseholdCounter);
 			else {
 				tmpPtNodeEndHouse = vecNodes+sizeVecNodes;
-				intHouseholdCounter = vecNodes+sizeVecNodes-tmpPtNode;
+				intHouseholdCounter = vecNodes + sizeVecNodes - tmpPtNode;
 			}
 			while (tmpPtNode != tmpPtNodeEndHouse) {
 				tmpPtNode->ptGridHex = this;
@@ -168,7 +169,6 @@ SR::GridHex::GridHex(SR::ParameterSet& p, SR::Hexagon tmphex, SR::DensityField& 
 	intMinYCoord = 9999999;
 	dblHexagonWidth = p.GetValue("dblHexagonWidth");
 	SR::Node* ptNode = vecNodes;
-
 
 	tmpIntCoord = RealToHexCoords(GetMaxDx(),GetMaxDy());
 	intNoXCoords = tmpIntCoord.x + 1;

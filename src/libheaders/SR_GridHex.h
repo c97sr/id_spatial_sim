@@ -126,7 +126,7 @@ namespace SR {
 		inline void SetX(double x) {dblX=x;};
 		inline void SetY(double y) {dblY=y;};
 		friend ofstream& operator<<(ofstream& ofs, Node& n);
-		friend Node SR::ReadNodeBinaryFromFile(ifstream& ifs);
+		friend SR::Node ReadNodeBinaryFromFile(ifstream& ifs);
 		string OutputNodeToLine();
 		inline GridHex* GetPtGridHex(){return ptGridHex;};
 		inline void SetPtGridHex(GridHex* g) {ptGridHex = g;};
