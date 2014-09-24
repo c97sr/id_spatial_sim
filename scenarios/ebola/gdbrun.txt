@@ -7,3 +7,5 @@
 file ../../g++/flu_build.exe 
 # Up to here
 set args ./both_setup.in ./network/pop
+
+break SR_GridHex.cpp:198
