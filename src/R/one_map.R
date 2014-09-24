@@ -2,18 +2,16 @@ rm(list=ls(all=TRUE))
 # setwd("~/Dropbox/git/id_spatial_sim/src/R")
 require("raster")
 
-r <- raster("~/Dropbox/tmp/Spatial_Data/AllCountries/AllCountriesOutline.sbx")
-
 # options(error=recover)
 # options(error=NULL)
 # require("fields")
 # require("lattice")
 require("sp")
 require("scales")
-source("../../../../idsource/R/stevensRfunctions.R")
+source("~/Dropbox/svneclipse/idsource/R/stevensRfunctions.R")
 
-fnPopdata = "../../data/prd_sim_ascii_n_44384655.txt"
-fnEpidata = "../../runtemplates/ebola/output/flusars_2_pset_0_Events.out"
+fnPopdata = "../../data/conakryAscii.asc"
+fnEpidata = "../../scenarios/ebola/output/flusars_2_pset_0_Events.out"
 fnOutStem = "~/Dropbox/tmp/debg"
 
 popgrid <- read.asciigrid(fnPopdata,as.image=TRUE)
