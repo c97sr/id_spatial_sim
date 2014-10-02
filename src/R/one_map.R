@@ -10,17 +10,28 @@ require("sp")
 require("scales")
 source("~/Dropbox/svneclipse/idsource/R/stevensRfunctions.R")
 
-fnPopdata = "../../data/conakryAscii.asc"
-fnEpidata = "../../scenarios/ebola/output/flusars_2_pset_0_Events.out"
+fnPopdata = "../../data/monroviaAscii.asc"
+fnEpidata = "../../scenarios/ebola/output/ebola_pset_0_Events.out"
 fnOutStem = "~/Dropbox/tmp/debg"
 
 popgrid <- read.asciigrid(fnPopdata,as.image=TRUE)
 popgrid$x <- popgrid$x * pi / 180
 popgrid$y <- popgrid$y * pi / 180
-data <- read.table(file=fnEpidata,header=TRUE)
-epiImage <- eventImage(data,popgrid,0,0,1000,0,0)
+dat <- read.table(file=fnEpidata,header=TRUE)
+epiImage <- eventImage(dat,popgrid,0,0,1000,0,0)
 
 pdf(file=paste(fnOutStem,"pop.pdf",sep=""))
-	image(popgrid$x,popgrid$y,log(popgrid$z+0.5),col=grey_pal()(100))
+	image(popgrid$x,popgrid$y,log(popgrid$z+0.5),col=rev(grey_pal()(100)))
 	image(epiImage$x,epiImage$y,epiImage$z,add=TRUE)
 dev.off()
+
+tmp <- dat[dat$Event == 0,]
+names(tmp)
+x <- table(tmp$Run,tmp$Event)
+x
+
+
+
+
+
+

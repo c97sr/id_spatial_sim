@@ -12,7 +12,7 @@ CXX = g++
 # Set local paths
 SRCLIBCPP = ../src/libcpps
 SRCLIBHEADER = ../src/libheaders
-SRCLIBMAIN = ../src/projects/FLU
+SRCLIBMAIN = ../src/projects/ebola
 NRCHEADDIR = ../nrcpptmp/other
 NRCSRCDIR = ../nrcpptmp/recipes
 
@@ -50,15 +50,15 @@ OBJFILES = 	ran1.o ran2.o gamdev.o gammln.o poidev.o \
 			SR_BytePackedInt.o SR_CachedLookups.o SR_DensityField.o SR_EventMatrix.o \
 			SR_GatherRunInformation.o SR_GridHex.o SR_InitialConditions.o SR_Kernels.o \
 			SR_Label.o SR_PagesForThings.o SR_Parameter.o SR_Stats.o SR_StripComments.o \
-			SR_Utility.o SR_Workplaces.o flu_common.o
+			SR_Utility.o SR_Workplaces.o ebola_common.o
 
-all : flu_build.exe flu_run.exe
+all : ebola_build.exe ebola_run.exe
 
-flu_run.exe : $(OBJFILES) flu_run.o  
-	$(CXX) $(OBJFILES) flu_run.o -o $@ $(LDFLAGS) 
+ebola_run.exe : $(OBJFILES) ebola_run.o  
+	$(CXX) $(OBJFILES) ebola_run.o -o $@ $(LDFLAGS) 
 
-flu_build.exe : $(OBJFILES) flu_build.o  
-	$(CXX) $(OBJFILES) flu_build.o -o $@ $(LDFLAGS)
+ebola_build.exe : $(OBJFILES) ebola_build.o  
+	$(CXX) $(OBJFILES) ebola_build.o -o $@ $(LDFLAGS)
 
 clean:
 	rm *.o *.exe

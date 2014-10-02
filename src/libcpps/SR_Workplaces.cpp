@@ -386,16 +386,17 @@ void SR::Workplaces::MCMCUpdate(GridHex& gh, ParameterSet& p, double pdistance(d
 	int intNoAllWorkplaces = sizeVecWorkplaces;
 	int intNoNearbyWorkplaces;
 
+	// These might be the wrong indexes... 0 and 1, no? XXXX errors here XXXX
 	double vecp0[2];
-	vecp0[1] = p.GetValue("Commute_Power_One_GZ");
-	vecp0[2] = p.GetValue("Commute_Change_Point_GZ");
+	vecp0[0] = p.GetValue("Commute_Power_One_GZ");
+	vecp0[1] = p.GetValue("Commute_Change_Point_GZ");
 
 	double vecp1[2];
-	vecp1[1] = p.GetValue("Commute_Power_One_HK");
-	vecp1[2] = p.GetValue("Commute_Change_Point_HK");
+	vecp1[0] = p.GetValue("Commute_Power_One_HK");
+	vecp1[1] = p.GetValue("Commute_Change_Point_HK");
 
 	SR::CachedDblLookup cached_pdistance_0(pdistance,startscale,incsPerOrder,noOrders,2,vecp0);
-	SR::CachedDblLookup cached_pdistance_1(pdistance,startscale,incsPerOrder,noOrders,2,vecp0);
+	SR::CachedDblLookup cached_pdistance_1(pdistance,startscale,incsPerOrder,noOrders,2,vecp1);
 
 	// SR::OpenNullFile(funcfile,cached_pdistance.PrintDistributionOfCommutes());
 
@@ -427,7 +428,7 @@ void SR::Workplaces::MCMCUpdate(GridHex& gh, ParameterSet& p, double pdistance(d
 			// Why is line -1 "> 0" and line -3 "!=1"
 			if (intNoNearbyWorkplaces > 0 && NR::ran2(p.intSeed) < dblLocalThreshold) {
 				// Choose workplace number
-				while (ptProposedWorkplace==ptCurrentWorkplace && intNoNearbyWorkplaces != 1) {
+				while (ptProposedWorkplace == ptCurrentWorkplace && intNoNearbyWorkplaces != 1) {
 					intKingsSquareOffset=0;
 					tmpIndexWorkplace = static_cast<int>(static_cast<double>(intNoNearbyWorkplaces)*NR::ran2(p.intSeed));
 					while (tmpIndexWorkplace >= ptArrNumberEachNearbyWorkplaces[intTmpNodeGridIndex*9+intKingsSquareOffset]) {
@@ -440,6 +441,8 @@ void SR::Workplaces::MCMCUpdate(GridHex& gh, ParameterSet& p, double pdistance(d
 				if (indexProposedWorkplace < 0 || indexProposedWorkplace >= sizeVecWorkplaces) SR::srerror("problem");
 			} else {
 				while (ptProposedWorkplace==ptCurrentWorkplace) {
+
+					// intNoAllWorkplaces seems badly wrong
 					indexProposedWorkplace = static_cast<int>(1.0*intNoAllWorkplaces*NR::ran2(p.intSeed));
 					ptProposedWorkplace = vecWorkplaces+indexProposedWorkplace;
 				}

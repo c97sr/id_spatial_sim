@@ -3,13 +3,13 @@
 TOP="../../"
 BINDIR=$TOP"g++/"
 PARSTEM="both"
-BUILD="flu_build.exe"
-RUN="flu_run.exe"
+BUILD="ebola_build.exe"
+RUN="ebola_run.exe"
 
 OUTDIR="./output/"
 NETDIR="./network/"
-OUTSTEM="pop"
+OUTSTEM="ebola_pop"
 
-$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}flusars_2
+$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola
 
 

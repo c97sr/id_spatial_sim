@@ -809,6 +809,7 @@ void RunExtraParameters(SR::ParameterSet &p) {
 	p.Lock();
 };
 
+// This function takes the attack rate and tries to calculate the correct attack rates
 void CalcBetasWithAttackRate(SR::ParameterSet &p, SR::GridHex& g, SR::KERNEL k) {
 	double nn= g.CalculateAverageSpatialNeighbours(); //NMF
 	double nh = g.CalculateAverageHousehold();
@@ -853,7 +854,7 @@ void CalcBetasWithAttackRate(SR::ParameterSet &p, SR::GridHex& g, SR::KERNEL k) 
 	if (attack_rate==0) {current_beta=0;stop_flag=true;}
 
 	cerr << "Setting absolute hazards for network transmission using attack rate XXX ...";
-	// Chould also have the option for setting with R0 here
+	// Should also have the option for setting with R0 here
 	while (!stop_flag) {
 		p_pro_home = CalcProbContactInfected(feverVec,timestep,current_beta*h_hn);
 		p_symp_home = CalcProbContactInfected(rashVec,timestep,current_beta*h_hn*h_rf);

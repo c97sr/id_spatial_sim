@@ -171,7 +171,9 @@ SR::GridHex::GridHex(SR::ParameterSet& p, SR::Hexagon tmphex, SR::DensityField& 
 	SR::Node* ptNode = vecNodes;
 
 	tmpIntCoord = RealToHexCoords(GetMaxDx(),GetMaxDy());
-	intNoXCoords = tmpIntCoord.x + 1;
+
+	// SR 20140930 these changed line below from +1 to +2. Some approximation in hexagons needs looking at
+	intNoXCoords = tmpIntCoord.x + 2;
 	intNoYCoords = tmpIntCoord.y + 2;
 
 	lastHexagon = vecHexagon+intNoXCoords*intNoYCoords;
