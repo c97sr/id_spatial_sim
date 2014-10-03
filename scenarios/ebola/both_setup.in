@@ -11,7 +11,7 @@
 	strHouseholdDensityFile	0	../../data/monroviaAscii.asc [Uniform_0_to_199, prd_sim_ascii_n_44384655, westAfricaAscii, monroviaAscii]
 
 [Workplace setup]			
-	dblPropColleguesInNetwork	1	0.1
+	dblPropColleguesInNetwork	1	0.0
 	dblAverageWorkplaceSize	1	1000
 	strWorkplaceDensityFile	0 	../../data/monroviaAscii.asc [../data/Uniform_0_to_199]
 	dblDistanceAllWorkplacesHistDx	1	10
