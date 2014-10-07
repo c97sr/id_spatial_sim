@@ -52,6 +52,7 @@ double kernNeighbourInfection(SR::ParameterSet &p, SR::Node* pt1, SR::Node* pt2,
 double kernHouseholdInfectionSymp(SR::ParameterSet &p, SR::Node* pt1, SR::Node* pt2, double offset);
 double kernNeighbourInfectionSymp(SR::ParameterSet &p, SR::Node* pt1, SR::Node* pt2, double offset);
 double kernIntroSetup(SR::ParameterSet &p, SR::Node* pt1, SR::Node* pt2, double offset);
+double kernSpatialEbola(SR::ParameterSet &p, SR::Node* pt1, SR::Node* pt2, double offset);
 double DensityTest(double x, double y);
 void SetUpExtraParameters(SR::ParameterSet &p);
 void RunExtraParameters(SR::ParameterSet &p);

@@ -70,9 +70,31 @@ double kernSpatialInfection(SR::ParameterSet &p, SR::Node* pt1, SR::Node* pt2, d
 	return  (*ts)*newconstant*(*constant)*pow((dist+1),-(*decay));
 };
 
-double kernSpatialInfectionExp(SR::ParameterSet &p, SR::Node* pt1, SR::Node* pt2, double offset) {
+double kernSpatialEbola(SR::ParameterSet &p, SR::Node* pt1, SR::Node* pt2, double offset) {
 	static double* constant = p.GetPointer("Relative_Transmit_Spatial");
 	static double* decay = p.GetPointer("Decay_Transmit_Spatial");
+	static double* cutdist = p.GetPointer("Cutoff_Distance_Transmit_Spatial");
+	static double* cuttime = p.GetPointer("Cutoff_Time_Transmit_Spatial");
+	static double* cuttimefactor = p.GetPointer("Cutoff_Factor_Transmit_Spatial");
+	static double* ts = p.GetPointer("dblTimeStep");
+	static double* t = p.GetPointer("dblCurrentTime");
+	static double newconstant;
+	static double debug;
+	double dist;
+	newconstant = 1;
+	dist = pt1->Distance(pt2)-offset;
+	if (*decay == 0) return (*ts)*(*constant);
+	if (dist < *cutdist) return 0;
+	if (*t < *cuttime) newconstant *= *cuttimefactor;
+	debug = (*ts)*newconstant*(*constant)*pow((dist+1),-(*decay));
+	return  (*ts)*newconstant*(*constant)*pow((dist+1),-(*decay));
+};
+
+
+double kernSpatialInfectionExp(SR::ParameterSet &p, SR::Node* pt1, SR::Node* pt2, double offset) {
+	static double* constant = p.GetPointer("Relative_Transmit_Spatial");
+	static double* alpha = p.GetPointer("Decay_Transmit_Spatial");
+	static double* rho = p.GetPointer("Offset_Transmit_Spatial");
 	static double* cutdist = p.GetPointer("Cutoff_Distance_Transmit_Spatial");
 	static double* cuttime = p.GetPointer("Cutoff_Time_Transmit_Spatial");
 	static double* cuttimefactor = p.GetPointer("Cutoff_Factor_Transmit_Spatial");
@@ -86,8 +108,7 @@ double kernSpatialInfectionExp(SR::ParameterSet &p, SR::Node* pt1, SR::Node* pt2
 	dist = pt1->Distance(pt2)-offset;
 	if (dist < *cutdist) return 0;
 	if (*t < *cuttime) newconstant *= *cuttimefactor;
-	debug = (*ts)*newconstant*(*constant)*exp(-(*decay)*(dist));
-	return (*ts)*newconstant*(*constant)*exp(-(*decay)*(dist));
+	return (*ts)*newconstant*(*constant)*(pow((1+dist/(*rho)),-1.0 * (*alpha)));
 };
 
 double kernFileCached(SR::ParameterSet &p, SR::Node* pt1, SR::Node* pt2, double offset) {
@@ -834,6 +855,7 @@ void CalcBetasWithAttackRate(SR::ParameterSet &p, SR::GridHex& g, SR::KERNEL k) 
 	double spatial_coeff;
 	int stop_flag=false;
 	int notry=0;
+	double epsilon=1e-10;
 	static double p_symp_home,p_symp_network,p_pro_home,p_pro_network;
 	static double lower_beta,current_beta,upper_beta;
 	static double current_r0;
@@ -851,38 +873,53 @@ void CalcBetasWithAttackRate(SR::ParameterSet &p, SR::GridHex& g, SR::KERNEL k) 
 
 	lower_beta=0;
 	upper_beta=100.0;
-	current_beta=0.5;
 	lower_ar=0;
 	upper_ar=1;
 
-	if (attack_rate==0) {current_beta=0;stop_flag=true;}
+	// Start the different conditions for parameterizing
+	// If the attack rate is greater than zero and network R0 zero
+	if (attack_rate > epsilon && r0n < epsilon) {
+		current_beta=0.5;
+		stop_flag=0;
+		cerr << "Setting absolute hazards for network transmission using attack rate ...";
+		// Should also have the option for setting with R0 here
+		while (!stop_flag) {
+			p_pro_home = CalcProbContactInfected(feverVec,timestep,current_beta*h_hn);
+			p_symp_home = CalcProbContactInfected(rashVec,timestep,current_beta*h_hn*h_rf);
+			current_ar = p_pro_home+(1-p_pro_home)*p_symp_home;
+			if (attack_rate > current_ar) {lower_ar=current_ar;lower_beta=current_beta;current_beta=(lower_beta+upper_beta)/2.0;}
+			else {upper_ar=current_ar;upper_beta=current_beta;current_beta=(lower_beta+upper_beta)/2.0;}
+			notry++;
+			if (notry > ar_max_tries) SR::srerror("Could not get accurate enough r0 network with allowed number of attempts");
+			if (upper_ar - lower_ar < ar_accuracy) {current_beta=(lower_beta+upper_beta)/2.0;stop_flag=true;}
+		}
+		cerr << "done.\n";
 
-	cerr << "Setting absolute hazards for network transmission using attack rate ...";
-	// Should also have the option for setting with R0 here
-	while (!stop_flag) {
-		p_pro_home = CalcProbContactInfected(feverVec,timestep,current_beta*h_hn);
-		p_symp_home = CalcProbContactInfected(rashVec,timestep,current_beta*h_hn*h_rf);
-		current_ar = p_pro_home+(1-p_pro_home)*p_symp_home;
-		if (attack_rate > current_ar) {lower_ar=current_ar;lower_beta=current_beta;current_beta=(lower_beta+upper_beta)/2.0;}
-		else {upper_ar=current_ar;upper_beta=current_beta;current_beta=(lower_beta+upper_beta)/2.0;}
-		notry++;
-		if (notry > ar_max_tries) SR::srerror("Could not get accurate enough r0 network with allowed number of attempts");
-		if (upper_ar - lower_ar < ar_accuracy) {current_beta=(lower_beta+upper_beta)/2.0;stop_flag=true;}
-	}
+	// Network ro greater than zero but no attack rate
+	} else if (attack_rate < epsilon && r0n > epsilon) {
+		current_beta=0.5;
+		stop_flag=0;
+		cerr << "Setting absolute hazards for network transmission using network R0 ...";
+		if (nn < epsilon) SR::srerror("Trying to get an r0 in the network without any network!");
+		while (!stop_flag) {
+			p_pro_network = CalcProbContactInfected(feverVec,timestep,current_beta);
+			p_symp_network = CalcProbContactInfected(earlyRashVec,timestep,current_beta*h_rf);
+			current_r0n = nn*(p_pro_network+(1-p_pro_network)*p_symp_network);
+			if (r0n > current_r0n) {lower_r0n=current_r0n;lower_beta=current_beta;current_beta=(lower_beta+upper_beta)/2.0;}
+			else {upper_r0n=current_r0n;upper_beta=current_beta;current_beta=(lower_beta+upper_beta)/2.0;}
+			notry++;
+			if (notry > ar_max_tries) SR::srerror("Could not get accurate enough r0 network with allowed number of attempts");
+			if (upper_r0n - lower_r0n < ar_accuracy*nn) {current_beta=(lower_beta+upper_beta)/2.0;stop_flag=true;}
+		}
+		cerr << "done.\n";
 
-	if (attack_rate==0) {current_beta=0.5;stop_flag=false;}
+	// Both r0 and attack rate zero
+	} else if (attack_rate < epsilon && r0n < epsilon) {
+		current_beta=0;
 
-	cerr << "Setting absolute hazards for network transmission using network R0 ...";
-
-	while (!stop_flag) {
-		p_pro_network = CalcProbContactInfected(feverVec,timestep,current_beta);
-		p_symp_network = CalcProbContactInfected(earlyRashVec,timestep,current_beta*h_rf);
-		current_r0n = nn*(p_pro_network+(1-p_pro_network)*p_symp_network);
-		if (r0n > current_r0n) {lower_r0n=current_r0n;lower_beta=current_beta;current_beta=(lower_beta+upper_beta)/2.0;}
-		else {upper_r0n=current_r0n;upper_beta=current_beta;current_beta=(lower_beta+upper_beta)/2.0;}
-		notry++;
-		if (notry > ar_max_tries) SR::srerror("Could not get accurate enough r0 network with allowed number of attempts");
-		if (upper_r0n - lower_r0n < ar_accuracy*nn) {current_beta=(lower_beta+upper_beta)/2.0;stop_flag=true;}
+	// Throw and error if they are both non zero
+	} else {
+		SR::srerror("Can't have attack rate and network R0 be greater than zero");
 	}
 
 	p.ChangeValue("Common_Constant_Transmit",current_beta);

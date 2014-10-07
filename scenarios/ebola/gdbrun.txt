@@ -4,9 +4,12 @@
 # for sudden seg faults, try "bt" after the seg fault to see where it occurred
 # lots more at http://www.gnu.org/software/gdb/
 
-file ../../g++/flu_build.exe 
+# file ../../g++/ebola_build.exe
+file ../../g++/ebola_run.exe 
 
 # Up to here
-set args ./both_setup.in ./network/pop
+# set args ./both_setup.in ./network/pop
+set args ./both_run.in ./network/ebola_pop ./output/ebola
 
-break SR_GridHex.cpp:198
+# break SR_GridHex.cpp:198
+break ebola_common.cpp:860

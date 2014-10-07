@@ -126,10 +126,11 @@ int main(int argc, char* argv[]) {
 		if (ukPars.GetTag("strEventLogging")=="TRUE") gatherA.StartEventLogging();
 		else gatherA.StopEventLogging();
 
+		// Have removed cached kernel from below
 		SR::SpatialKernel ukPoxSpatial(
 			SourceCharacteristicAllSpatial,
 			TargetCharacteristic,
-			kernFileCached,
+			kernSpatialEbola,
 			procInfection,
 			ukPars.GetIntValue("intInfectionKernelStackSize"),
 			0);
@@ -168,7 +169,7 @@ int main(int argc, char* argv[]) {
 		blReset = static_cast<bool>(ukPars.GetValue("boolResetICEachRealisation"));
 		double dblMaxNoInfections = ukPars.GetValue("intMaxCumInfections");
 
-		CalcBetasWithAttackRate(ukPars,ukGridHex,kernFileCached);
+		CalcBetasWithAttackRate(ukPars,ukGridHex,kernSpatialEbola);
 
 		// Declare a suitable event matrix and initialize fixed initial node
 		int remMaxDelay=static_cast<int>(ukPars.GetValue("Latent_Vaccinated_One_Maximum_Time")/ukPars.GetValue("dblTimeStep")+1);
