@@ -102,9 +102,8 @@ double kernSpatialInfectionExp(SR::ParameterSet &p, SR::Node* pt1, SR::Node* pt2
 	static double* t = p.GetPointer("dblCurrentTime");
 	double dist;
 	static double newconstant;
-	static double debug;
 	newconstant = 1;
-	if (*decay == 0) return (*ts)*(*constant);
+	if (*alpha == 0) return (*ts)*(*constant);
 	dist = pt1->Distance(pt2)-offset;
 	if (dist < *cutdist) return 0;
 	if (*t < *cuttime) newconstant *= *cuttimefactor;

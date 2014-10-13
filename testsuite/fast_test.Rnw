@@ -15,7 +15,7 @@
 \newcommand{\eeq}{\end{equation}}
 \newcommand{\m}[1]{\mathbf{#1}}
 
-\title{Test of id\_spatial\_sim}
+\title{Spatial simulation code for 2014 EBV epidemic}
 \author{Steven Riley}
 \date{\today}
 
@@ -47,21 +47,41 @@ options(width=80)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Playing around with the ebola library}
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
-When this is not being run in bacth mode, we need to set the working directoy.
+This R script goes with a bacth file in the testsuite directory of the
+id\_sptail\_sim library. After grabbing the code as a zip file from
+http:XXgoo.glXabcdef, you should be able to generate the simulation
+results and then the pdf of this script with the following commands
+
+\begin{verbatim}
+gunzip id_spatial_sim.zip 
+cd id_spatial_sim/g++ 
+make 
+cd ../testsuite 
+./fast_test.sh 
+\end{verbatim}
+
+
+When this is not being run in bacth mode, we need to set the working directory.
 This appears here as a comment, so it is not run when in batch mode.
 
 <<>>=
+rm(list=ls(all=TRUE))
 # setwd("~/Dropbox/git/id_spatial_sim/testsuite")
 @
 
-First we declare some packages that we will use below.
+First we declare some packages and local libraries that might be needed. If the
+script goes into more general use, the dependency on the local libraries will
+have to be removed.
 
 <<>>=
 require("raster")
+require("scales")
+require("sp")
+require("rgdal")
+source("~/Dropbox/svneclipse/idsource/R/stevensRfunctions.R")
 @
 
 The first line of the batch file builds a synthetic population with density
@@ -81,7 +101,15 @@ times. The outbreak is seeded in the same area as the reported patient zero for
 the 2014 Ebola outbreak. There are 4 iniitally infectious individuals at time
 $t=0$. Transmission is only via the spatial kernel and thus allows us to test
 that the basic reproductive number is parameterized correctly. We can also
-report the serial interval.
+report the serial interval. 
+
+%{\bf Table 1. Key parameters of the simulation model}
+%
+%\begin{tabular}{lll} \hline
+%Parameter & Value & Notes \\ \hline
+%$R_0$ spatial & 1.6 & From fully spatial kernel \\
+%Mean latent period & XXX & XXX \\ \hline
+%\end{tabular}
 
 We first load the linelist of events from all the realizations. And check the
 dimensions of the output. The output was designed before csvs became so
@@ -158,7 +186,43 @@ in Spain are not entirely inconsistent with the NEJM estimated parameters.
 \subsection{Spatial analysis}
 
 Next we load up the population desity on which the model was based and look at
-the spatial distribution of these initial infections.
+the spatial distribution of these initial infections. The simulation is using
+the kernel shape and parameters from the SI file that Azra sent last week.
+
+Note that the pattern is way too diffuse because the population
+density is only at about 1\% of the real density. The same kernel will bring
+all these first generation events in much closer with the real population
+density. This section is working, but I can't get the aggregate function to work
+properly and give lower resolution for the event map.
+
+<<>>=
+popgrid <- read.asciigrid("../data/westAfricaAscii_agg100.asc",as.image=TRUE)
+sum(popgrid$z,na.rm=TRUE)
+popgrid$x <- popgrid$x * pi / 180
+popgrid$y <- popgrid$y * pi / 180
+epiImage <- eventImage(dat1,popgrid,0,0,1000,0,1000)
+image(popgrid$x,popgrid$y,log(popgrid$z+0.5),col=rev(grey_pal()(100)),xlab="",ylab="")
+image(epiImage$x,epiImage$y,epiImage$z,add=TRUE)
+@
+
+Next is to figure out how to extract district incidence from the simulation
+results so it can be compared with the data.
+
+The shape files loaded below are not the publically available adm2 files.
+
+<<>>=
+shapeDir <- "/Users/sriley/srileytmp/sfs"
+dists <- readOGR(dsn=shapeDir,layer="ThreeCountries")
+summary(dists)
+plot(dists)
+@
+
+Now generate incidence from the polygons and the simulation results, by making a
+vector of districts associated with each event.
+
+<<>>=
+incidence <- overlay(SpatialPoints(cbind(lon=x,lat=y)),dists)
+@
 
 \end{document}
 

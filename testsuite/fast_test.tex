@@ -69,7 +69,7 @@
 \newcommand{\eeq}{\end{equation}}
 \newcommand{\m}[1]{\mathbf{#1}}
 
-\title{Test of id\_spatial\_sim}
+\title{Spatial simulation code for 2014 EBV epidemic}
 \author{Steven Riley}
 \date{\today}
 
@@ -99,23 +99,39 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Playing around with the ebola library}
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
-When this is not being run in bacth mode, we need to set the working directoy.
+This R script goes with a bacth file in the testsuite directory of the
+id\_sptail\_sim library. After grabbing the code as a zip file from
+http:XXgoo.glXabcdef, you should be able to generate the simulation
+results and then the pdf of this script with the following commands
+
+\begin{verbatim}
+gunzip id_spatial_sim.zip 
+cd id_spatial_sim/g++ 
+make 
+cd ../testsuite 
+./fast_test.sh 
+\end{verbatim}
+
+
+When this is not being run in bacth mode, we need to set the working directory.
 This appears here as a comment, so it is not run when in batch mode.
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
+\hlfunctioncall{rm}(list=\hlfunctioncall{ls}(all=TRUE))
 \hlcomment{# setwd("~/Dropbox/git/id_spatial_sim/testsuite")}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
 
 
-First we declare some packages that we will use below.
+First we declare some packages and local libraries that might be needed. If the
+script goes into more general use, the dependency on the local libraries will
+have to be removed.
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -128,7 +144,31 @@ First we declare some packages that we will use below.
 
 {\ttfamily\noindent\itshape\color{messagecolor}{\#\# Loading required package: methods}}
 
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Loading required package: sp}}\end{kframe}
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Loading required package: sp}}\begin{alltt}
+\hlfunctioncall{require}(\hlstring{"scales"})
+\end{alltt}
+
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Loading required package: scales}}\begin{alltt}
+\hlfunctioncall{require}(\hlstring{"sp"})
+\hlfunctioncall{require}(\hlstring{"rgdal"})
+\end{alltt}
+
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# Loading required package: rgdal}}
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# rgdal: version: 0.8-9, (SVN revision 470)\\\#\# Geospatial Data Abstraction Library extensions to R successfully loaded\\\#\# Loaded GDAL runtime: GDAL 1.9.2, released 2012/10/08\\\#\# Path to GDAL shared files: /Library/Frameworks/R.framework/Versions/3.0/Resources/library/rgdal/gdal\\\#\# Loaded PROJ.4 runtime: Rel. 4.8.0, 6 March 2012, [PJ\_VERSION: 480]\\\#\# Path to PROJ.4 shared files: /Library/Frameworks/R.framework/Versions/3.0/Resources/library/rgdal/proj}}\begin{alltt}
+\hlfunctioncall{source}(\hlstring{"~/Dropbox/svneclipse/idsource/R/stevensRfunctions.R"})
+\end{alltt}
+\begin{verbatim}
+## Reading in stevensRfunctions.R
+## The latest version of this file can be loaded into R with
+## source("http://idsource.googlecode.com/svn/trunk/R/stevensRfunctions.R") or
+## source("http://tinyurl.com/5t7gwnv")
+## Revision X of this file can be loaded into R with
+## source("http://idsource.googlecode.com/svn-history/rX/trunk/R/stevensRfunctions.R")
+\end{verbatim}
+\end{kframe}
 \end{knitrout}
 
 
@@ -149,7 +189,15 @@ times. The outbreak is seeded in the same area as the reported patient zero for
 the 2014 Ebola outbreak. There are 4 iniitally infectious individuals at time
 $t=0$. Transmission is only via the spatial kernel and thus allows us to test
 that the basic reproductive number is parameterized correctly. We can also
-report the serial interval.
+report the serial interval. 
+
+%{\bf Table 1. Key parameters of the simulation model}
+%
+%\begin{tabular}{lll} \hline
+%Parameter & Value & Notes \\ \hline
+%$R_0$ spatial & 1.6 & From fully spatial kernel \\
+%Mean latent period & XXX & XXX \\ \hline
+%\end{tabular}
 
 We first load the linelist of events from all the realizations. And check the
 dimensions of the output. The output was designed before csvs became so
@@ -311,7 +359,148 @@ in Spain are not entirely inconsistent with the NEJM estimated parameters.
 \subsection{Spatial analysis}
 
 Next we load up the population desity on which the model was based and look at
-the spatial distribution of these initial infections.
+the spatial distribution of these initial infections. The simulation is using
+the kernel shape and parameters from the SI file that Azra sent last week.
+
+Note that the pattern is way too diffuse because the population
+density is only at about 1\% of the real density. The same kernel will bring
+all these first generation events in much closer with the real population
+density. This section is working, but I can't get the aggregate function to work
+properly and give lower resolution for the event map.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+popgrid <- \hlfunctioncall{read.asciigrid}(\hlstring{"../data/westAfricaAscii_agg100.asc"},as.image=TRUE)
+\hlfunctioncall{sum}(popgrid$z,na.rm=TRUE)
+\end{alltt}
+\begin{verbatim}
+## [1] 24881385
+\end{verbatim}
+\begin{alltt}
+popgrid$x <- popgrid$x * pi / 180
+popgrid$y <- popgrid$y * pi / 180
+epiImage <- \hlfunctioncall{eventImage}(dat1,popgrid,0,0,1000,0,1000)
+\hlfunctioncall{image}(popgrid$x,popgrid$y,\hlfunctioncall{log}(popgrid$z+0.5),col=\hlfunctioncall{rev}(\hlfunctioncall{grey_pal}()(100)),xlab=\hlstring{""},ylab=\hlstring{""})
+\hlfunctioncall{image}(epiImage$x,epiImage$y,epiImage$z,add=TRUE)
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\textwidth]{figs/unnamed-chunk-12} 
+
+}
+
+
+
+\end{knitrout}
+
+
+Next is to figure out how to extract district incidence from the simulation
+results so it can be compared with the data.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+shapeDir <- \hlstring{"/Users/sriley/srileytmp/sfs"}
+dists <- \hlfunctioncall{readOGR}(dsn=shapeDir,layer=\hlstring{"ThreeCountries"})
+\end{alltt}
+\begin{verbatim}
+## OGR data source with driver: ESRI Shapefile 
+## Source: "/Users/sriley/srileytmp/sfs", layer: "ThreeCountries"
+## with 67 features and 28 fields
+## Feature type: wkbPolygon with 2 dimensions
+\end{verbatim}
+\begin{alltt}
+\hlfunctioncall{summary}(dists)
+\end{alltt}
+\begin{verbatim}
+## Object of class SpatialPolygonsDataFrame
+## Coordinates:
+##       min    max
+## x -15.081 -7.367
+## y   4.343 12.677
+## Is projected: FALSE 
+## proj4string :
+## [+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0]
+## Data attributes:
+##     OBJECTID    WHO_REGION ISO_2_CODE   ADM2_NAME       ADM1_NAME 
+##  Min.   : 422   AFRO:67    GN:38      BEYLA  : 1   N'ZEREKORE: 6  
+##  1st Qu.:1028              LR:15      BO     : 1   BOKE      : 5  
+##  Median :1724              SL:14      BOFFA  : 1   CONAKRY   : 5  
+##  Mean   :1726                         BOKE   : 1   KANKAN    : 5  
+##  3rd Qu.:2235                         BOMBALI: 1   KINDIA    : 5  
+##  Max.   :3439                         BOMI   : 1   LABE      : 5  
+##                                       (Other):61   (Other)   :36  
+##         ADM0_NAME                 ADM2_CODE                 ADM1_CODE 
+##  GUINEA      :38   GN001001001000000000: 1   GN001008000000000000: 6  
+##  LIBERIA     :15   GN001001002000000000: 1   GN001001000000000000: 5  
+##  SIERRA LEONE:14   GN001001003000000000: 1   GN001002000000000000: 5  
+##                    GN001001004000000000: 1   GN001004000000000000: 5  
+##                    GN001001005000000000: 1   GN001005000000000000: 5  
+##                    GN001002001000000000: 1   GN001006000000000000: 5  
+##                    (Other)             :61   (Other)             :36  
+##                 ADM0_CODE       STARTDATE        ENDDATE  
+##  GN001000000000000000:38   2000/01/01:67   9999/12/31:67  
+##  LR001000000000000000:15                                  
+##  SL001000000000000000:14                                  
+##                                                           
+##                                                           
+##                                                           
+##                                                           
+##                                      GUID    ISO_3_CODE WHO_CODE ADM2_ALTNA
+##  {02B44F7F-85C2-4177-B4C6-0D058ABA7D8E}: 1   GIN:38     GUI:38   NA's:67   
+##  {0FEF85C0-C239-40FD-A0BB-4844FDA4D6F9}: 1   LBR:15     LIB:15             
+##  {10025130-AD44-4B4F-A231-45BBE541B861}: 1   SLE:14     SIL:14             
+##  {16FAC340-B054-43D4-9089-E51664302A43}: 1                                 
+##  {1ACFF5CE-8BE8-41AD-8B75-23006FA2D9E8}: 1                                 
+##  {2028113B-9DAE-49D0-AB36-0F00F4E3D4C1}: 1                                 
+##  (Other)                               :61                                 
+##  ADM2_ALTCO     ISO_2_ADM2      LVL           WHO_STATUS    UN_CODE   
+##  NA's:67    GN_BEYLA : 1   Min.   :2   Member state:67   Min.   :324  
+##             GN_BOFFA : 1   1st Qu.:2                     1st Qu.:324  
+##             GN_BOKE  : 1   Median :2                     Median :324  
+##             GN_COYAH : 1   Mean   :2                     Mean   :425  
+##             GN_DABOLA: 1   3rd Qu.:2                     3rd Qu.:430  
+##             GN_DALABA: 1   Max.   :2                     Max.   :694  
+##             (Other)  :61                                              
+##  UNICEF_REG   CENTER_LON       CENTER_LAT   
+##  WCARO:67   Min.   :-14.36   Min.   : 4.75  
+##             1st Qu.:-12.79   1st Qu.: 7.73  
+##             Median :-11.35   Median : 9.24  
+##             Mean   :-11.24   Mean   : 8.96  
+##             3rd Qu.: -9.76   3rd Qu.:10.50  
+##             Max.   : -7.85   Max.   :12.38  
+##                                             
+##                                    GlobalID    SHAPE_Leng      SHAPE_Area    
+##  {003C987E-55FF-4142-B1A4-FBB9AEB9B470}: 1   Min.   :0.188   Min.   :0.0015  
+##  {016CAA15-BF3B-46B0-A410-21EACE8F161F}: 1   1st Qu.:2.772   1st Qu.:0.2600  
+##  {02D83A72-0004-4280-AC2C-A9EB65DFFC3E}: 1   Median :3.587   Median :0.4444  
+##  {0607C700-9B3B-43FA-9109-969CCF8C59A0}: 1   Mean   :3.636   Mean   :0.5081  
+##  {0719C492-5BCA-4CF4-B354-7C041EFCE375}: 1   3rd Qu.:4.795   3rd Qu.:0.7024  
+##  {0AECF59E-1559-4D1F-9854-2F2A7ACD8803}: 1   Max.   :8.021   Max.   :1.4793  
+##  (Other)                               :61                                   
+##       ADM1_VIZ_N   ADM2_VIZ_N
+##  N'Zerekore: 6   Beyla  : 1  
+##  Boke      : 5   Bo     : 1  
+##  Conakry   : 5   Boffa  : 1  
+##  Kankan    : 5   Boke   : 1  
+##  Kindia    : 5   Bombali: 1  
+##  Labe      : 5   Bomi   : 1  
+##  (Other)   :36   (Other):61
+\end{verbatim}
+\begin{alltt}
+\hlfunctioncall{plot}(dists)
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\textwidth]{figs/unnamed-chunk-13} 
+
+}
+
+
+
+\end{knitrout}
+
 
 \end{document}
 
