@@ -90,7 +90,6 @@ double kernSpatialEbola(SR::ParameterSet &p, SR::Node* pt1, SR::Node* pt2, doubl
 	return  (*ts)*newconstant*(*constant)*pow((dist+1),-(*decay));
 };
 
-
 double kernSpatialInfectionExp(SR::ParameterSet &p, SR::Node* pt1, SR::Node* pt2, double offset) {
 	static double* constant = p.GetPointer("Relative_Transmit_Spatial");
 	static double* alpha = p.GetPointer("Decay_Transmit_Spatial");

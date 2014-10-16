@@ -11,6 +11,15 @@ require("rgdal")
 source("~/Dropbox/svneclipse/idsource/R/stevensRfunctions.R")
 source("../../../sr_source/ebola/ebolaFuncs.R")
 
+# Make a latin hyper cube for the analysis
+nosamples <- 100
+param_scan <- data.frame(
+    R0_Spatial = srg.hyper.vector(nosamples,1.4,2.0,FALSE),
+    Decay_Transmit_Spatial = srg.hyper.vector(nosamples,1,100,TRUE),
+    Offset_Transmit_Spatial = srg.hyper.vector(nosamples,1.5,5.5,FALSE)
+)
+write.table(param_scan,file="~/srileytmp/paramscan.txt",row.names=FALSE,sep=" ")
+
 weeksUsed <- 0:30
 
 # Load up the real data
@@ -29,13 +38,15 @@ dat <- dat[order(dat$EpiDay)[1:1000],]
 shapeDir <- "/Users/sriley/srileytmp/sfs"
 dists <- readOGR(dsn=shapeDir,layer="ThreeCountries")
 
+# Reorder the districts by country, then latitude
+distsLatOrder <- as.character(dists$ADM2_NAME[rev(order(dists$CENTER_LAT))])
+distsCountryLO <- as.character(dists$ADM0_NAME[rev(order(dists$CENTER_LAT))])
+
 y <- (
   make.incidence.from.linelist(
-      as.character(dists$ADM2_NAME),dat$district,dat$EpiWeek,DTs=weeksUsed
+      distsLatOrder,dat$district,dat$EpiWeek,DTs=weeksUsed
   )
 )$inctab
-
-inc.heat.chart.pdf.v2(y,vecCountries=as.character(dists$ADM0_NAME),outstem=paste("~/srileytmp/data_heat_chart",sep=""))
 
 fnPopdata = "../../data/westAfricaAscii.asc"
 fnOutStem = "~/Dropbox/projects/ebola/"
@@ -77,17 +88,16 @@ for (j in allBatches) {
   for (i in 0:noReals) {
     dat_one_r <- datSim[datSim$Run==i,]
     tmp <- make.incidence.from.linelist(
-        as.character(dists$ADM2_NAME),
+        distsLatOrder,
         dat_one_r$district,
         dat_one_r$EpiWeek,
         DTs=((min(weeksUsed)-maxoff)):(max(weeksUsed)+maxoff))
     for (k in 1:(noff)) {
-      # XXXX up to here
       x <- tmp$inctab[k:(k+length(weeksUsed)-1),]
       arrAllInc[,,k,i+1,j] <- x
       
       # Need to run a sliding window for 
-      arrSumSq[k,i+1,j] <- sum((x-y)^2)    
+      arrSumSq[k,i+1,j] <- sum((x/sum(x)*sum(y)-y)^2)    
       
     }
     
@@ -100,11 +110,21 @@ ibest <- which(arrSumSq==min(arrSumSq),arr.ind=TRUE)
 
 x <- y
 x[] <- arrAllInc[,,ibest[1],ibest[2],ibest[3]]
+rownames(x) <- rownames(y)
 inc.heat.chart.pdf.v2(
     x,
-    vecCountries=as.character(dists$ADM0_NAME),
-    outstem=paste("~/srileytmp/best",sep="")
+    vecCountries=distsCountryLO,
+    outstem=paste("~/srileytmp/best",sep=""),
+    xlabs=seq(0,30,5)
 )
+
+inc.heat.chart.pdf.v2(
+    y,
+    vecCountries=distsCountryLO,
+    outstem=paste("~/srileytmp/data_heat_chart",sep=""),
+    xlabs=seq(0,30,5)
+)
+
 sum(x)
 
 for (b in allBatches) {

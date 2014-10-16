@@ -206,7 +206,8 @@ SR::ParameterValueSet::ParameterValueSet(string filename) {
 	noChanges = norows;
 	norows=0;
 
-	paramlabels = new (string(*[noChanges]));
+	//paramlabels = new (string(*[noChanges]));
+	paramlabels = new string(*[noChanges]);
 	paramvalues = new double[noChanges];
 	setnumbers = new int[noChanges];
 
