@@ -3,7 +3,7 @@ ifndef $(SYSTEM)
 SYSTEM=mac1
 endif
 ifndef $(MODE)
-MODE=debug
+MODE=run
 endif
 
 # Set main compile option
