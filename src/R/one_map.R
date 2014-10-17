@@ -8,19 +8,11 @@ require("raster")
 require("sp")
 require("scales")
 require("rgdal")
-source("~/Dropbox/svneclipse/idsource/R/stevensRfunctions.R")
+# source("~/Dropbox/svneclipse/idsource/R/stevensRfunctions.R")
 source("../../../sr_source/ebola/ebolaFuncs.R")
+source("idSimFuncs.R")
 
-# Make a latin hyper cube for the analysis
-nosamples <- 100
-param_scan <- data.frame(
-    R0_Spatial = srg.hyper.vector(nosamples,1.4,2.0,FALSE),
-    Decay_Transmit_Spatial = srg.hyper.vector(nosamples,1,100,TRUE),
-    Offset_Transmit_Spatial = srg.hyper.vector(nosamples,1.5,5.5,FALSE)
-)
-write.table(param_scan,file="~/srileytmp/paramscan.txt",row.names=FALSE,sep=" ")
-
-weeksUsed <- 0:30
+weeksUsed <- 0:40
 
 # Load up the real data
 data.to.use <- paste("~/Dropbox/shares/neil_Ebola/",readLines("~/Dropbox/shares/neil_Ebola/Data_to_use.txt"),".RData",sep="")
@@ -32,7 +24,7 @@ dat$district <- as.character(dat$district)
 dat <- spatial.prune.v2(dat,0,c(1,2,3),useEpiWeek=FALSE)
 
 # Trim the data down to the first 1000
-dat <- dat[order(dat$EpiDay)[1:1000],]
+# dat <- dat[order(dat$EpiDay)[1:1000],]
 
 # Load the shape files
 shapeDir <- "/Users/sriley/srileytmp/sfs"
@@ -63,8 +55,8 @@ sum(popgrid$z,na.rm=TRUE)
 sum(popgrid$z,na.rm=TRUE)
 
 # Preconditions for the batch runs, remember weeksUsed
-allBatches <- 1:9
-allReals <- 0:99
+allBatches <- 1:1
+allReals <- 0:10
 maxoff <- 5
 noff <- 2*maxoff+1
 arrSumSq <- array(dim=c(noff,length(allReals),length(allBatches)))
@@ -74,38 +66,57 @@ arrAllInc <- array(
 )
 
 for (j in allBatches) {
-  fnEpidata = paste("~/srileytmp/event_files/20141007/batch_",j,"_pset_0_Events.out",sep="")
-  datSim <- read.table(file=fnEpidata,header=TRUE)
-  datSim <- datSim[datSim$Event==0,]
-  datSim$X <- datSim$X * 180 / pi
-  datSim$Y <- datSim$Y * 180 / pi
-  datSim <- cbind(datSim,dist_code=overlay(SpatialPoints(cbind(lon=datSim$X,lat=datSim$Y)),dists))
-  datSim <- cbind(datSim,district=dists$ADM2_NAME[datSim$dist_code])
-  datSim$EpiWeek <- ceiling(datSim$Day/7.0)
   
-  # Up to here. Need to make this bit work
-  noReals <- max(datSim$Run)
-  for (i in 0:noReals) {
-    dat_one_r <- datSim[datSim$Run==i,]
-    tmp <- make.incidence.from.linelist(
-        distsLatOrder,
-        dat_one_r$district,
-        dat_one_r$EpiWeek,
-        DTs=((min(weeksUsed)-maxoff)):(max(weeksUsed)+maxoff))
-    for (k in 1:(noff)) {
-      x <- tmp$inctab[k:(k+length(weeksUsed)-1),]
-      arrAllInc[,,k,i+1,j] <- x
-      
-      # Need to run a sliding window for 
-      arrSumSq[k,i+1,j] <- sum((x/sum(x)*sum(y)-y)^2)    
-      
-    }
-    
-  }
+  tmp <- make.incidence.from.batch(
+    y,
+#   paste("~/srileytmp/event_files/20141007/batch_",j,"_pset_0_Events.out",sep=""),
+    paste("~/srileytmp/event_files/gemma_20141017/WestAfrica_R1.40_paramset",j,".infevents.csv",sep=""),
+    dists,
+    fileformat="EbolaSim",
+    weeksUsed,
+    noff,
+    distsLatOrder,
+    allReals
+  )
+  
+  arrAllInc[,,,,j] <- tmp$inc
+  arrSumSq[,,j] <- tmp$stats
+  
+#  fnEpidata = paste("~/srileytmp/event_files/20141007/batch_",j,"_pset_0_Events.out",sep="")
+#  datSim <- read.table(file=fnEpidata,header=TRUE)
+#  datSim <- datSim[datSim$Event==0,]
+#  datSim$X <- datSim$X * 180 / pi
+#  datSim$Y <- datSim$Y * 180 / pi
+#  datSim <- cbind(datSim,dist_code=overlay(SpatialPoints(cbind(lon=datSim$X,lat=datSim$Y)),dists))
+#  datSim <- cbind(datSim,district=dists$ADM2_NAME[datSim$dist_code])
+#  datSim$EpiWeek <- ceiling(datSim$Day/7.0)
+#  
+#  # Up to here. Need to make this bit work
+#  noReals <- max(datSim$Run)
+#  for (i in 0:noReals) {
+#    dat_one_r <- datSim[datSim$Run==i,]
+#    tmp <- make.incidence.from.linelist(
+#        distsLatOrder,
+#        dat_one_r$district,
+#        dat_one_r$EpiWeek,
+#        DTs=((min(weeksUsed)-maxoff)):(max(weeksUsed)+maxoff))
+#    for (k in 1:(noff)) {
+#      x <- tmp$inctab[k:(k+length(weeksUsed)-1),]
+#      arrAllInc[,,k,i+1,j] <- x
+#      
+#      # Need to run a sliding window for 
+#      arrSumSq[k,i+1,j] <- sum((x/sum(x)*sum(y)-y)^2)    
+#      
+#    }
+#    
+#  }
+  
   cat("batch",j,"complete\n")
+
 }
 
 log10(min(arrSumSq))
+plot(apply(arrSumSq,c(3),min))
 ibest <- which(arrSumSq==min(arrSumSq),arr.ind=TRUE) 
 
 x <- y
@@ -115,18 +126,17 @@ inc.heat.chart.pdf.v2(
     x,
     vecCountries=distsCountryLO,
     outstem=paste("~/srileytmp/best",sep=""),
-    xlabs=seq(0,30,5)
+    xlabs=seq(0,40,5)
 )
 
 inc.heat.chart.pdf.v2(
     y,
     vecCountries=distsCountryLO,
     outstem=paste("~/srileytmp/data_heat_chart",sep=""),
-    xlabs=seq(0,30,5)
+    xlabs=seq(0,40,5)
 )
 
-sum(x)
-
+# Doesn't run yet
 for (b in allBatches) {
   x[] <- arrAllInc[,,index_mins[b],b] 
   cat(sum(x),"\n")
@@ -137,6 +147,14 @@ for (b in allBatches) {
   )  
 }
 
+# Load an example set of realizations from Gemma's code
+gDat <- read.csv(
+    "~/srileytmp/event_files/gemma_20141017/WestAfrica_R1.40_paramset1.infevents.csv",
+    header=FALSE,
+    col.names=c("Run","Time","id","Long","Lat","t_infector","id_infector"))
+dim(gDat)
+table(gDat$Run)
+
 # epiImage <- eventImage(datSim,popgrid,0,0,1000,0,0)
 # sum(epiImage$z,na.rm=TRUE)
 
@@ -144,3 +162,12 @@ for (b in allBatches) {
 #  image(popgrid$x,popgrid$y,log(popgrid$z+0.5),col=rev(grey_pal()(100)))
 #  image(epiImage$x,epiImage$y,epiImage$z,add=TRUE)
 # dev.off()
+
+# Make a latin hyper cube for the analysis
+nosamples <- 100
+param_scan <- data.frame(
+    R0_Spatial = srg.hyper.vector(nosamples,1.4,2.0,FALSE),
+    Decay_Transmit_Spatial = srg.hyper.vector(nosamples,1,100,TRUE),
+    Offset_Transmit_Spatial = srg.hyper.vector(nosamples,1.5,5.5,FALSE)
+)
+write.table(param_scan,file="~/srileytmp/paramscan.txt",row.names=FALSE,sep=" ")

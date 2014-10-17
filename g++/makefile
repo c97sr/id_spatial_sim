@@ -2,6 +2,8 @@
 ifndef $(SYSTEM) 
 SYSTEM=mac1
 endif
+
+# Possible modes are debug and run
 ifndef $(MODE)
 MODE=run
 endif
