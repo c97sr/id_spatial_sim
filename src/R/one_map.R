@@ -8,11 +8,11 @@ require("raster")
 require("sp")
 require("scales")
 require("rgdal")
-source("~/Dropbox/svneclipse/idsource/R/stevensRfunctions.R")
+# source("~/Dropbox/svneclipse/idsource/R/stevensRfunctions.R")
 source("../../../sr_source/ebola/ebolaFuncs.R")
 source("idSimFuncs.R")
 
-weeksUsed <- 0:30
+weeksUsed <- 0:40
 
 # Load up the real data
 data.to.use <- paste("~/Dropbox/shares/neil_Ebola/",readLines("~/Dropbox/shares/neil_Ebola/Data_to_use.txt"),".RData",sep="")
@@ -24,7 +24,7 @@ dat$district <- as.character(dat$district)
 dat <- spatial.prune.v2(dat,0,c(1,2,3),useEpiWeek=FALSE)
 
 # Trim the data down to the first 1000
-dat <- dat[order(dat$EpiDay)[1:1000],]
+# dat <- dat[order(dat$EpiDay)[1:1000],]
 
 # Load the shape files
 shapeDir <- "/Users/sriley/srileytmp/sfs"
@@ -54,11 +54,9 @@ sum(popgrid$z,na.rm=TRUE)
 # popgrid <- read.asciigrid(fnPopdata,as.image=TRUE)
 sum(popgrid$z,na.rm=TRUE)
 
-make.incidence.from.batch()
-
 # Preconditions for the batch runs, remember weeksUsed
-allBatches <- 1:9
-allReals <- 0:99
+allBatches <- 1:1
+allReals <- 0:10
 maxoff <- 5
 noff <- 2*maxoff+1
 arrSumSq <- array(dim=c(noff,length(allReals),length(allBatches)))
@@ -71,12 +69,14 @@ for (j in allBatches) {
   
   tmp <- make.incidence.from.batch(
     y,
-    paste("~/srileytmp/event_files/20141007/batch_",j,"_pset_0_Events.out",sep=""),
+#   paste("~/srileytmp/event_files/20141007/batch_",j,"_pset_0_Events.out",sep=""),
+    paste("~/srileytmp/event_files/gemma_20141017/WestAfrica_R1.40_paramset",j,".infevents.csv",sep=""),
     dists,
-    fileformat="id_spatial_sim",
+    fileformat="EbolaSim",
     weeksUsed,
     noff,
-    distsLatOrder
+    distsLatOrder,
+    allReals
   )
   
   arrAllInc[,,,,j] <- tmp$inc
@@ -126,14 +126,14 @@ inc.heat.chart.pdf.v2(
     x,
     vecCountries=distsCountryLO,
     outstem=paste("~/srileytmp/best",sep=""),
-    xlabs=seq(0,30,5)
+    xlabs=seq(0,40,5)
 )
 
 inc.heat.chart.pdf.v2(
     y,
     vecCountries=distsCountryLO,
     outstem=paste("~/srileytmp/data_heat_chart",sep=""),
-    xlabs=seq(0,30,5)
+    xlabs=seq(0,40,5)
 )
 
 # Doesn't run yet

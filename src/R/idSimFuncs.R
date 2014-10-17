@@ -5,7 +5,8 @@ make.incidence.from.batch <- function(
     fileformat,
     wksUsed,
     noff,
-    distsInOrder
+    distsInOrder,
+    realsUsed
 ) {
   
   # Load different file formats
@@ -23,15 +24,14 @@ make.incidence.from.batch <- function(
   datSim <- cbind(datSim,dist_code=overlay(SpatialPoints(cbind(lon=datSim$X,lat=datSim$Y)),shapes))
   datSim <- cbind(datSim,district=shapes$ADM2_NAME[datSim$dist_code])
   datSim$EpiWeek <- ceiling(datSim$Day/7.0)
-  
-  allReals <- as.numeric(names(table(datSim$Run)))
-  noReals <- max(datSim$Run)
+   
+  noReals <- max(realsUsed)
   
   # Define the returnvalues
-  rtnSumSq <- array(dim=c(noff,length(allReals)))
+  rtnSumSq <- array(dim=c(noff,length(realsUsed)))
   rtnAllInc <- array(
-      dim=c(dim(y)[1],dim(y)[2],noff,length(allReals)),
-      dimnames=list(rownames(y),colnames(y),1:noff,allReals)
+      dim=c(dim(y)[1],dim(y)[2],noff,length(realsUsed)),
+      dimnames=list(rownames(y),colnames(y),1:noff,realsUsed)
   )
   
   # Search through realizations and offsets
