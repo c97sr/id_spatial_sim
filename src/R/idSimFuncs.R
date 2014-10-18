@@ -4,7 +4,6 @@ make.incidence.from.batch <- function(
     shapes,
     fileformat,
     wksUsed,
-    noff,
     distsInOrder,
     realsUsed
 ) {
@@ -30,10 +29,9 @@ make.incidence.from.batch <- function(
   noReals <- length(realsUsed)
   
   # Define the returnvalues
-  rtnSumSq <- array(dim=c(noff,noReals))
   rtnAllInc <- array(
-      dim=c(dim(y)[1],dim(y)[2],noff,noReals),
-      dimnames=list(rownames(y),colnames(y),1:noff,1:noReals)
+      dim=c(dim(y)[1],dim(y)[2],noReals),
+      dimnames=list(rownames(y),colnames(y),1:noReals)
   )
   
   # Search through realizations and offsets
@@ -43,15 +41,10 @@ make.incidence.from.batch <- function(
         distsLatOrder,
         dat_one_r$district,
         dat_one_r$EpiWeek,
-        DTs=((min(wksUsed)-noff)):(max(wksUsed)+noff))
-    for (k in 1:(noff)) {
-      x <- tmp$inctab[k:(k+length(wksUsed)-1),]
-      rtnAllInc[,,k,i] <- x 
-      rtnSumSq[k,i] <- sum((x/sum(x)*sum(y)-y)^2)    
-    }
+        DTs=min(wksUsed):max(wksUsed))
   }
   
-  list(inc=rtnAllInc,stats=rtnSumSq)
+  list(inc=rtnAllInc)
   
 }
 

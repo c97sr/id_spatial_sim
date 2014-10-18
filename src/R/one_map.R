@@ -59,16 +59,13 @@ sum(popgrid$z,na.rm=TRUE)
 params <- read.table("~/srileytmp/events/gemma_20141017/paramscan.txt",header=TRUE)
 
 # Preconditions for the batch runs, remember weeksUsed
-R0s <- c("1.40","1.60","1.80")
-chosen_params <- 1:100
-chosenReals <- sample(0:399,200)
-maxoff <- 5
-noff <- 2*maxoff+1
+R0s <- c("1.40","1.60","1.8")
+chosen_params <- sample(1:100,50)
+chosenReals <- sample(0:399,100)
 totalBatches <- length(R0s)*length(chosen_params)
-arrSumSq <- array(dim=c(noff,length(chosenReals),totalBatches))
 arrAllInc <- array(
-    dim=c(dim(y)[1],dim(y)[2],noff,length(chosenReals),totalBatches),
-    dimnames=list(rownames(y),colnames(y),1:noff,1:length(chosenReals),1:totalBatches)
+    dim=c(dim(y)[1],dim(y)[2],length(chosenReals),totalBatches),
+    dimnames=list(rownames(y),colnames(y),1:length(chosenReals),1:totalBatches)
 )
 
 for (i in 0:(length(R0s)-1)) {
@@ -82,20 +79,20 @@ for (i in 0:(length(R0s)-1)) {
         dists,
         fileformat="EbolaSim",
         weeksUsed,
-        noff,
         distsLatOrder,
         chosenReals
     )
     
-    arrAllInc[,,,,i*length(chosen_params)+j] <- tmp$inc
-    arrSumSq[,,i*length(chosen_params)+j] <- tmp$stats
+    gc()
+    
+    arrAllInc[,,,i*length(chosen_params)+j] <- tmp$inc
     
     cat("batch",i*length(chosen_params)+j," of ",totalBatches,"complete\n")
     
   }
 }
 
-save(arrAllInc,arrSumSq,chosen_params,params,file="~/srileytmp/events/gemma_20141017/postProc.Rdata")
+save(arrAllInc,chosen_params,params,file="~/srileytmp/events/gemma_20141017/postProc.Rdata")
 
 log10(min(arrSumSq))
 plot(apply(arrSumSq,c(3),min))
@@ -127,10 +124,10 @@ inc.heat.chart.pdf.v2(
 # dev.off()
 
 # Make a latin hyper cube for the analysis
-nosamples <- 100
-param_scan <- data.frame(
-    R0_Spatial = srg.hyper.vector(nosamples,1.4,2.0,FALSE),
-    Decay_Transmit_Spatial = srg.hyper.vector(nosamples,1,100,TRUE),
-    Offset_Transmit_Spatial = srg.hyper.vector(nosamples,1.5,5.5,FALSE)
-)
-write.table(param_scan,file="~/srileytmp/paramscan.txt",row.names=FALSE,sep=" ")
+# nosamples <- 100
+# param_scan <- data.frame(
+#    R0_Spatial = srg.hyper.vector(nosamples,1.4,2.0,FALSE),
+#    Decay_Transmit_Spatial = srg.hyper.vector(nosamples,1,100,TRUE),
+#    Offset_Transmit_Spatial = srg.hyper.vector(nosamples,1.5,5.5,FALSE)
+#)
+#write.table(param_scan,file="~/srileytmp/paramscan.txt",row.names=FALSE,sep=" ")
