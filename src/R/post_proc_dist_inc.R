@@ -28,7 +28,7 @@ dat <- spatial.prune.v2(dat,0,c(1,2,3),useEpiWeek=FALSE)
 # dat <- dat[order(dat$EpiDay)[1:1000],]
 
 # Load the shape files
-shapeDir <- "/home/sriley/srileytmp/sfs/"
+shapeDir <- "/Users/sriley/srileytmp/sfs/"
 dists <- readOGR(dsn=shapeDir,layer="ThreeCountries")
 
 # Reorder the districts by country, then latitude
@@ -41,58 +41,22 @@ y <- (
   )
 )$inctab
 
-fnPopdata = "../../data/westAfricaAscii.asc"
-fnOutStem = "~/Dropbox/projects/ebola/"
-
-# Make an aggregated version of the rater file
-popgrid <- read.asciigrid(fnPopdata,as.image=TRUE)
-sum(popgrid$z,na.rm=TRUE)
-# popgrid_tmp <- raster(popgrid)
-# popgrid_coarse_tmp <- aggregate(popgrid_tmp,factor=1000,fun=sum)
-# writeRaster(popgrid_coarse_tmp,file="../data/westAfricaAscii_agg1000.asc",format="ascii",
-#    overwrite=TRUE)
-
-# popgrid <- read.asciigrid(fnPopdata,as.image=TRUE)
-sum(popgrid$z,na.rm=TRUE)
-
-# Read in the parameter file that goes with the runs
-params <- read.table("~/srileytmp/events/gemma_20141017/paramscan.txt",header=TRUE)
-
 # Preconditions for the batch runs, remember weeksUsed
 R0s <- c("1.40","1.60","1.8")
-chosen_params <- sample(1:100,50)
 chosenReals <- sample(0:399,100)
+
+load("~/Dropbox/tmp/postproc.Rdata",verbose=TRUE)
+# save(arrAllInc,chosen_params,params,file="~/srileytmp/events/gemma_20141017/postProc.Rdata")
+
+diff_stats <- c("sum_sq")
+
+sumArr <- array(dim=c(length(diff_stats),dim(arrAllInc)[3],dim(arrAllInc[4])))
+
 totalBatches <- length(R0s)*length(chosen_params)
-arrAllInc <- array(
-    dim=c(dim(y)[1],dim(y)[2],length(chosenReals),totalBatches),
-    dimnames=list(rownames(y),colnames(y),1:length(chosenReals),1:totalBatches)
-)
 
-for (i in 0:(length(R0s)-1)) {
-  for (j in 1:length(chosen_params)) {
-    
-    tmp <- make.incidence.from.batch(
-        y,
-#   paste("~/srileytmp/event_files/20141007/batch_",j,"_pset_0_Events.out",sep=""),
-#   paste("~/srileytmp/event_files/gemma_20141017/WestAfrica_R1.40_paramset",j,".infevents.csv",sep="")      
-        paste("~/srileytmp/events/gemma_20141017/WestAfrica_R",R0s[i+1],"_paramset",chosen_params[j],".infevents.csv",sep=""),
-        dists,
-        fileformat="EbolaSim",
-        weeksUsed,
-        distsLatOrder,
-        chosenReals
-    )
-    
-    gc()
-    
-    arrAllInc[,,,i*length(chosen_params)+j] <- tmp$inc
-    
-    cat("batch",i*length(chosen_params)+j," of ",totalBatches,"complete\n")
-    
-  }
-}
+# Up to here. Need to trawl through for best fit
 
-save(arrAllInc,chosen_params,params,file="~/srileytmp/events/gemma_20141017/postProc.Rdata")
+dim(arrAllInc)
 
 log10(min(arrSumSq))
 plot(apply(arrSumSq,c(3),min))
@@ -115,19 +79,3 @@ inc.heat.chart.pdf.v2(
     xlabs=seq(0,40,5)
 )
 
-# epiImage <- eventImage(datSim,popgrid,0,0,1000,0,0)
-# sum(epiImage$z,na.rm=TRUE)
-
-# png(file=paste(fnOutStem,"figs/map.png",sep=""),width=12,height=12,units="cm",res=300)
-#  image(popgrid$x,popgrid$y,log(popgrid$z+0.5),col=rev(grey_pal()(100)))
-#  image(epiImage$x,epiImage$y,epiImage$z,add=TRUE)
-# dev.off()
-
-# Make a latin hyper cube for the analysis
-# nosamples <- 100
-# param_scan <- data.frame(
-#    R0_Spatial = srg.hyper.vector(nosamples,1.4,2.0,FALSE),
-#    Decay_Transmit_Spatial = srg.hyper.vector(nosamples,1,100,TRUE),
-#    Offset_Transmit_Spatial = srg.hyper.vector(nosamples,1.5,5.5,FALSE)
-#)
-#write.table(param_scan,file="~/srileytmp/paramscan.txt",row.names=FALSE,sep=" ")
