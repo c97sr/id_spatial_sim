@@ -5,25 +5,28 @@ make.incidence.from.batch <- function(
     fileformat,
     wksUsed,
     distsInOrder,
-    realsUsed
+    realsUsed,
+    maxNoEvents
 ) {
+  
+  require("data.table")
   
   # Load different file formats
   if (fileformat=="id_spatial_sim") {
-    datSim <- read.table(file=filen,header=TRUE)
+    datSim <- fread(input=filen,header=TRUE)
     datSim <- datSim[datSim$Event==0,]
     datSim$X <- datSim$X * 180 / pi
     datSim$Y <- datSim$Y * 180 / pi
   } else if (fileformat=="EbolaSim") {
-    datSim <- read.csv(
-        file=filen,header=FALSE,
-        col.names=c("Run","Day","Index","X","Y","t_infector","infector"))    
+    datSim <- fread(input=filen,header=FALSE,showProgress=FALSE)
+    setnames(datSim,names(datSim),c("Run","Day","Index","X","Y","t_infector","infector"))
   } else stop("fileformat not recognised")
-  
+    
   datSim <- datSim[datSim$Run %in% realsUsed,]
   
   datSim <- cbind(datSim,dist_code=overlay(SpatialPoints(cbind(lon=datSim$X,lat=datSim$Y)),shapes))
   datSim <- cbind(datSim,district=shapes$ADM2_NAME[datSim$dist_code])
+  datSim <- datSim[!is.na(datSim$district)]
   datSim$EpiWeek <- ceiling(datSim$Day/7.0)
   
   noReals <- length(realsUsed)
@@ -35,15 +38,21 @@ make.incidence.from.batch <- function(
   )
   
   # Search through realizations and offsets
-  for (i in 1:length(realsUsed)) {
+  for (i in 1:noReals) {
     dat_one_r <- datSim[datSim$Run==realsUsed[i],]
+    if (dim(dat_one_r)[1] > maxNoEvents) {
+      dat_one_r <- dat_one_r[1:maxNoEvents,]
+    }
+    
     tmp <- make.incidence.from.linelist(
         distsLatOrder,
         dat_one_r$district,
         dat_one_r$EpiWeek,
         DTs=min(wksUsed):max(wksUsed))
+    rtnAllInc[,,i] <- tmp$inctab
   }
   
+  # Return the incidence tables
   list(inc=rtnAllInc)
   
 }
