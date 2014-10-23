@@ -1,3 +1,7 @@
+# setwd("~/Dropbox/git/id_spatial_sim/src/R")
+# setwd("/home/sriley/git/id_spatial_sim/src/R")
+source("~/Dropbox/svneclipse/idsource/R/stevensRfunctions.R")
+
 fnPopdata = "../../data/westAfricaAscii.asc"
 fnOutStem = "~/Dropbox/projects/ebola/"
 
@@ -19,12 +23,12 @@ sum(popgrid$z,na.rm=TRUE)
 # dev.off()
 
 # Make a latin hyper cube for the analysis
-# nosamples <- 100
-# param_scan <- data.frame(
-#    R0_Spatial = srg.hyper.vector(nosamples,1.4,2.0,FALSE),
-#    Decay_Transmit_Spatial = srg.hyper.vector(nosamples,1,100,TRUE),
-#    Offset_Transmit_Spatial = srg.hyper.vector(nosamples,1.5,5.5,FALSE)
-#)
-#write.table(param_scan,file="~/srileytmp/paramscan.txt",row.names=FALSE,sep=" ")
+nosamples <- 200
+param_scan <- data.frame(
+   R0_Spatial = srg.hyper.vector(nosamples,1.4,1.8,FALSE),
+   Decay_Transmit_Spatial = srg.hyper.vector(nosamples,1,100,TRUE),
+   Offset_Transmit_Spatial = srg.hyper.vector(nosamples,1.5,5.5,FALSE)
+)
+write.table(param_scan,file="~/srileytmp/paramscan.txt",row.names=FALSE,sep=" ")
 
 

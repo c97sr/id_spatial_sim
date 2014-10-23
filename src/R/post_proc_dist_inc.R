@@ -45,37 +45,82 @@ y <- (
 R0s <- c("1.40","1.60","1.8")
 chosenReals <- sample(0:399,100)
 
-load("~/Dropbox/tmp/postproc.Rdata",verbose=TRUE)
+load("~/Dropbox/tmp/postProc19oct.Rdata",verbose=TRUE)
 # save(arrAllInc,chosen_params,params,file="~/srileytmp/events/gemma_20141017/postProc.Rdata")
 
+dim(arrAllInc)
+npsets <- dim(arrAllInc)[4]
+nreals <- dim(arrAllInc)[3]
 diff_stats <- c("sum_sq")
+nstats <- length(diff_stats)
 
-sumArr <- array(dim=c(length(diff_stats),dim(arrAllInc)[3],dim(arrAllInc[4])))
+sumArr <- array(dim=c(nstats,nreals,npsets))
 
-totalBatches <- length(R0s)*length(chosen_params)
+for (p in 1:npsets) {
+  for (r in 1:nreals) {
+    sumArr[1,r,p] <- sum((arrAllInc[,,r,p]-y)^2) 
+  }
+}
 
 # Up to here. Need to trawl through for best fit
+log10Sum <- log10(sumArr)
 
-dim(arrAllInc)
-
-log10(min(arrSumSq))
-plot(apply(arrSumSq,c(3),min))
-ibest <- which(arrSumSq==min(arrSumSq),arr.ind=TRUE) 
+plot(params$power,apply(sumArr[1,,101:200],c(2),min),ylim=c(3e5,4e5))
+minval <- sort(sumArr[1,,101:200])[2]
+ibest <- which(sumArr[1,,101:200]==minval,arr.ind=TRUE) 
+apply(sumArr[1,,101:200],c(2),min)
+params[21,]
 
 x <- y
-x[] <- arrAllInc[,,ibest[1],ibest[2],ibest[3]]
+x[] <- arrAllInc[,,ibest[1],ibest[2]]
+sum(x)
+sum(y)
+
 rownames(x) <- rownames(y)
 inc.heat.chart.pdf.v2(
     x,
     vecCountries=distsCountryLO,
-    outstem=paste("~/srileytmp/best",sep=""),
+    outstem=paste("~/srileytmp/best_sim",sep=""),
     xlabs=seq(0,40,5)
 )
 
 inc.heat.chart.pdf.v2(
     y,
     vecCountries=distsCountryLO,
-    outstem=paste("~/srileytmp/data_heat_chart",sep=""),
+    outstem=paste("~/srileytmp/data_",sep=""),
     xlabs=seq(0,40,5)
 )
+
+#logbreaks <- seq(-0.30102-1e-10,2.7,0.176+0.30103)
+logbreaks <- c(
+    #log10(0+0.5)-1e-10,log10(0.5+0.5)-1e-10,
+    log10(0+0.5),
+    seq(log10(1+0.5)-1e-10,2.8,length.out=100))
+legendscale <- c(0,1,2,3,4,5,10,20,50,100,200,400)
+logcols <- rainbow(length(logbreaks)-2,start=0,end=0.9) 
+inc.heat.chart.pdf.v2(
+    log10(x+0.5),    
+    cols = c(colors()[1],logcols),
+    breaks = logbreaks,
+    legendlabs = legendscale,
+    legendats = log10(legendscale+0.5),
+    vecCountries=distsCountryLO,
+    outstem=paste("~/srileytmp/best_sim_log",sep=""),
+    xlabs=seq(0,40,5)
+)
+inc.heat.chart.pdf.v2(
+    log10(y+0.5),    
+    cols = c(colors()[1],logcols),
+    breaks = logbreaks,
+    legendlabs = legendscale,
+    legendats = log10(legendscale+0.5),
+    vecCountries=distsCountryLO,
+    outstem=paste("~/srileytmp/data_log",sep=""),
+    xlabs=seq(0,40,5)
+)
+
+
+
+write.table(t(x),file="~/Dropbox/tmp/sim_data_for_wes.txt",
+    sep="\t",row.names=TRUE,col.names=FALSE)
 
