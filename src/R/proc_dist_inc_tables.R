@@ -10,7 +10,7 @@ require("sp")
 require("scales")
 require("rgdal")
 # source("~/Dropbox/svneclipse/idsource/R/stevensRfunctions.R")
-source("../../../sr_source/ebola/ebolaFuncs.R")
+# source("../../../sr_source/ebola/ebolaFuncs.R")
 source("idSimFuncs.R")
 
 weeksUsed <- 0:40
@@ -41,66 +41,20 @@ y <- (
       )
       )$inctab
 
-# popgrid <- read.asciigrid(fnPopdata,as.image=TRUE)
-sum(popgrid$z,na.rm=TRUE)
+# Start to look at the table files
+tabledir <- "/home/sriley/srileytmp/events/gemma_20141021/"
+paramfname <- "paramscan.txt"
 
-# Read in the parameter file that goes with the runs
-params <- read.table("~/srileytmp/events/gemma_20141017/paramscan.txt",header=TRUE)
+# Load the parameter table
+paramTab <- read.table(file=paste(tabledir,paramfname,sep=""),header=TRUE,sep=" ")
+names(paramTab) <- c("R0_Spatial","Decay_Transmit_Spatial","Offset_Transmit_Spatial")
 
-# Preconditions for the batch runs, remember weeksUsed
-R0s <- c("1.40","1.60","1.8")
-chosen_params <- sample(1:100,50)
-chosenReals <- sample(0:399,100)
-totalBatches <- length(R0s)*length(chosen_params)
-arrAllInc <- array(
-    dim=c(dim(y)[1],dim(y)[2],length(chosenReals),totalBatches),
-    dimnames=list(rownames(y),colnames(y),1:length(chosenReals),1:totalBatches)
-)
+# Load the place lookups
+tableDistricts <- read.table("../../data/WestAfricaDistricts.txt")
+names(tableDistricts) <- c("Code","Country","Districts")
 
-for (i in 0:(length(R0s)-1)) {
-  for (j in 1:length(chosen_params)) {
-    
-    tmp <- make.incidence.from.batch(
-        y,
-#   paste("~/srileytmp/event_files/20141007/batch_",j,"_pset_0_Events.out",sep=""),
-#   paste("~/srileytmp/event_files/gemma_20141017/WestAfrica_R1.40_paramset",j,".infevents.csv",sep="")      
-        paste("~/srileytmp/events/gemma_20141017/WestAfrica_R",R0s[i+1],"_paramset",chosen_params[j],".infevents.csv",sep=""),
-        dists,
-        fileformat="EbolaSim",
-        weeksUsed,
-        distsLatOrder,
-        chosenReals
-    )
-    
-    gc()
-    
-    arrAllInc[,,,i*length(chosen_params)+j] <- tmp$inc
-    
-    cat("batch",i*length(chosen_params)+j," of ",totalBatches,"complete\n")
-    
-  }
-}
+# Read in a single table
+dataDir <- "/home/sriley/srileytmp/events/gemma_20141021"
+testTab <- read.csv("/home/sriley/srileytmp/events/gemma_20141021/WestAfrica_paramset111.121.adunit.csv")
 
 save(arrAllInc,chosen_params,params,file="~/srileytmp/events/gemma_20141017/postProc.Rdata")
-
-log10(min(arrSumSq))
-plot(apply(arrSumSq,c(3),min))
-ibest <- which(arrSumSq==min(arrSumSq),arr.ind=TRUE) 
-
-x <- y
-x[] <- arrAllInc[,,ibest[1],ibest[2],ibest[3]]
-rownames(x) <- rownames(y)
-inc.heat.chart.pdf.v2(
-    x,
-    vecCountries=distsCountryLO,
-    outstem=paste("~/srileytmp/best",sep=""),
-    xlabs=seq(0,40,5)
-)
-
-inc.heat.chart.pdf.v2(
-    y,
-    vecCountries=distsCountryLO,
-    outstem=paste("~/srileytmp/data_heat_chart",sep=""),
-    xlabs=seq(0,40,5)
-)
-
