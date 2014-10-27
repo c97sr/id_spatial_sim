@@ -324,10 +324,163 @@ testInlineCpp <- function() {
   
 }
 
-
     # R> addMat(matrix(1:9,3,3))
 # [,1] [,2] [,3]
 # [1,]    2    5    8
 # [2,]    3    6    9
 # [3,]    4    7   10
+
+# Function to take output of the spatial simulation and make it comparable with
+# WHO data.
+# tabss - the raw csv read in from spatial sim output
+convert.spatialsim.WHO.V1 <- function(tabss,distNames,tabLookup,max_week) {
+  
+  # Extract the correct names
+  #  ssNames <- colnames(tabss)
+  #  ssNames <- sub("C","",ssNames)
+  #  ssNames <- ifelse(is.na(match(ssNames,tabLookup$Code)),ssNames,tabLookup$WHO_districts[match(ssNames,tabLookup$Code)])
+  #  setnames(tabss,names(tabss),ssNames)
+  
+  # Re-prders the tabss names to be in the distNames order
+  rtn_day <- as.matrix(subset(tabss,select=distNames))
+  
+  # Setup the return type
+  rtn_week <- matrix(
+      nrow=max_week,ncol=dim(rtn_day)[2],
+      dimnames=list(1:max_week,colnames(rtn_day)))
+  
+  rtn_week[] <- 0
+  nodays <- dim(rtn_day)[1]
+  
+  current_day <- 1
+  current_week <- 1
+  day_next_week <- 8
+  while (current_week <= max_week && current_day <= nodays) {    
+    rtn_week[current_week,] <- rtn_week[current_week,] + rtn_day[current_day,]
+    current_day <- current_day + 1
+    if (current_day == day_next_week) {
+      current_week <- current_week + 1
+      day_next_week <- day_next_week + 7
+    }
+  } 
+  
+  rtn_week
+  
+}
+
+# Function to output a heat chart of districts with legend
+# To be run in two different ways
+inc.heat.chart.pdf.v3 <- function(
+    z,
+    vecCountries,
+    cols = c(colors()[1],rev(heat.colors(200)[1:180])),
+    breaks=c(0,0.5,1.5,1.5+(1:(length(cols)-2))/(length(cols)-2)*zmax),
+    zmax=ceiling(max(z)/100)*100,
+    filen="district_inc",
+    xlabs=c(1,seq(20,40,5)),
+    chttype="",
+    pdfWidth=10,
+    leftMarginFraction=0.25,
+    zmaxabsolute=200,
+    outstem="./figs/",
+    legendlabs=NULL,
+    legendats=NULL) {
+  
+  # Define local functions
+  ebola.dist.axis.v2 <- function(side,vecDists,vecCountries,vecColCountries) {
+    noDists <- length(vecDists)
+    labellocs <- (0:(noDists-1))/(noDists-1)
+    reps <- names(table(vecCountries))
+    axis(side,at=c(0,1),labels=c("",""))
+    for (ctry in reps) {
+      axis(	side,at=labellocs[vecCountries==ctry],
+          labels=vecDists[vecCountries==ctry],
+          col.axis=vecColCountries[ctry],
+          las=2)
+    }
+  }
+  
+  # Test for log values
+  col.countries <- c("GUINEA"="#4f81bd","SIERRA LEONE"="#c0504d", "LIBERIA"="#9bbb59","NIGERIA"="#a6a6a6")
+  
+  # Define local aux variables
+  minDT <- min(as.numeric(rownames(z)))
+  maxDT <- max(as.numeric(rownames(z)))
+  vecDists <- colnames(z)
+  
+  noDists <- length(vecDists)
+  useCountries <- TRUE
+  if(length(vecCountries)==0) {
+    useCountries <- FALSE
+  } else if (length(vecCountries)!=noDists) {
+    stop("Vector of country names not the same as vector of district names")
+  }
+  if (useCountries) {
+    tabCountries <- table(vecCountries)
+  }
+  
+  # Open the device and set the usual parameters
+  # pdf(file=paste(outstem,filen,chttype,".pdf",sep=""),height=15,width=pdfWidth,useDingbats=FALSE)
+  png(file=paste(outstem,filen,chttype,".png",sep=""),height=15,width=pdfWidth,units="in",res=300)
+  par(	cex=12/12,
+      mai=c(0,0,0,0),
+      xpd=FALSE
+  )
+  
+  # Check that the full scale is being drawn (otherwise might get white instead of high val)
+  if (max(breaks) < max(z)) stop("Full range of z not plotted")
+  
+  # Plot the main chart
+  par(fig=c(leftMarginFraction,0.8,0.075,0.975),new=FALSE)
+  image(z,breaks=breaks,axes=FALSE,col=cols,xlab="",ylab="")
+  xaxilabels <- xlabs 
+  axis(1,at=(xaxilabels-minDT)/(maxDT-minDT),labels=xaxilabels)
+  mtext("Epidemiological week",1,line=3)
+  if (useCountries) {
+    mtext("Liberia",side=2,line=10.5,at=tabCountries["LIBERIA"]/2/noDists)
+    mtext("Sierra Leone",side=2,line=10.5,at=(tabCountries["LIBERIA"]+tabCountries["SIERRA LEONE"]/2)/noDists)
+    mtext("Guinea",side=2,line=10.5,at=(tabCountries["LIBERIA"]+tabCountries["SIERRA LEONE"]+tabCountries["GUINEA"]/2)/noDists)
+  } 
+  ebola.dist.axis.v2(2,vecDists,vecCountries,col.countries)	
+  
+  # Plot the legend
+  par(fig=c(0.9,0.95,0.5,0.9),new=TRUE)
+  
+  plot(1:2,type="n",
+      axes=FALSE,col=cols,
+      ylab="Incidence",xlab="",
+      ylim=c(min(breaks),max(breaks)),
+      xlim=c(0,1)
+  )
+  for (i in 1:length(cols)) {
+    polygon(c(0,1,1,0),c(breaks[i],
+            breaks[i],breaks[i+1],breaks[i+1]),border=NA,col=cols[i])
+  }
+  
+#  image(1,breaks,
+#      t(as.matrix(breaks)),
+#      axes=FALSE,col=cols,
+#      ylab="Incidence",xlab="",
+#      ylim=c(min(breaks),max(breaks)),
+#      oldstyle=FALSE)
+  if (is.null(legendlabs)) {
+    axis(2,las=1)
+  } else {
+    axis(2,las=1,labels=legendlabs,at=legendats)
+  }
+  mtext("incidence",side=3,line=0.5)
+  if (chttype=="_absolute") {
+    mtext("Absolute",side=3,line=2.5)
+    mtext("weekly",side=3,line=1.5)
+  } else if (chttype=="_percap") {
+    mtext("Per capita",side=3,line=2.5)
+    mtext("weekly",side=3,line=1.5)
+  } else {
+    mtext("Weekly",side=3,line=1.5)
+  }
+  
+  # Close the pdf device
+  dev.off()
+}
+
 
