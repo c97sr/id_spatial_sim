@@ -85,7 +85,7 @@ make.incidence.from.linelist <- function(
   noDT <- length(DTs)
   rtn <- matrix(data=0,nrow=noDT,ncol=length(vecAllDists),dimnames=list(firstDT:(lastDT),vecAllDists))
   rowcounter <- 1
-  maxrow <- length(vecIncDists)
+  maxrow <- length(vecIncDists)  
   
   # This is the section that needs optimizing
   # Work on the server, sort twice, first by day and then by district and do a single sweep through
@@ -235,7 +235,7 @@ spatial.prune.v2 <- function(matDat,firstDT,casesinc, useEpiWeek=TRUE) {
   rtn <- rtn[rtn$EpiCaseDef %in% casesinc,]
   rtn <- rtn[!is.na(rtn$DateOnsetInferred),]
   
-  # Make week variable
+  # Make week variable	
   if (useEpiWeek) {
     swone <- as.Date("30/12/13", "%d/%m/%y")
   } else {
@@ -384,7 +384,12 @@ inc.heat.chart.pdf.v3 <- function(
     zmaxabsolute=200,
     outstem="./figs/",
     legendlabs=NULL,
-    legendats=NULL) {
+    legendats=NULL,
+    addCountryBreak=FALSE) {
+  
+  # Add a break in for the first two changes in country
+  if (addCountryBreak) {
+  }
   
   # Define local functions
   ebola.dist.axis.v2 <- function(side,vecDists,vecCountries,vecColCountries) {

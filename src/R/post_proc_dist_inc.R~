@@ -51,22 +51,21 @@ load("~/Dropbox/tmp/postProc19oct.Rdata",verbose=TRUE)
 dim(arrAllInc)
 npsets <- dim(arrAllInc)[4]
 nreals <- dim(arrAllInc)[3]
-diff_stats <- c("sum_sq","thesh_sum_sq")
+diff_stats <- c("sum_sq")
 nstats <- length(diff_stats)
 
 sumArr <- array(dim=c(nstats,nreals,npsets))
 
 for (p in 1:npsets) {
   for (r in 1:nreals) {
-    sumArr[1,r,p] <- sum((arrAllInc[,,r,p]-y)^2)
-    sumArr[2,r,p] <- sum(ifelse(arrAllInc[,,r,p]>5,(arrAllInc[,,r,p]-y)^2,y^2))
+    sumArr[1,r,p] <- sum((arrAllInc[,,r,p]-y)^2) 
   }
 }
 
 # Up to here. Need to trawl through for best fit
 log10Sum <- log10(sumArr)
 
-plot(params$power,apply(sumArr[2,,101:200],c(2),min),ylim=c(3e5,6e5))
+plot(params$power,apply(sumArr[1,,101:200],c(2),min),ylim=c(3e5,4e5))
 minval <- sort(sumArr[1,,101:200])[2]
 ibest <- which(sumArr[1,,101:200]==minval,arr.ind=TRUE) 
 apply(sumArr[1,,101:200],c(2),min)
@@ -119,6 +118,8 @@ inc.heat.chart.pdf.v2(
     outstem=paste("~/srileytmp/data_log",sep=""),
     xlabs=seq(0,40,5)
 )
+
+
 
 write.table(t(x),file="~/Dropbox/tmp/sim_data_for_wes.txt",
     sep="\t",row.names=TRUE,col.names=FALSE)

@@ -23,12 +23,12 @@ sum(popgrid$z,na.rm=TRUE)
 # dev.off()
 
 # Make a latin hyper cube for the analysis
-nosamples <- 200
+nosamples <- 400
 param_scan <- data.frame(
-   R0_Spatial = srg.hyper.vector(nosamples,1.4,1.8,FALSE),
-   Decay_Transmit_Spatial = srg.hyper.vector(nosamples,1,100,TRUE),
-   Offset_Transmit_Spatial = srg.hyper.vector(nosamples,1.5,5.5,FALSE)
+   R0_Spatial = srg.hyper.vector(nosamples,1.2,1.6,FALSE),
+   Offset_Transmit_Spatial = srg.hyper.vector(nosamples,1,100,TRUE),
+   Decay_Transmit_Spatial = srg.hyper.vector(nosamples,1.5,5.5,FALSE)
 )
-write.table(param_scan,file="~/srileytmp/paramscan.txt",row.names=FALSE,sep=" ")
+write.table(param_scan,file="~/srileytmp/paramscan27Oct2014.txt",row.names=FALSE,sep=" ")
 
 
