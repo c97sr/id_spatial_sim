@@ -1,6 +1,8 @@
 # Start from a clean environment if not using immediately after run generation
 rm(list=ls(all=TRUE))
 load("~/srileytmp/postProc_Wed_Oct_29_11_54_01_2014.RData",verbose=TRUE)
+remakeSummaries <- FALSE
+remakeAnneal <- FALSE
 
 # Set you present working directory to find the output
 # setwd("~/Dropbox/git/id_spatial_sim/src/R")
@@ -14,7 +16,7 @@ load("~/srileytmp/postProc_Wed_Oct_29_11_54_01_2014.RData",verbose=TRUE)
 # require("data.table")
 require("adegenet")
 require("GenSA")
-# qrequire("NMOF")
+# require("NMOF")
 
 source("idSimFuncs.R")
 
@@ -44,32 +46,37 @@ timethresh <- function(vec,thresh=20){
 }
 
 # Next try week of x cases
-for (r in 1:noreals) {
-  for (p in 1:noparams) {
-    
-    # Simple sun of squares
-    x <- arrAllInc[,,r,p]
-    x_tmp <- apply(x,2,cumsum)
-    y_tmp <- apply(y,2,cumsum)
-    x_tmp2 <- x_tmp
-    x_tmp2[4:(dim(x_tmp)[1]),] <- x_tmp2[4:(dim(x_tmp)[1]),] - x_tmp2[1:(dim(x_tmp)[1]-3),]
-    compStats["sumSq",r,p] <- sum((x-y)^2)
-    reportingCorr <- max(1,sum(x)/sum(y))
-    compStats["sumSqReport",r,p] <- sum((x-y*reportingCorr)^2)
-    compStats["reportLevel",r,p] <- reportingCorr
-    if (reportingCorr > 1) {
-      compStats["largeSumSq",r,p] <- compStats["sumSqReport",r,p]
-    } else {
-      compStats["largeSumSq",r,p] <- 1e100
+if (remakeSummaries) {
+  for (r in 1:noreals) {
+    for (p in 1:noparams) {
+      
+      # Simple sun of squares
+      x <- arrAllInc[,,r,p]
+      x_tmp <- apply(x,2,cumsum)
+      y_tmp <- apply(y,2,cumsum)
+      x_tmp2 <- x_tmp
+      x_tmp2[4:(dim(x_tmp)[1]),] <- x_tmp2[4:(dim(x_tmp)[1]),] - x_tmp2[1:(dim(x_tmp)[1]-3),]
+      compStats["sumSq",r,p] <- sum((x-y)^2)
+      reportingCorr <- max(1,sum(x)/sum(y))
+      compStats["sumSqReport",r,p] <- sum((x-y*reportingCorr)^2)
+      compStats["reportLevel",r,p] <- reportingCorr
+      if (reportingCorr > 1) {
+        compStats["largeSumSq",r,p] <- compStats["sumSqReport",r,p]
+      } else {
+        compStats["largeSumSq",r,p] <- 1e100
+      }
+      compStats["thresh5SumSq",r,p] <- sum(ifelse(x_tmp2>5,(x-y)^2,y^2))
+      compStats["thresh5SumSqReport",r,p] <- sum(ifelse(x_tmp2/reportingCorr > 5,(x-y*reportingCorr)^2,(y*reportingCorr)^2))
+      compStats["time20",r,p] <- sqrt(sum((apply(x_tmp,2,timethresh)-apply(y_tmp,2,timethresh))^2))
+      
     }
-    compStats["thresh5SumSq",r,p] <- sum(ifelse(x_tmp2>5,(x-y)^2,y^2))
-    compStats["thresh5SumSqReport",r,p] <- sum(ifelse(x_tmp2/reportingCorr > 5,(x-y*reportingCorr)^2,(y*reportingCorr)^2))
-    compStats["time20",r,p] <- sqrt(sum((apply(x_tmp,2,timethresh)-apply(y_tmp,2,timethresh))^2))
+    
+    cat(paste("completed",r,"of",noreals,"\n"))
     
   }
-  
-  cat(paste("completed",r,"of",noreals,"\n"))
-  
+  save(compStats,file="./compStats.Rdat")
+} else {
+  load("./compStats.Rdat",verbose=TRUE)
 }
 
 hist((compStats["time20",,]))
@@ -80,27 +87,21 @@ ibest <- which(compStats[2,,]==bestSumSq,arr.ind=TRUE)
 multiBest <- compStats["reportLevel",ibest[1],ibest[2]]
 sum(apply(compStats["sumSqReport",,],c(2),min) < 5e5)
 
-pdf(file=paste(reportdir,"figure1_R0.pdf",sep=""))
+pdf(file=paste(reportdir,"fig_R0_sumSqReport.pdf",sep=""))
 plot(paramTab$R0_Spatial*1.1,apply(compStats["sumSqReport",,],c(2),min),ylim=c(3e5,5e5))
 dev.off()
-pdf(file=paste(reportdir,"figure1s_R0_thresh5SumSqReport.pdf",sep=""))
+
+pdf(file=paste(reportdir,"fig_R0_thresh5SumSqReport.pdf",sep=""))
 plot(paramTab$R0_Spatial*1.1,apply(compStats["thresh5SumSqReport",,],c(2),min),ylim=c(0,10e5))
 dev.off()
-plot(paramTab$R0_Spatial,apply(compStats["sumSqReport",,],c(2),min))
-pdf(file=paste(reportdir,"figure2_power.pdf",sep=""))
+
+pdf(file=paste(reportdir,"fig_power_sumSqReport.pdf",sep=""))
 plot(paramTab$Decay_Transmit_Spatial,apply(compStats["sumSqReport",,],c(2),min),log="y",ylim=c(3e5,5e5))
 dev.off()
-plot(paramTab$Decay_Transmit_Spatial,apply(compStats["sumSqReport",,],c(2),min),log="y")
-pdf(file=paste(reportdir,"figure3_offset.pdf",sep=""))
+
+pdf(file=paste(reportdir,"fig_offset_sumSqReport.pdf",sep=""))
 plot(paramTab$Offset_Transmit_Spatial,apply(compStats["sumSqReport",,],c(2),min),log="y",ylim=c(3e5,5e5))
 dev.off()
-plot(paramTab$Offset_Transmit_Spatial,apply(compStats["sumSqReport",,],c(2),min),log="y")
-hist(log10(apply(arrAllInc,c(3,4),sum)))
-
-x <- arrAllInc[,,ibest[1],ibest[2]]/multiBest
-
-sum(x)
-sum(y)
 
 # Use the updated version of the heat chart function to make the log rainbow (lego) version
 logbreaks <- c(
@@ -110,6 +111,10 @@ logbreaks <- c(
 legendscale <- c(0,1,2,3,4,5,10,20,50,100,200,400)
 logcols_seasun <- seasun(length(logbreaks)-2)
 
+x <- arrAllInc[,,ibest[1],ibest[2]]/multiBest
+sum(x)
+sum(y)
+
 inc.heat.chart.pdf.v3(
     log10(y+0.5),    
     cols = c(colors()[1],logcols_seasun),
@@ -117,7 +122,7 @@ inc.heat.chart.pdf.v3(
     legendlabs = legendscale,
     legendats = log10(legendscale+0.5),
     vecCountries=distsCountryLO,
-    outstem=paste(reportdir,"figure4_data_",sep=""),
+    outstem=paste(reportdir,"fig_data_",sep=""),
     xlabs=seq(0,40,5)
 )
 
@@ -128,12 +133,13 @@ inc.heat.chart.pdf.v3(
     legendlabs = legendscale,
     legendats = log10(legendscale+0.5),
     vecCountries=distsCountryLO,
-    outstem=paste(reportdir,"figure5_best_ASOS_",sep=""),
+    outstem=paste(reportdir,"fig_sumSqReport_",sep=""),
     xlabs=seq(0,40,5)
 )
 
 bestLargeSumSq <- min(compStats["largeSumSq",,])
 ibest2 <- which(compStats["largeSumSq",,]==bestLargeSumSq,arr.ind=TRUE)
+x2_all <- arrAllInc[,,ibest2[1],]
 
 paramTab[147,]
 sum(apply(compStats["sumSqReport",,],c(2),min) < 5e5)
@@ -147,7 +153,7 @@ inc.heat.chart.pdf.v3(
     legendlabs = legendscale,
     legendats = log10(legendscale+0.5),
     vecCountries=distsCountryLO,
-    outstem=paste(reportdir,"figure6_best_ASOS_no_under_report_",sep=""),
+    outstem=paste(reportdir,"fig_largeSumSq_",sep=""),
     xlabs=seq(0,40,5)
 )
 
@@ -164,27 +170,46 @@ inc.heat.chart.pdf.v3(
   legendlabs = legendscale,
   legendats = log10(legendscale+0.5),
   vecCountries=distsCountryLO,
-  outstem=paste(reportdir,"figure6b_best_time_20_",sep=""),
+  outstem=paste(reportdir,"fig_time20_",sep=""),
   xlabs=seq(0,40,5)
 )
 
+# Plot some goodness of fits charts
+fit_x3 <- ifelse(x3>0 & y>1,x3/y,NA)
+fit_x2 <- ifelse(x2>0 & y>1,x2/y,NA)
+
+pdf(file=paste(reportdir,"fig_gof_ss_time20_control.pdf",sep=""))
+  hist(ifelse(x2 > 0 & y > 0,x2-y,NA),breaks=seq(-300,300,5)-2.5,xlim=c(-100,100),
+      main="Sum of square fit",xlab="Sim - data (where either non zero)")
+  hist(ifelse(x3 > 0 & y > 0,x3-y,NA),breaks=seq(-300,300,5)-2.5,xlim=c(-100,100),
+      main="Time to 20 cases fit",xlab="Sim - data (where either non zero)")
+dev.off()
+
+hist(ifelse(x2_all > 0 & replicate(400,x2) > 0,replicate(400,x2)-x2_all,NA),breaks=seq(-10000,10000,5)-2.5,xlim=c(-100,100),
+    main="Best time fit - all sims (same parameters)",
+    xlab="Sim random - sim data (where either non zero)")
+
+
+image(log10(fit_x2),,col=seasun(100))
+image(fit_x3,breaks=0:100,col=seasun(100))
+
 topLogSumSq <- apply(log10(compStats["sumSqReport",,]),c(2),function(vec){mean(sort(vec)[1:5])})
-topThreshLogSumSq <- apply(log10(compStats["threshSumSq",,]),c(2),function(vec){mean(sort(vec)[1:5])})
-pdf(file=paste(reportdir,"figure7_R0_top_5_log.pdf",sep=""))
+topThreshLogSumSq <- apply(log10(compStats["thresh5SumSq",,]),c(2),function(vec){mean(sort(vec)[1:5])})
+pdf(file=paste(reportdir,"fig_R0_thresh5SumSq.pdf",sep=""))
   plot(paramTab$R0_Spatial,topLogSumSq,ylim=c(5.5,6))
 dev.off()
 
-pdf(file=paste(reportdir,"figure7a_R0_top_5_threshlog.pdf",sep=""))
+pdf(file=paste(reportdir,"fig_R0_topThreshLogSumSq.pdf",sep=""))
   plot(paramTab$R0_Spatial,topThreshLogSumSq,ylim=c(5.5,6))
 dev.off()
 
 maskLow <- topLogSumSq < 5.7
 sum(topLogSumSq < 5.7)
-pdf(file=paste(reportdir,"figure8_correlation_good_power_offsets.pdf",sep=""))
+pdf(file=paste(reportdir,"fig_correlation_good_power_offsets.pdf",sep=""))
 plot(paramTab$Decay_Transmit_Spatial[maskLow],paramTab$Offset_Transmit_Spatial[maskLow])
 dev.off()
 plot(paramTab$Offset_Transmit_Spatial,topLogSumSq,ylim=c(5.5,6.0))
-pdf(file=paste(reportdir,"figure9_ratio_offset_over_power.pdf",sep=""))
+pdf(file=paste(reportdir,"fig_ratio_offset_over_power.pdf",sep=""))
 plot(paramTab$Offset_Transmit_Spatial/paramTab$Decay_Transmit_Spatial,topLogSumSq,ylim=c(5.5,6.0))
 dev.off()
 
@@ -255,29 +280,32 @@ repSimSimAnneal <- function(n,m) {
   rtn
 }
 
-system.time(x <- repSimSimAnneal(100,2000))
-x <- x[order(x[,4]),]
+if (remakeAnneal) {
+  system.time(annealRes <- repSimSimAnneal(100,2000))
+  save(annealRes,file="annealRes.Rdat")
+} else {
+  load("annealRes.Rdat",verbose=TRUE)
+}
 
-pdf(file=paste(reportdir,"figure10_sim_anneal_R0.pdf",sep=""))
+annealRes <- annealRes[order(annealRes[,4]),]
+
+pdf(file=paste(reportdir,"fig_simanneal_R0.pdf",sep=""))
 plot(
-    jitter(x[,1],amount=0.005),
-    jitter(x[,4],amount=0.03),
+    jitter(annealRes[,1],amount=0.005),
+    jitter(annealRes[,4],amount=0.03),
     pch=19,
     cex=0.5,
     xlim=c(1.2,1.6),
     ylim=c(5.5,6.2))
 dev.off()
 
-pdf(file=paste(reportdir,"figure11_sim_anneal_power_offset_ratio.pdf",sep=""))
+pdf(file=paste(reportdir,"figure_simanneal_power_offset_ratio.pdf",sep=""))
 plot(
-    jitter(x[,2]/x[,3],amount=0.1),
-    jitter(x[,4],amount=0.03),
+    jitter(annealRes[,2]/annealRes[,3],amount=0.1),
+    jitter(annealRes[,4],amount=0.03),
     pch=19,
     cex=0.5,
     xlim=c(1,30),
     ylim=c(5.5,6.2))
 dev.off()
-
-
-hist(x[,1],breaks=seq(1.2,1.6,0.05))
 
