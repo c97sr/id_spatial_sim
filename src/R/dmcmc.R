@@ -2,6 +2,8 @@
 rm(list=ls(all=TRUE))
 
 # Set you present working directory to find the output
+# Just to check the Dropbox solution works
+# And it seems to work on the nexus as well
 # setwd("~/Dropbox/git/id_spatial_sim/src/R")
 # setwd("/home/sriley/git/id_spatial_sim/src/R")
 

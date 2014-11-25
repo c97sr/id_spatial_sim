@@ -27,8 +27,7 @@ noweeks <- dim(arrAllInc)[1]
 nodists <- dim(arrAllInc)[2]
 noreals <- dim(arrAllInc)[3]
 noparams <- dim(arrAllInc)[4]
-testedStats <- c("sumSq","sumSqReport","reportLevel","largeSumSq","thresh5SumSq","thresh5SumSqReport",
-    "time20")
+testedStats <- c("sumSq","sumSqReport","reportLevel","largeSumSq","thresh5SumSq","thresh5SumSqReport","time20")
 compStats <- array(
     dim=c(length(testedStats),dim(arrAllInc)[3],dim(arrAllInc)[4]),
     dimnames=list(testedStats,1:dim(arrAllInc)[3],paramsToLoad)

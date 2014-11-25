@@ -1,5 +1,5 @@
 rm(list=ls(all=TRUE))
-# setwd("~/Dropbox/svneclipse/spatialsim/spatialsim/src/rcode")
+# setwd("/Users/sriley/Dropbox/git/id_spatial_sim/src/R")
 
 # options(error=recover)
 # options(error=NULL)

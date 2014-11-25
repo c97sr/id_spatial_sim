@@ -30,6 +30,6 @@ param_scan <- data.frame(
    Decay_Transmit_Spatial = srg.hyper.vector(nosamples,1.5,5.5,FALSE),
    Contact_Trace_Capacity = srg.hyper.vector(nosamples,10,100,TRUE)
 )
-write.table(param_scan,file="~/srileytmp/paramscan27Oct2014.txt",row.names=FALSE,sep=" ")
+write.table(param_scan,file="~/srileytmp/paramscan14Nov2014.txt",row.names=FALSE,sep=" ")
 
 
