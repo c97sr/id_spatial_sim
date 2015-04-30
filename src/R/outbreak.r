@@ -7,7 +7,7 @@ require("fields")
 require("lattice")
 require("sp")
 require("scales")
-source("../../../../idsource/R/stevensRfunctions.R")
+source("../../../../svneclipse/idsource/R/stevensRfunctions.R")
 
 fnPopdata = "../../data/prd_sim_ascii_n_44384655.txt"
 fnEpidata = "../../runtemplates/ebola/output/flusars_2_pset_0_Events.out"

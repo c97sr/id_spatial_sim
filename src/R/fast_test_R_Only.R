@@ -6,7 +6,6 @@ require("sp")
 require("rgdal")
 source("~/Dropbox/svneclipse/idsource/R/stevensRfunctions.R")
 
-
 dat0 <- read.table(file="./output/ft_sp_pset_0_Events.out",header=TRUE)
 dimDat0 <- dim(dat0)
 noevents <- dimDat0[1]
@@ -15,7 +14,6 @@ names(dat0)
 tabInfs0 <- dat0[dat0$Event==0,]
 table(tabInfs0$Run,tabInfs0$Generation)
 table(tabInfs0$Generation)[2]/table(tabInfs0$Generation)[1]
-
 
 dat1 <- read.table(file="./output/ft_sp_pset_1_Events.out",header=TRUE)
 dim(dat1)
