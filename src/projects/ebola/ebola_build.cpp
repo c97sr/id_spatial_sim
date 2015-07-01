@@ -45,6 +45,7 @@ int main(int argc, char* argv[]) {
 	strHouseholdFile = ukPars.GetTag("strHouseholdDensityFile");
 	strWorkplaceFile = ukPars.GetTag("strWorkplaceDensityFile");
 	SR::DensityField PopulationDensityField(strHouseholdFile);
+	// PopulationDensityField.WriteAsciiGrid("tmpAsciiDump.out");
 	SR::DensityField WorkplaceDensityField(strWorkplaceFile);
 	ukPars.AddValue("dblXGridMin",PopulationDensityField.GetMinX());
 	ukPars.AddValue("dblXGridSize",PopulationDensityField.GetMaxX()-PopulationDensityField.GetMinX());
@@ -141,6 +142,8 @@ int main(int argc, char* argv[]) {
 	if (ofs.fail()) SR::srerror("You idiot.");
 	ofs << ukGridHex;
 	ofs.close();
+
+	// Write population density actually used to a file
 
 	if (ukPars.GetTag("blNetworkDumpFile")=="TRUE") {
 		ukGridHex.WriteArcsToFile(strOutputFile+"_arcs.out");

@@ -41,6 +41,7 @@ namespace SR {
 		inline double GetMinY(){return miny;};
 		inline double GetMaxY(){return maxy;};
 		inline double GetMaxVal(){return maxval;};
+		void WriteAsciiGrid(string filename);
 	};
 }
 

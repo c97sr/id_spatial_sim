@@ -6,14 +6,14 @@
 	intBlockSizeInUnitsOfPointers	1	4096
 
 [Household setup]			
-	intNoNodes	1	100000	[24881385]
+	intNoNodes	1	584396	[584396,24881385]
 	dblAverageHousehold	1	1.0	[3.3]
-	strHouseholdDensityFile	0	../data/westAfricaAscii.asc
+	strHouseholdDensityFile	0	../data/monroviaAscii.asc
 
 [Workplace setup]			
 	dblPropColleguesInNetwork	1	0.1
 	dblAverageWorkplaceSize	1	100
-	strWorkplaceDensityFile	0 	../data/westAfricaAscii.asc
+	strWorkplaceDensityFile	0	../data/monroviaAscii.asc
 	dblDistanceAllWorkplacesHistDx	1	10
 	dblDistanceAllWorkplacesGridDx	1	5
 	intMCMCMaxSamplesInMillions	1	0

@@ -44,7 +44,7 @@ void procEnterProdrome(SR::ParameterSet &p, SR::Node* pt1, SR::Node* pt2, SR::Ev
 void procEnterQuarantine(SR::ParameterSet &p, SR::Node* pt1, SR::Node* pt2, SR::EventMatrix& em);
 double kernNeighbourSetup(SR::ParameterSet &p, SR::Node* pt1, SR::Node* pt2, double offset);
 double kernSpatialInfection(SR::ParameterSet &p, SR::Node* pt1, SR::Node* pt2, double offset);
-double kernSpatialInfectionExp(SR::ParameterSet &p, SR::Node* pt1, SR::Node* pt2, double offset);
+double kernSpatialInfectionOff(SR::ParameterSet &p, SR::Node* pt1, SR::Node* pt2, double offset);
 double kernFileCached(SR::ParameterSet &p, SR::Node* pt1, SR::Node* pt2, double offset);
 double kernFileCachedEarlyRash(SR::ParameterSet &p, SR::Node* pt1, SR::Node* pt2, double offset);
 double kernHouseholdInfection(SR::ParameterSet &p, SR::Node* pt1, SR::Node* pt2, double offset);

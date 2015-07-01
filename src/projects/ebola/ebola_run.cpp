@@ -130,7 +130,7 @@ int main(int argc, char* argv[]) {
 		SR::SpatialKernel ukPoxSpatial(
 			SourceCharacteristicAllSpatial,
 			TargetCharacteristic,
-			kernSpatialEbola,
+			kernSpatialInfectionOff,
 			procInfection,
 			ukPars.GetIntValue("intInfectionKernelStackSize"),
 			0);

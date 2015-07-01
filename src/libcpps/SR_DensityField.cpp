@@ -99,7 +99,6 @@ SR::DensityField::DensityField(string filename) {
 	stepx = stepx / 57.2957795131;
 	stepy=stepx;
 
-
 	vals = new double[nox*noy]; for (int i=0;i<nox*noy;++i) vals[i]=0;
 
 	maxx=minx+(nox-1)*stepx;
@@ -116,6 +115,7 @@ SR::DensityField::DensityField(string filename) {
 	ifs.close();
 	CalcMaxVal();
 	cerr << "Density field constructed.  Sum of densities (0 for uniform): " << total << "\n";
+
 };
 
 string SR::DensityField::Table() {
@@ -140,7 +140,9 @@ double SR::DensityField::Value(double x, double y) {
 	xcoord = static_cast<int>((x-minx)/stepx);
 	ycoord = static_cast<int>((y-miny)/stepy);
 	// cerr << "here9" << endl;
-	rtnval = (vals[xcoord*noy+ycoord]+vals[(xcoord+1)*noy+ycoord]+vals[(xcoord+1)*noy+ycoord+1]+vals[xcoord*noy+ycoord+1])/4;
+	// Consider edit here
+	// rtnval = (vals[xcoord*noy+ycoord]+vals[(xcoord+1)*noy+ycoord]+vals[(xcoord+1)*noy+ycoord+1]+vals[xcoord*noy+ycoord+1])/4;
+	rtnval = vals[xcoord*noy+ycoord];
 	return rtnval;
 };
 
@@ -154,3 +156,33 @@ void SR::DensityField::CalcMaxVal() {
 	if (rtnval==0) SR::srerror("Entire density field is zero.");
 	maxval = rtnval;
 };
+
+void SR::DensityField::WriteAsciiGrid(string filename) {
+
+	static int nullData;
+	ofstream ofs;
+	double tmp,total=0;
+	string junk;
+	vector<double>::iterator ptVecDbl;
+	ofs.open(filename.c_str());
+	if (ofs.fail()) SR::srerror("Problem opening density file to write");
+
+	ofs << "NCOLS" << " " << nox << "\n";
+	ofs << "NROWS" << " " << noy << "\n";
+	ofs << "XLLCORNER" << " " << minx*57.2957795131 << "\n";
+	ofs << "YLLCORNER" << " " << miny*57.2957795131 << "\n";
+	ofs << "CELLSIZE" << " " << stepx*57.2957795131 << "\n";
+	ofs << "NODATA_value -2147483647\n";
+
+	for (int i=noy-1;i>=0;--i) {
+		for (int j=0;j<nox;++j) {
+			ofs << vals[j*noy+(noy-i-1)] << " ";
+		}
+		ofs << "\n";
+	}
+
+	ofs.close();
+	cerr << "Density written to field " << filename << "\n";
+
+};
+
