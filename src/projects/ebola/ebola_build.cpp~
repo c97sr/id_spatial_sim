@@ -21,13 +21,13 @@ int main(int argc, char* argv[]) {
 	// The NR functions in the code still need to be replaced by the gsl functions
 	// I've commented these out for now
 
-    double x = 5.0;
+	double x = 5.0;
     double y = gsl_sf_bessel_J0(x);
     cout << x << " " << y << endl;
     cout << numeric_limits<unsigned int>::max() << endl;
     cout << numeric_limits<double>::max() << endl;
 
-    // return 0;
+	// return 0;
 
 	// Read from command line and set up parameter object
 	int intNoArgs = 2;
@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
 	double dblDistanceAllWorkplacesHistDx = ukPars.GetValue("dblDistanceAllWorkplacesHistDx");
 
 	// Declare stream objects
-        ofstream ofs;
+	ofstream ofs;
 	ifstream ifs;
 	ostringstream foss;
 
