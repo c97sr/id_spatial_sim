@@ -1,4 +1,5 @@
 // Just testing the web interface for git hub
+// And also the add and commit functions
 
 #include"ebola.h"
 #include<ctime>
