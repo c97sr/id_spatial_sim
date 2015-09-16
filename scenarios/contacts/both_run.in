@@ -45,30 +45,30 @@
 [Network/household transmission]			
 	AttackRate	1	0 	
 	R0_Network	1	1.6 	
-	Hazard_Rash_Relative_Fever	1	0.02840909
+	Hazard_Rash_Relative_Fever	1	1 [0.02840909] 
 	Hazard_Home_Relative_Network	1	1 
 
 [Seeding]			
 	Seeding_x	1	-10.739424		[ Monrovia -10.739424; ]
 	Seeding_y	1	6.338849 		[ Monrovia 6.338849; ]
 	Seeding_range	1	100
-	Seeding_number	1	10
+	Seeding_number	1	1 [10]
 	Max_seeding_number	1	50
-	Trickle_rate	1	0
-	Trickle_duration	1	100
+	Trickle_rate	1	0.14    [0]
+	Trickle_duration	1	183   [100]
 	Seeding_max_try	1	1000000
 	boolResetICEachRealisation	1	1
 
 [Contact tracing and vaccination]			
 	Start_Time_Contact_Tracing	1	999
 	Start_Time_Self_Isolation	1	999
-	Vaccine_Probability_Susceptible	1	0.95
+	Vaccine_Probability_Susceptible	1	1 [0.95]
 	Latent_Vaccinated_One_Minimum_Time	1	5
 	Latent_Vaccinated_One_Maximum_Time	1	7
 	Recovery_Probability_Latent_Vaccinated_One	1	0
 	Recovery_Probability_Latent_Vaccinated_Two	1	0
 	Probability_Trace_Household	1	0
-	Probability_Trace_Neighbour	1	0
+	Probability_Trace_Neighbour	1	0.25
 	Maximum_Number_CT_Vaccinations_Each_Day	1	1000000
 	Duration_Quarantine	1	14
 	Fever_Self_Isolation_Average	1	50
