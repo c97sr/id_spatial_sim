@@ -1,0 +1,2 @@
+contacts <- read.table("D:/cygwin/id_spatial_sim/scenarios/contacts/output/ebola_pset_0_Events.out", header=TRUE, stringsAsFactors=FALSE,  
+						 na.strings = c("NA","-", "N/A") )
