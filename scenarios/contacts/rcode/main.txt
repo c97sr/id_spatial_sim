@@ -1,2 +1,26 @@
 contacts <- read.table("D:/cygwin/id_spatial_sim/scenarios/contacts/output/ebola_pset_0_Events.out", header=TRUE, stringsAsFactors=FALSE,  
 						 na.strings = c("NA","-", "N/A") )
+
+contacts1 <- contacts[contacts$Event==0,]
+
+
+### Without any interventions
+takeoffday <- rep(0,100)
+duration_epidemics <- rep(0,100)
+for (i in  1:100){
+takeoffday[i] <- contacts1$Day[which(contacts1$Run==i)][10]
+
+duration_epidemics[i] <- contacts1$Day[which(contacts1$Run==i-1)[length(which(contacts1$Run==i-1))]]
+
+} 
+
+
+
+
+hist(takeoffday)
+
+hist(duration_epidemics)
+
+
+### Use other criterion to define take off : Seven days windows 
+
