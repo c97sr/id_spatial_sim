@@ -1,0 +1,228 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage[colorlinks=true,urlcolor=blue]{hyperref}
+\usepackage{array}
+\usepackage{color}
+\usepackage[english]{babel}
+\usepackage{amsfonts}
+\usepackage{url}
+\usepackage{bm}
+\usepackage[margin=2.5cm]{geometry}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\beq}{\begin{equation}}
+\newcommand{\eeq}{\end{equation}}
+\newcommand{\m}[1]{\mathbf{#1}}
+
+\title{Spatial simulation code for 2014 EBV epidemic}
+\author{Steven Riley}
+\date{\today}
+
+\sloppy
+\hyphenpenalty 10000
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\selectlanguage{english}
+
+%% some knitr options
+<<include=FALSE>>=
+opts_chunk$set(fig.path='figs/', fig.keep='high', dev=c('pdf'), fig.width=4, fig.height=4, cache=FALSE,
+               tidy=FALSE, warning=FALSE, fig.show="asis", fig.align='center', out.width="\\textwidth")
+@
+
+\maketitle
+
+<<echo=FALSE>>=
+options(width=80)
+@
+
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+This R script goes with a bacth file in the testsuite directory of the
+id\_sptail\_sim library. After grabbing the code as a zip file from
+http:XXgoo.glXabcdef, you should be able to generate the simulation
+results and then the pdf of this script with the following commands
+
+\begin{verbatim}
+gunzip id_spatial_sim.zip 
+cd id_spatial_sim/g++ 
+make 
+cd ../testsuite 
+./fast_test.sh 
+\end{verbatim}
+
+
+When this is not being run in bacth mode, we need to set the working directory.
+This appears here as a comment, so it is not run when in batch mode.
+
+<<>>=
+rm(list=ls(all=TRUE))
+# setwd("~/Dropbox/git/id_spatial_sim/testsuite")
+@
+
+First we declare some packages and local libraries that might be needed. If the
+script goes into more general use, the dependency on the local libraries will
+have to be removed.
+
+<<>>=
+require("raster")
+require("scales")
+require("sp")
+require("rgdal")
+source("~/Dropbox/svneclipse/idsource/R/stevensRfunctions.R")
+@
+
+The first line of the batch file builds a synthetic population with density
+proportional the ebola affected region in west Africa, but much smaller. With a total population of only
+100,000. Each person has, one average, 10 network links but these links are
+distributed entirely randomly in space. This takes a while because the
+average population is very low and there is high variability. Hence the
+accept-reject method for assinging nodes has many rejection steps. We assume
+that only one individual lives in a household for this population. 
+
+%% <<>>=
+%% # system("../g++/ebola_build.exe ./params/fast_test_build_params.in ./output/small_pop1")  
+%% @
+
+The second line of the batch file runs an outbreak of only two generations 20
+times. The outbreak is seeded in the same area as the reported patient zero for
+the 2014 Ebola outbreak. There are 4 iniitally infectious individuals at time
+$t=0$. Transmission is only via the spatial kernel and thus allows us to test
+that the basic reproductive number is parameterized correctly. We can also
+report the serial interval. 
+
+%{\bf Table 1. Key parameters of the simulation model}
+%
+%\begin{tabular}{lll} \hline
+%Parameter & Value & Notes \\ \hline
+%$R_0$ spatial & 1.6 & From fully spatial kernel \\
+%Mean latent period & XXX & XXX \\ \hline
+%\end{tabular}
+
+We first load the linelist of events from all the realizations. And check the
+dimensions of the output. The output was designed before csvs became so
+dominant!
+
+<<>>=
+dat0 <- read.table(file="./output/ft_sp_pset_0_Events.out",header=TRUE)
+dimDat0 <- dim(dat0)
+noevents <- dimDat0[1]
+nocols <- dimDat0[2]
+@
+
+The column headings describe the information captured in the event file
+<<>>=
+names(dat0)
+@
+
+We can subset these 'data' to look at only infection. Then examine the number of
+infections by generation for each realization.
+
+<<>>=
+tabInfs0 <- dat0[dat0$Event==0,]
+table(tabInfs0$Run,tabInfs0$Generation)
+@
+
+And look at the average number in the second generation divided by the number of
+seeds as a test of the $R_0$ parameterization. 
+
+<<>>=
+table(tabInfs0$Generation)[2]/table(tabInfs0$Generation)[1]
+@
+
+Its difficult to tell if this is accurate with such small numbers, so we can
+load up the similar run with 100 realisations.
+
+<<>>=
+dat1 <- read.table(file="./output/ft_sp_pset_1_Events.out",header=TRUE)
+dim(dat1)
+tabInfs1 <- dat1[dat1$Event==0,]
+estR0 <- table(tabInfs1$Generation)[2] / table(tabInfs1$Generation)[1]
+estR0
+@
+
+Might also be worth looking at the distribution of the ratio of secondary cases
+for each realization. So we make a table of generations by run and plot a
+histogram of the ratios for each realization. You can see quite a bit of
+variance in the size of the second generation of this model. Note that the
+offspring distribution will be even more highly over-dispersed because these
+results are based on a seed of 4.
+
+<<>>=
+tabRunGen1 <- table(tabInfs1$Run,tabInfs1$Generation)
+hist( tabRunGen1[,2]/tabRunGen1[,1],breaks=seq(0,7,0.25),
+      xlab="Ratio first to second gens",main="")
+abline(v=estR0,lwd=2,col="red")	
+@
+
+It is also straightforward to look at the distributions of different waiting
+times in the model because we 'observe' them directly in this idealized
+linelist. So the average serial interval is equal to the average time of the
+infection event in the second generation.
+
+<<>>=
+vecTimesG1 <- tabInfs1[tabInfs1$Generation==2,"Day"] 
+mean(vecTimesG1)
+hist(vecTimesG1,breaks=seq(0,50,2),main="",
+    xlab="Time from exposure to infection (2 day bins)")
+@
+
+Its a highly over-dospersed distribution, suggesting that events such as the
+long time from exposure to infection for the non-African infection event
+in Spain are not entirely inconsistent with the NEJM estimated parameters.
+
+\subsection{Spatial analysis}
+
+Next we load up the population desity on which the model was based and look at
+the spatial distribution of these initial infections. The simulation is using
+the kernel shape and parameters from the SI file that Azra sent last week.
+
+Note that the pattern is way too diffuse because the population
+density is only at about 1\% of the real density. The same kernel will bring
+all these first generation events in much closer with the real population
+density. This section is working, but I can't get the aggregate function to work
+properly and give lower resolution for the event map.
+
+<<>>=
+popgrid <- read.asciigrid("../data/westAfricaAscii_agg100.asc",as.image=TRUE)
+sum(popgrid$z,na.rm=TRUE)
+popgrid$x <- popgrid$x * pi / 180
+popgrid$y <- popgrid$y * pi / 180
+epiImage <- eventImage(dat1,popgrid,0,0,1000,0,1000)
+image(popgrid$x,popgrid$y,log(popgrid$z+0.5),col=rev(grey_pal()(100)),xlab="",ylab="")
+image(epiImage$x,epiImage$y,epiImage$z,add=TRUE)
+@
+
+Next is to figure out how to extract district incidence from the simulation
+results so it can be compared with the data.
+
+The shape files loaded below are not the publically available adm2 files.
+
+<<>>=
+shapeDir <- "/Users/sriley/srileytmp/sfs"
+dists <- readOGR(dsn=shapeDir,layer="ThreeCountries")
+summary(dists)
+plot(dists)
+@
+
+Now generate incidence from the polygons and the simulation results, by making a
+vector of districts associated with each event.
+
+<<>>=
+incidence <- overlay(SpatialPoints(cbind(lon=x,lat=y)),dists)
+@
+
+\end{document}
+
