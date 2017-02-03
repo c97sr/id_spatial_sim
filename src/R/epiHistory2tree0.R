@@ -1,5 +1,37 @@
 require(ape) 
 
+# Takes the raw output from the simulation code, extracts a subset of
+# events that are being used as the observed events, and then assigns
+# them to have been observed or not based on a two stage sampling process
+# The first stage is to assign events as possibly observable according to
+# some constasnt probability and the second stage is to assign them as being
+# actually observed according to a capacity constrained process
+# events 2 and 6 are death and recovery. No individual should have
+# both!
+obsprocess <- function(tabEvs,obsevents = c(2,6),weekCap=999999) {
+    
+    # Setup the return value
+    rtnTab <- tabEvs
+    norows <- dim(rtnTab)[1]
+
+    # Add an index for the events
+    rtnTab$EvIndex <- 1:norows
+
+    browser()
+    
+    # Tag events as possibly observable and make tmp subset
+    rtnTab$obsEv <- tabEvs$Event %in% obsevents
+    subTab <- tabEvs[rtnTab$obsEv,]
+    noSubs <- dim(subTab)[1]
+
+    # Create the extra columns for the sub table
+    subTab$possObs <- rep(FALSE,noSubs)
+    subTab$actObs <- rep(FALSE,noSubs)
+
+    # Return the full table of events tagged by observation status
+    rtnTab
+    
+}
 
 epi2tree <- function( transmission_table, removal_table )
 {
@@ -98,10 +130,21 @@ epi2tree <- function( transmission_table, removal_table )
 	multi2di( read.tree(text= write.tree( o )) ) 
 }
 
+# Function by SR to add a sampling process to the output of the spatial simulation
+# epiTab is a data.frame in the format obtained from read.table( 'ebola_pset_0_Events.out', header = T )
+sample.epi.data <- function(epiTab) {
+  
+}
+
 
 if (F)
 {
-	ebovtab <- read.table( 'ebola_pset_0_Events.out', header = T )
+        rm(list=ls(all=TRUE))
+# Assumes location of the sourec for pwd
+        source("epiHistory2tree0.R")
+        ebovtab <- read.table( '../../scenarios/ebola/output/ebola_pset_0_Events.out', header = T )
+        debugtab <- obsprocess(ebovtab)
+        # ebovtab <- debugtab
 	ebovtab$Index <- as.character(ebovtab$Index)
 	ebovtab$infector <- as.character( ebovtab$infector )
 	inf_ebovtab <- ebovtab[ ebovtab$Event==0, ]
@@ -133,3 +176,4 @@ if (F)
 	BNPR( tre ) -> o
 	plot_BNPR( o , ylim = c(200, 2e5 ))
 }
+
