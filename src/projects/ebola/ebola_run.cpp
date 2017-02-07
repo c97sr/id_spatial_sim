@@ -5,23 +5,25 @@
 #include"ebola.h"
 
 int main(int argc, char* argv[]) {
-	cerr << "\nBuilt on 15/02/2006 at 11:00\n";
+  cerr << "\nBuilt on 15/02/2006 at 11:00\n";
 #ifdef SR_PAE_PAGING
-	cerr << "MS Windows Advanced Server or better required to run this version.\n";
-#endif
-#ifdef SR_BYTEPACKED
-	cerr << "Built with a 32 bit byte packed node.\n";
+  cerr << "MS Windows Advanced Server or better required";
+  cerr << "to run this version.\n";
 #endif
 
-	// Read from command line
-	int intNoArgs = 3;
-	if (argc<intNoArgs+1) SR::srerror("First three arguments parameter_file_name, binary_file_name, output_file_name. Rest parsed as parameter values.\n");
-	string strParamFile, strBinaryFile, strOutputFile, strRunOutputFile, strJunk, strArgs, strValuesChangesFile, strEventFile;
-	ostringstream osstmp;
-	bool blReset;
-	strParamFile = argv[1];
-	strBinaryFile = argv[2];
-	strOutputFile = argv[3];
+#ifdef SR_BYTEPACKED
+  cerr << "Built with a 32 bit byte packed node.\n";
+#endif
+  
+  // Read from command line
+  int intNoArgs = 3;
+  if (argc<intNoArgs+1) SR::srerror("First three arguments parameter_file_name, binary_file_name, output_file_name. Rest parsed as parameter values.\n");
+  string strParamFile, strBinaryFile, strOutputFile, strRunOutputFile, strJunk, strArgs, strValuesChangesFile, strEventFile;
+  ostringstream osstmp;
+  bool blReset;
+  strParamFile = argv[1];
+  strBinaryFile = argv[2];
+  strOutputFile = argv[3];
 
 	if ((argc-(intNoArgs+1))%3!=0) SR::srerror("An even number of parameter arguments are required.\n");
 	for (int i=intNoArgs+1;i<argc;i=i+3){strArgs+=argv[i];strArgs+="\t";strArgs+=argv[i+1];strArgs+="\t";strArgs+=argv[i+2];strArgs+="\t";};

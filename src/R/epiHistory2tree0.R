@@ -216,4 +216,3 @@ if (F)
     BNPR( tre ) -> o
     plot_BNPR( o , ylim = c(200, 2e5 ))
 }
-
