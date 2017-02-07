@@ -183,6 +183,7 @@ if (F)
     ## am pretty sure we just need to have
     ## inf_ebovtab <- obsebovtab[obsebovtab$actObs,]
     ## but I see something happening with ae_ebovtab, so not completely sure
+    
 
     ebovtab$Index <- as.character(ebovtab$Index)
     ebovtab$infector <- as.character( ebovtab$infector )
