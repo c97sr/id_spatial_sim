@@ -25,100 +25,102 @@ int main(int argc, char* argv[]) {
   strBinaryFile = argv[2];
   strOutputFile = argv[3];
 
-	if ((argc-(intNoArgs+1))%3!=0) SR::srerror("An even number of parameter arguments are required.\n");
-	for (int i=intNoArgs+1;i<argc;i=i+3){strArgs+=argv[i];strArgs+="\t";strArgs+=argv[i+1];strArgs+="\t";strArgs+=argv[i+2];strArgs+="\t";};
+  if ((argc-(intNoArgs+1))%3!=0) SR::srerror("An even number of parameter arguments are required.\n");
+  for (int i=intNoArgs+1;i<argc;i=i+3){
+	  strArgs+=argv[i];strArgs+="\t";strArgs+=argv[i+1];strArgs+="\t";strArgs+=argv[i+2];strArgs+="\t";
+  };
 
-	// Define some utility variables
-	ofstream ofs;
+  // Define some utility variables
+  ofstream ofs;
 
-	// Debug binary in and out
-	cerr << "Opening binary file and checking for consistency...\n";
-	ifstream ifs;
-	ifs.open((strBinaryFile+"_params.hex").c_str(),ios::binary);
-	if (ifs.fail()) SR::srerror("Problem opening binary parameter file.");
-	SR::ParameterSet ukPars;
-	ifs >> ukPars;
-	ifs.close();
-	SR::Hexagon tmphex(ukPars.GetIntValue("intNoCharacteristics"),ukPars.GetIntValue("intNoMaximalNodes"));
-	ifs.open((strBinaryFile+"_gridhex.hex").c_str(),ios::binary);
-	if (ifs.fail()) SR::srerror("Problem opening binary gridhex file.");
-	SR::GridHex ukGridHex(ukPars,tmphex,ifs);
-	ifs.close();
-	ifs.open((strBinaryFile+"_pages.hex").c_str(),ios::binary);
-	if (ifs.fail()) SR::srerror("Problem opening binary pages file.");
-	SR::PagesForThings<SR::Node> ukEvmemInitial(ukPars.GetIntValue("intBlockSizeInUnitsOfPointers"),ukPars.GetIntValue("intNumberOfBlocks"),ifs,ukGridHex.FirstNode());
-	ifs.close();
-	ukGridHex.AssignToPagesOfNodes(&ukEvmemInitial);
+  // Debug binary in and out
+  cerr << "Opening binary file and checking for consistency...\n";
+  ifstream ifs;
+  ifs.open((strBinaryFile+"_params.hex").c_str(),ios::binary);
+  if (ifs.fail()) SR::srerror("Problem opening binary parameter file.");
+  SR::ParameterSet ukPars;
+  ifs >> ukPars;
+  ifs.close();
+  SR::Hexagon tmphex(ukPars.GetIntValue("intNoCharacteristics"),ukPars.GetIntValue("intNoMaximalNodes"));
+  ifs.open((strBinaryFile+"_gridhex.hex").c_str(),ios::binary);
+  if (ifs.fail()) SR::srerror("Problem opening binary gridhex file.");
+  SR::GridHex ukGridHex(ukPars,tmphex,ifs);
+  ifs.close();
+  ifs.open((strBinaryFile+"_pages.hex").c_str(),ios::binary);
+  if (ifs.fail()) SR::srerror("Problem opening binary pages file.");
+  SR::PagesForThings<SR::Node> ukEvmemInitial(ukPars.GetIntValue("intBlockSizeInUnitsOfPointers"),ukPars.GetIntValue("intNumberOfBlocks"),ifs,ukGridHex.FirstNode());
+  ifs.close();
+  ukGridHex.AssignToPagesOfNodes(&ukEvmemInitial);
 
-	// cerr << ukGridHex.FirstHexagon()->OutputIndexByCharacteristicOnOneLine() << "\n";
+  // cerr << ukGridHex.FirstHexagon()->OutputIndexByCharacteristicOnOneLine() << "\n";
 
-	// Define minimum set of parameters initialize in the absence of parameter file reading
-	cerr << "Command line parameters listed below...\n";
-	ukPars.ReadParamsFromFile(strParamFile);
-	if (argc > 3) ukPars.ReadParams(strArgs);
-	RunExtraParameters(ukPars);
+  // Define minimum set of parameters initialize in the absence of parameter file reading
+  cerr << "Command line parameters listed below...\n";
+  ukPars.ReadParamsFromFile(strParamFile);
+  if (argc > 3) ukPars.ReadParams(strArgs);
+  RunExtraParameters(ukPars);
+  cerr << "done.\n";
+  bool blPartialRun;
+  if (ukPars.GetTag("strPartialRun")=="TRUE") blPartialRun=true; else blPartialRun=false;
+  bool blLogOutputBinary;
+  if (ukPars.GetTag("strLogOutputBinary")=="TRUE") blLogOutputBinary=true; else blLogOutputBinary=false;
+
+  // Output text version of network if required
+  if (ukPars.GetTag("blNetworkDumpFileRunCode")=="TRUE") {
+	cerr << "Writing text output...";
+	ukGridHex.WriteArcsToFile(strOutputFile+"_runcode_arcs.out");
+	ukGridHex.WriteNodeLocationsAndSizesToFile(strOutputFile+"_runcode_nodes.out");
 	cerr << "done.\n";
-	bool blPartialRun;
-	if (ukPars.GetTag("strPartialRun")=="TRUE") blPartialRun=true; else blPartialRun=false;
-	bool blLogOutputBinary;
-	if (ukPars.GetTag("strLogOutputBinary")=="TRUE") blLogOutputBinary=true; else blLogOutputBinary=false;
+  }
 
-	// Output text version of network if required
-	if (ukPars.GetTag("blNetworkDumpFileRunCode")=="TRUE") {
-		cerr << "Writing text output...";
-		ukGridHex.WriteArcsToFile(strOutputFile+"_runcode_arcs.out");
-		ukGridHex.WriteNodeLocationsAndSizesToFile(strOutputFile+"_runcode_nodes.out");
-		cerr << "done.\n";
-	}
+  // Set up the infection process
+  // Characteristic go 0-sus, 1-lat, 2-inf nonsym (prodromal?), 3-inf sym, 4-rec, 5-dead
+  // Arg 2 of vector constructor gives value (arg one gives size)
+  vector<int> SourceCharacteristic(1,2);
+  // vector<int> TargetCharacteristic(1,0);
+  vector<int> TargetCharacteristic(9);
+  TargetCharacteristic[0]=0;
+  TargetCharacteristic[1]=1;
+  TargetCharacteristic[2]=2;
+  TargetCharacteristic[3]=3;
+  TargetCharacteristic[4]=4;
+  TargetCharacteristic[5]=5;
+  TargetCharacteristic[6]=6;
+  TargetCharacteristic[7]=7;
+  TargetCharacteristic[8]=8;
+  vector<int> SourceCharacteristicAllSymp(2);
+  SourceCharacteristicAllSymp[0]=3;
+  SourceCharacteristicAllSymp[1]=8;
+  vector<int> SourceCharacteristicAllSpatial(2);
+  SourceCharacteristicAllSpatial[0]=2;
+  SourceCharacteristicAllSpatial[1]=3;
+  vector<int> SourceCharacteristicEarlySymp(1,3);
+  vector<int> SourceCharacteristicRegionalVaccination(3);
+  SourceCharacteristicRegionalVaccination[0]=0;
+  SourceCharacteristicRegionalVaccination[1]=1;
+  SourceCharacteristicRegionalVaccination[2]=2;
+  double *ptConstSpatial = ukPars.GetPointer("Relative_Transmit_Spatial");
 
-	// Set up the infection process
-	// Characteristic go 0-sus, 1-lat, 2-inf nonsym (prodromal?), 3-inf sym, 4-rec, 5-dead
-	// Arg 2 of vector constructor gives value (arg one gives size)
-	vector<int> SourceCharacteristic(1,2);
-	// vector<int> TargetCharacteristic(1,0);
-	vector<int> TargetCharacteristic(9);
-	TargetCharacteristic[0]=0;
-	TargetCharacteristic[1]=1;
-	TargetCharacteristic[2]=2;
-	TargetCharacteristic[3]=3;
-	TargetCharacteristic[4]=4;
-	TargetCharacteristic[5]=5;
-	TargetCharacteristic[6]=6;
-	TargetCharacteristic[7]=7;
-	TargetCharacteristic[8]=8;
-	vector<int> SourceCharacteristicAllSymp(2);
-	SourceCharacteristicAllSymp[0]=3;
-	SourceCharacteristicAllSymp[1]=8;
-	vector<int> SourceCharacteristicAllSpatial(2);
-	SourceCharacteristicAllSpatial[0]=2;
-	SourceCharacteristicAllSpatial[1]=3;
-	vector<int> SourceCharacteristicEarlySymp(1,3);
-	vector<int> SourceCharacteristicRegionalVaccination(3);
-	SourceCharacteristicRegionalVaccination[0]=0;
-	SourceCharacteristicRegionalVaccination[1]=1;
-	SourceCharacteristicRegionalVaccination[2]=2;
-	double *ptConstSpatial = ukPars.GetPointer("Relative_Transmit_Spatial");
+  strValuesChangesFile = ukPars.GetTag("strFileParamChanges");
+  SR::ParameterValueSetB objParamChanges(strValuesChangesFile);
 
-	strValuesChangesFile = ukPars.GetTag("strFileParamChanges");
-	SR::ParameterValueSetB objParamChanges(strValuesChangesFile);
+  if (blPartialRun) strEventFile = ukPars.GetTag("strEventFile");
 
-	if (blPartialRun) strEventFile = ukPars.GetTag("strEventFile");
+  // Start parameter loop
+  for (int i=0;i<objParamChanges.NoChanges();++i) {
 
-	// Start parameter loop
-	for (int i=0;i<objParamChanges.NoChanges();++i) {
+	  // ukPars.intSeed = -1234;
+	  // The line above does not produce the desired results
+	  // for now assume OK
+	  // in the future at some point, have an array to log values at different points in the loop and throw an error as soon as it fails
 
-		// ukPars.intSeed = -1234;
-		// The line above does not produce the desired results
-		// for now assume OK
-		// in the future at some point, have an array to log values at different points in the loop and throw an error as soon as it fails
+	  osstmp.str("");
+	  osstmp << strOutputFile << "_pset_" << i;
+	  strRunOutputFile = osstmp.str();
 
-		osstmp.str("");
-		osstmp << strOutputFile << "_pset_" << i;
-		strRunOutputFile = osstmp.str();
+	  objParamChanges.UpdateParameterSet(ukPars);
 
-		objParamChanges.UpdateParameterSet(ukPars);
-
-		// Set up monitoring object
+	  // Set up monitoring object
 		GatherUKPoxInfoA gatherA(static_cast<int>(ukPars.GetValue("dblEndTime")/ukPars.GetValue("dblTimeStep")+1),
 			ukPars.GetValue("dblTimeStep"),
 			ukPars.GetIntValue("intRealisationsPerParameterSet"),

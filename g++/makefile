@@ -6,7 +6,7 @@ endif
 
 # Possible modes are debug and run
 ifndef $(MODE)
-MODE=debug
+MODE=run
 endif
 
 # Set main compile option

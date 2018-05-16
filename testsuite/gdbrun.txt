@@ -13,3 +13,4 @@ set args params/fast_test_run_params.in output/pop1 output/test1
 
 # break SR_GridHex.cpp:198
 # break ebola_common.cpp:860
+break SR_Parameter.cpp:297
