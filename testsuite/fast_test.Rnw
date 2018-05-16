@@ -1,3 +1,6 @@
+% Now being depricated from fast_test * to first_test.R using spin
+
+
 \documentclass{article}
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
@@ -63,8 +66,7 @@ cd ../testsuite
 ./fast_test.sh 
 \end{verbatim}
 
-
-When this is not being run in bacth mode, we need to set the working directory.
+When this is not being run in batch mode, we need to set the working directory.
 This appears here as a comment, so it is not run when in batch mode.
 
 <<>>=
