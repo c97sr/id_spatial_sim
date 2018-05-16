@@ -30,4 +30,5 @@
 # SR Stuff
 *.hex
 *.pdf
-
+*#*
+*~*
