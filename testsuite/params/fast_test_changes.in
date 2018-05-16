@@ -1,4 +1,4 @@
 intRealisationsPerParameterSet	intMaxGeneration intMaxCumInfections R0_Spatial PARAM_LINE_END
-5 999 100 1.6
-5 999 100 0.9
-5 999 100 3.0
+2 1 1000 1.6
+2 4 1000 1.6
+2 1 1000 1.6

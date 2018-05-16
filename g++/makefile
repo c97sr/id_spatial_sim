@@ -1,4 +1,3 @@
-# ONON
 # Set main options (can be at command line)
 ifndef $(SYSTEM) 
 SYSTEM=mac1
@@ -6,7 +5,7 @@ endif
 
 # Possible modes are debug and run
 ifndef $(MODE)
-MODE=run
+MODE=debug
 endif
 
 # Set main compile option

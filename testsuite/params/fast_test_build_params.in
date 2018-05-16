@@ -22,14 +22,14 @@
 	dblWeightMCMCUpdateLocal	1	0.9
 
 [Commuting distribution]			
-	Commute_Power_One_GZ	1	2.29
+	Commute_Power_One_GZ	 1	2.29
 	Commute_Change_Point_GZ	1	3.47
-	Commute_Power_One_HK	1	2.29
+	Commute_Power_One_HK	 1	2.29
 	Commute_Change_Point_HK	1	3.47
 
 [Spatial neighbour generation]			
 	Constant_Generate_Spatial_Neighbour	1	0
-	Decay_Generate_Spatial_Neighbour	1	0.75
+	Decay_Generate_Spatial_Neighbour 	1	0.75
 	Prob_Generate_Spatial_Neighbour	1	0
 	Offset_Generate_Spatial_Neighbour	1	0
 	Cutoff_Distance_Generate_Spatial_Neighbour	1	0.01
