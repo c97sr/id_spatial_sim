@@ -34,7 +34,7 @@
 	Probability_Of_Recovery	1	0.3
 
 [Spatial transmission]			
-	R0_Spatial	1	0
+	R0_Spatial	1	0.0
 	Cutoff_Distance_Transmit_Spatial	1	0.001
 	intMaxInfsPerDt	1	10000
 	intMaxDelayInAuxEventMatrix	1	1
@@ -49,8 +49,8 @@
 	Hazard_Home_Relative_Network	1	1 
 
 [Seeding]			
-	Seeding_x	1	-10.739424		[ Monrovia -10.739424; ]
-	Seeding_y	1	6.338849 		[ Monrovia 6.338849; ]
+	Seeding_x	1	18.1399		[ Monrovia -10.739424; ]
+	Seeding_y	1	-0.7317 		[ Monrovia 6.338849; ]
 	Seeding_range	1	100
 	Seeding_number	1	10
 	Max_seeding_number	1	50

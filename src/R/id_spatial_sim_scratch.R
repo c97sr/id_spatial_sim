@@ -1,4 +1,4 @@
-# setwd("~/Dropbox/git/id_spatial_sim/src/R")
+# setwd("~/Dropbox/02_git/id_ss/src/R")
 # setwd("/home/sriley/git/id_spatial_sim/src/R")
 source("~/Dropbox/svneclipse/idsource/R/stevensRfunctions.R")
 

@@ -1,4 +1,5 @@
 # Start from a clean environment if not using immediately after run generation
+# File for processing output from gemma's code
 rm(list=ls(all=TRUE))
 load("~/srileytmp/postProc_Wed_Oct_29_11_54_01_2014.RData",verbose=TRUE)
 remakeSummaries <- FALSE
@@ -48,7 +49,7 @@ timethresh <- function(vec,thresh=20){
 if (remakeSummaries) {
   for (r in 1:noreals) {
     for (p in 1:noparams) {
-      
+
       # Simple sun of squares
       x <- arrAllInc[,,r,p]
       x_tmp <- apply(x,2,cumsum)
@@ -67,11 +68,11 @@ if (remakeSummaries) {
       compStats["thresh5SumSq",r,p] <- sum(ifelse(x_tmp2>5,(x-y)^2,y^2))
       compStats["thresh5SumSqReport",r,p] <- sum(ifelse(x_tmp2/reportingCorr > 5,(x-y*reportingCorr)^2,(y*reportingCorr)^2))
       compStats["time20",r,p] <- sqrt(sum((apply(x_tmp,2,timethresh)-apply(y_tmp,2,timethresh))^2))
-      
+
     }
-    
+
     cat(paste("completed",r,"of",noreals,"\n"))
-    
+
   }
   save(compStats,file="./compStats.Rdat")
 } else {
@@ -115,7 +116,7 @@ sum(x)
 sum(y)
 
 inc.heat.chart.pdf.v3(
-    log10(y+0.5),    
+    log10(y+0.5),
     cols = c(colors()[1],logcols_seasun),
     breaks = logbreaks,
     legendlabs = legendscale,
@@ -126,7 +127,7 @@ inc.heat.chart.pdf.v3(
 )
 
 inc.heat.chart.pdf.v3(
-    log10(x+0.5),    
+    log10(x+0.5),
     cols = c(colors()[1],logcols_seasun),
     breaks = logbreaks,
     legendlabs = legendscale,
@@ -146,7 +147,7 @@ urFactor <- compStats["reportLevel",ibest2[1],ibest2[2]]
 x2 <- arrAllInc[,,ibest2[1],ibest2[2]]/multiBest
 x2_cum <- cumweek(x2)
 inc.heat.chart.pdf.v3(
-    log10(ifelse(x2_cum>5,x2,0)+0.5),    
+    log10(ifelse(x2_cum>5,x2,0)+0.5),
     cols = c(colors()[1],logcols_seasun),
     breaks = logbreaks,
     legendlabs = legendscale,
@@ -163,7 +164,7 @@ x3 <- arrAllInc[,,ibest3[1],ibest3[2]]
 x3_cum <- cumweek(x3)
 sum(x3)
 inc.heat.chart.pdf.v3(
-  log10(ifelse(x3_cum > 5,x3,0) + 0.5),    
+  log10(ifelse(x3_cum > 5,x3,0) + 0.5),
   cols = c(colors()[1],logcols_seasun),
   breaks = logbreaks,
   legendlabs = legendscale,
@@ -220,23 +221,23 @@ pMaxes <- c(1.6,100,5.5)
 pLogs <- c(FALSE,TRUE,FALSE)
 unitParams <- paramTab
 unitParams[] <- NA
-unitParams$R0_Spatial <- (paramTab$R0_Spatial-1.2)/(1.6-1.2) 
+unitParams$R0_Spatial <- (paramTab$R0_Spatial-1.2)/(1.6-1.2)
 unitParams$Decay_Transmit_Spatial <- (paramTab$Decay_Transmit_Spatial-1.5)/(5.5-1.5)
 unitParams$Offset_Transmit_Spatial <- log10(paramTab$Offset_Transmit_Spatial)
 unitParams$Offset_Transmit_Spatial <- unitParams$Offset_Transmit_Spatial/2
 distFunc <- function(X,Y,unitVals){
-  rtn <- 	(unitVals[X,1]-unitVals[Y,1])^2 + 
+  rtn <- 	(unitVals[X,1]-unitVals[Y,1])^2 +
       (unitVals[X,2]-unitVals[Y,2])^2 +
       (unitVals[X,3]-unitVals[Y,3])^2
   rtn <- sqrt(rtn)
   rtn
-} 
+}
 distLookup <- outer(1:400,1:400,distFunc,unitVals=unitParams)
 indexNeigh <- t(apply(distLookup,c(1),function(x){order(x)[2:(2+nnearNeigh)]}))
 
 # Simulate simulated annealing!
 # Needs rerunning for about the number of runs we could do overnight
-# Needs a temperature cooling mechanism to be tested and also to be tested from 
+# Needs a temperature cooling mechanism to be tested and also to be tested from
 # different starting points
 simsimAnneal <- function(n) {
   nsamples 	<- n
@@ -245,7 +246,7 @@ simsimAnneal <- function(n) {
   rtn 			<- matrix(nrow=nsamples,ncol=1+length(names(paramTab)))
   csamp 		<- 1
   finalTmp	<- log10(0.001)
-  initTmp 	<- log10(0.1) 
+  initTmp 	<- log10(0.1)
   while (csamp <= nsamples) {
     logTemp 	<- 10^(initTmp + (csamp/nsamples)*(finalTmp-initTmp))
     rtn[csamp,] <- t(as.numeric(c(paramTab[cur_index,],cur_stat)))
@@ -254,7 +255,7 @@ simsimAnneal <- function(n) {
     next_stat <- topLogSumSq[next_index]
     accept <- FALSE
     if (next_stat < cur_stat) {
-      accept <- TRUE   
+      accept <- TRUE
     } else {
       acceptProb <- exp(-(next_stat-cur_stat)/logTemp)
       if (runif(1) < acceptProb) {
@@ -274,7 +275,7 @@ simsimAnneal(10)
 repSimSimAnneal <- function(n,m) {
   rtn <- matrix(nrow=n,ncol=4)
   for (i in 1:n) {
-    rtn[i,] <- simsimAnneal(m)    
+    rtn[i,] <- simsimAnneal(m)
   }
   rtn
 }
