@@ -1,6 +1,6 @@
 # setwd("~/Dropbox/02_git/id_ss/src/R")
 # setwd("/home/sriley/git/id_spatial_sim/src/R")
-source("~/Dropbox/svneclipse/idsource/R/stevensRfunctions.R")
+# source("~/Dropbox/svneclipse/idsource/R/stevensRfunctions.R")
 
 fnPopdata = "../../data/westAfricaAscii.asc"
 fnOutStem = "~/Dropbox/projects/ebola/"
@@ -12,7 +12,6 @@ sum(popgrid$z,na.rm=TRUE)
 # popgrid_coarse_tmp <- aggregate(popgrid_tmp,factor=1000,fun=sum)
 # writeRaster(popgrid_coarse_tmp,file="../data/westAfricaAscii_agg1000.asc",format="ascii",
 #    overwrite=TRUE)
-
 
 # epiImage <- eventImage(datSim,popgrid,0,0,1000,0,0)
 # sum(epiImage$z,na.rm=TRUE)
@@ -31,5 +30,3 @@ param_scan <- data.frame(
    Contact_Trace_Capacity = srg.hyper.vector(nosamples,10,100,TRUE)
 )
 write.table(param_scan,file="~/srileytmp/paramscan14Nov2014.txt",row.names=FALSE,sep=" ")
-
-
