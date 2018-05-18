@@ -15,22 +15,47 @@ using namespace std;
 #include<gsl/gsl_sf_bessel.h>
 #include<limits>
 
+// Some globals ONLY ONLY for random numbers
+// I hate globals, but they seem to make sense here
+const gsl_rng_type * T;
+gsl_rng * r;
+
 // Probably need an object for multiple travel behaviors that can handle many different zones
 // First thing is a multiple cached dbl object
 
+// This function needs to recreate a numerical recepies
+double dbgfn1() {
+
+	int i, n = 5;
+
+	for (i = 0; i < n; i++) {
+		double u = gsl_rng_uniform (r);
+		cout << u << endl;
+	}
+
+	return 2.3;
+
+};
+
 int main(int argc, char* argv[]) {
 
-	// These lines are just to test the compiling and linking of the gsl functions.
-	// The NR functions in the code still need to be replaced by the gsl functions
-	// I've commented these out for now
+    // Setup random number generator before ever used
+	gsl_rng_env_setup();
+	T = gsl_rng_default;
+	r = gsl_rng_alloc (T);
 
-    double x = 5.0;
-    double y = gsl_sf_bessel_J0(x);
-    cout << x << " " << y << endl;
-    cout << numeric_limits<unsigned int>::max() << endl;
-    cout << numeric_limits<double>::max() << endl;
+	// Demonstrate the the random number generator has the correct properties
+	gsl_rng_set(r, 123456);
+	cout << dbgfn1() << endl;
+    cout << endl << endl;
+    cout << dbgfn1() << endl;
+    cout << endl << endl;
+	gsl_rng_set(r, 123456);
+    cout << dbgfn1() << endl;
 
-    // return 0;
+	gsl_rng_free (r);
+
+    return 0;
 
 	// Read from command line and set up parameter object
 	int intNoArgs = 2;
