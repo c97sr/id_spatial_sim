@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
 
 	gsl_rng_free (r);
 
-    return 0;
+    // return 0;
 
 	// Read from command line and set up parameter object
 	int intNoArgs = 2;
