@@ -138,6 +138,10 @@ SR::GridHex::GridHex(SR::ParameterSet& p, SR::Hexagon tmphex, SR::DensityField& 
 	dblMaxRelativeDensity = homes.GetMaxVal();
 	cerr << "Choosing household locations and sizes using variable household density...\n";
 	while (tmpPtNode != vecNodes+sizeVecNodes) { // checking this routine
+
+		tmpx = gsl_rng_uniform(glob_rng)*GetMaxDx() + minx;
+		tmpy = gsl_rng_uniform(glob_rng)*GetMaxDy() + miny;
+
 		tmpx = NR::ran2(p.intSeed)*GetMaxDx() + minx;
 		tmpy = NR::ran2(p.intSeed)*GetMaxDy() + miny;
 		// cerr << p.intSeed << " " << tmpx << " " << tmpy << " " << dblMaxRelativeDensity << endl;

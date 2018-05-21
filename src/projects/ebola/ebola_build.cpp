@@ -3,22 +3,17 @@
 
 #include"ebola.h"
 #include<ctime>
-#include<gsl/gsl_rng.h>
-#include<gsl/gsl_randist.h>
-#include<gsl/gsl_sf_bessel.h>
 #include<limits>
+#include"SR_GslRng.h"
 
 using namespace std;
 
-#include<gsl/gsl_rng.h>
-#include<gsl/gsl_randist.h>
-#include<gsl/gsl_sf_bessel.h>
-#include<limits>
-
 // Some globals ONLY ONLY for random numbers
 // I hate globals, but they seem to make sense here
-const gsl_rng_type * T;
-gsl_rng * r;
+// gsl_rng * glob_rng;
+gsl_rng_env_setup();
+T = gsl_rng_default;
+glob_rng = gsl_rng_alloc (T);
 
 // Probably need an object for multiple travel behaviors that can handle many different zones
 // First thing is a multiple cached dbl object
@@ -29,7 +24,7 @@ double dbgfn1() {
 	int i, n = 5;
 
 	for (i = 0; i < n; i++) {
-		double u = gsl_rng_uniform (r);
+		double u = gsl_rng_uniform (glob_rng);
 		cout << u << endl;
 	}
 
@@ -40,21 +35,19 @@ double dbgfn1() {
 int main(int argc, char* argv[]) {
 
     // Setup random number generator before ever used
-	gsl_rng_env_setup();
-	T = gsl_rng_default;
-	r = gsl_rng_alloc (T);
 
 	// Demonstrate the the random number generator has the correct properties
-	gsl_rng_set(r, 123456);
+	gsl_rng_set(glob_rng, 123456);
 	cout << dbgfn1() << endl;
     cout << endl << endl;
     cout << dbgfn1() << endl;
     cout << endl << endl;
-	gsl_rng_set(r, 123456);
+	gsl_rng_set(glob_rng, 123456);
     cout << dbgfn1() << endl;
 
-	gsl_rng_free (r);
+	gsl_rng_free (glob_rng);
 
+	// For debugging here
     // return 0;
 
 	// Read from command line and set up parameter object
