@@ -110,5 +110,3 @@ void SR::srerror(const string etext) {
 	exit(1);
 };
 
-
-

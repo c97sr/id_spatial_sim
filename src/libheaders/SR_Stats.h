@@ -4,6 +4,7 @@
 #include<iostream>
 #include"nr.h"
 #include"SR_Utility.h"
+#include<gsl/gsl_rng.h>
 
 /*
 [Enter details]
@@ -26,6 +27,7 @@ namespace SR {
 	int GammaModelMatrixDelayFixed(double mean, int alpha, int &sd, double dt, int max);
 	double MeanOfModelMatrixDelay(double mean, int alpha, double dt_disc, double dt_int, int max);
 	double ProbabilityOfOneTimeStep(double mean, int alpha, double dt_disc, double dt_int, int timeStep);
+	double rngtest();
 }
 
 #endif

@@ -78,6 +78,9 @@ void SR::ParameterUpdates::LogParameterValues(double lnlike, ostringstream &oss,
 void SR::ParameterUpdates::ProposeUpdate() {
 	static double currentWeight,randomWeight,dblParamValue,dblJump,dblMaxJump;
 	static double *param;
+
+	int dbgtest = r->val();
+
 	randomWeight = totalWeight*NR::ran2(ps->intSeed);
 	intNoChosenParam = 0;
 	currentWeight = paramWeight[0];

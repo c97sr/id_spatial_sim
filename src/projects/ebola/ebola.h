@@ -14,7 +14,6 @@
 #include"SR_GridHex.h"
 #include"SR_Workplaces.h"
 #include"SR_InitialConditions.h"
-#include"SR_GslRng.h"
 
 using namespace std;
 

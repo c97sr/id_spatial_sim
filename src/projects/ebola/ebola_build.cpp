@@ -4,50 +4,39 @@
 #include"ebola.h"
 #include<ctime>
 #include<limits>
-#include"SR_GslRng.h"
 
 using namespace std;
+
+extern gsl_rng * glob_rng;
 
 // Some globals ONLY ONLY for random numbers
 // I hate globals, but they seem to make sense here
 // gsl_rng * glob_rng;
-gsl_rng_env_setup();
-T = gsl_rng_default;
-glob_rng = gsl_rng_alloc (T);
 
 // Probably need an object for multiple travel behaviors that can handle many different zones
 // First thing is a multiple cached dbl object
 
 // This function needs to recreate a numerical recepies
-double dbgfn1() {
-
-	int i, n = 5;
-
-	for (i = 0; i < n; i++) {
-		double u = gsl_rng_uniform (glob_rng);
-		cout << u << endl;
-	}
-
-	return 2.3;
-
-};
 
 int main(int argc, char* argv[]) {
 
-    // Setup random number generator before ever used
+    // Example code for the setup of a global GSL random number generator
+	// Setup random number generator before ever used
+	// The pattern of externals in the linked files is not obvious to me
+	// It needs to be an external here and then a simple global in all the otehr files
+	const gsl_rng_type * T;
+	gsl_rng_env_setup();
+	T = gsl_rng_default;
+	glob_rng = gsl_rng_alloc (T);
 
-	// Demonstrate the the random number generator has the correct properties
 	gsl_rng_set(glob_rng, 123456);
-	cout << dbgfn1() << endl;
-    cout << endl << endl;
-    cout << dbgfn1() << endl;
+	cout << SR::rngtest() << endl;
+	cout << endl << endl;
+    cout << SR::rngtest() << endl;
     cout << endl << endl;
 	gsl_rng_set(glob_rng, 123456);
-    cout << dbgfn1() << endl;
+    cout << SR::rngtest() << endl;
 
-	gsl_rng_free (glob_rng);
-
-	// For debugging here
     // return 0;
 
 	// Read from command line and set up parameter object

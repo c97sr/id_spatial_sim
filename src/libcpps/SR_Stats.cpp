@@ -258,3 +258,26 @@ S170:
 	if(floor(ix)!=ix) fprintf(stderr,"*** Non int ignbin ***\n");
 	return ix;
 };
+
+gsl_rng * glob_rng;
+
+double SR::rngtest() {
+
+	// const gsl_rng_type * T;
+
+    // Setup random number generator before ever used
+	// gsl_rng_env_setup();
+	// T = gsl_rng_default;
+	// glob_rng = gsl_rng_alloc (T);
+
+	int i, n = 5;
+
+	for (i = 0; i < n; i++) {
+		double u = gsl_rng_uniform (glob_rng);
+		cout << u << endl;
+	}
+
+	return 2.3;
+
+};
+

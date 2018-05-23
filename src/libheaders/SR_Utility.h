@@ -52,7 +52,6 @@ namespace SR {
 	inline double Distance(double x1, double y1, double x2, double y2) {
 		return Distance(x1,y1,x2,y2,1e100,1e100);
 	};
-
 	struct IntCoord {int x,y;};
 
 	class Node;
@@ -68,6 +67,7 @@ namespace SR {
 	struct UntimedEvent {SR::Node *ptNode1,*ptNode2;UNTIMEDEVENT ue;};
 
 	bool eqStrictUntimedEvent(const SR::UntimedEvent& ue1, const SR::UntimedEvent& ue2);
+
 }
 
 template<class T> ofstream& SR::operator<<(ofstream& ofs, vector<T>& v) {
