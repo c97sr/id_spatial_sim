@@ -8,6 +8,11 @@ ifndef $(MODE)
 MODE=debug
 endif
 
+# Compile option for the GSL random numbers
+# RNG = nrcpp
+# RNG = gsl
+RNG = banana
+
 # Set main compile option
 CXX = g++
 

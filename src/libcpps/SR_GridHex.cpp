@@ -1,5 +1,7 @@
 #include"SR_GridHex.h"
 
+gsl_rng * glob_rng;
+
 SR::GridHex* SR::Node::ptGridHex=NULL;
 
 string SR::Node::OutputIndexLocationNetwork() {
@@ -139,11 +141,29 @@ SR::GridHex::GridHex(SR::ParameterSet& p, SR::Hexagon tmphex, SR::DensityField& 
 	cerr << "Choosing household locations and sizes using variable household density...\n";
 	while (tmpPtNode != vecNodes+sizeVecNodes) { // checking this routine
 
-		// tmpx = gsl_rng_uniform(glob_rng)*GetMaxDx() + minx;
-		// tmpy = gsl_rng_uniform(glob_rng)*GetMaxDy() + miny;
+		// NEED to actually pass the RNG variable to the compiler in the make file!
+#ifndef RNG
+#error not defined
+		#endif
+
+#if RNG == gsl
+
+		tmpx = gsl_rng_uniform(glob_rng)*GetMaxDx() + minx;
+		tmpy = gsl_rng_uniform(glob_rng)*GetMaxDy() + miny;
+#error one
+
+#elif RNG == nrcpp
 
 		tmpx = NR::ran2(p.intSeed)*GetMaxDx() + minx;
 		tmpy = NR::ran2(p.intSeed)*GetMaxDy() + miny;
+
+#error two
+
+#else
+
+		#error Code inbetween NRCPP and GSL random numbers. One must be specified
+#endif
+
 		// cerr << p.intSeed << " " << tmpx << " " << tmpy << " " << dblMaxRelativeDensity << endl;
 		dblAcceptProbability = homes.Value(tmpx,tmpy)/dblMaxRelativeDensity;
 		// cerr << "here4" << endl;

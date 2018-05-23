@@ -74,6 +74,7 @@ int main(int argc, char* argv[]) {
 
 	// Initialise the ukPars.RunP.intSeed
 	ukPars.intSeed = -1*ukPars.intSeed;
+	gsl_rng_set(glob_rng, ukPars.intSeed);
 
 	// Initialise basic hexagon and density structures
 	SR::Hexagon tmphex(ukPars);

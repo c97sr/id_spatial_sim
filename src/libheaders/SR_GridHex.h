@@ -2,6 +2,7 @@
 #define SR_INC_GRIDHEX
 
 #include<iostream>
+#include<gsl/gsl_rng.h>
 #include"nr.h"
 #include"SR_Utility.h"
 #include"SR_BytePackedInt.h"

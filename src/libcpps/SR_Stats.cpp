@@ -1,5 +1,9 @@
 #include"SR_Stats.h"
 
+// Declare global pointer for gsl random numbers
+extern gsl_rng * glob_rng;
+
+
 double SR::LogNormalPdf(double *x, double *mu, double *sigma) {
 	static double rtnval;
 	if (*x < 1e-100) return 0;
@@ -258,8 +262,6 @@ S170:
 	if(floor(ix)!=ix) fprintf(stderr,"*** Non int ignbin ***\n");
 	return ix;
 };
-
-gsl_rng * glob_rng;
 
 double SR::rngtest() {
 
