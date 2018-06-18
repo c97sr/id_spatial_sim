@@ -3,7 +3,6 @@
 // Declare global pointer for gsl random numbers
 extern gsl_rng * glob_rng;
 
-
 double SR::LogNormalPdf(double *x, double *mu, double *sigma) {
 	static double rtnval;
 	if (*x < 1e-100) return 0;
@@ -15,14 +14,16 @@ double SR::LogNormalPdf(double *x, double *mu, double *sigma) {
 double SR::LnGamma(double *x, double *lambda, double *alpha) {
 	// Taken from p50 of Rice, Mathematical Statistics and Data Analysis, 2nd Ed
 	static double rtnval;
-	rtnval = (*alpha)*log(*lambda)-NR::gammln(*alpha)+(*alpha - 1)*log(*x) - (*lambda)*(*x);
+//	rtnval = (*alpha)*log(*lambda)-NR::gammln(*alpha)+(*alpha - 1)*log(*x) - (*lambda)*(*x);
+	rtnval = (*alpha)*log(*lambda)-gsl_sf_lngamma(*alpha)+(*alpha - 1)*log(*x) - (*lambda)*(*x);
 	return rtnval;
 };
 
 double SR::GammaExcel(double x, double alpha, double beta) {
 	// parameterization from MS excel (see "More Help" for GAMMADIST function in Excel)
 	static double rtnval;
-	rtnval = 1/pow(beta,alpha)/exp(NR::gammln(alpha))*pow(x,(alpha-1))*exp(-x/beta);
+//	rtnval = 1/pow(beta,alpha)/exp(NR::gammln(alpha))*pow(x,(alpha-1))*exp(-x/beta);
+	rtnval = 1/pow(beta,alpha)/exp(gsl_sf_lngamma(alpha))*pow(x,(alpha-1))*exp(-x/beta);
 	return rtnval;
 };
 
@@ -38,8 +39,15 @@ double SR::GammaModelDev(double mean, int alpha, int &sd) {
 	// Random deviate from gamma distribution GammaModel (with integer alphas)
 	// remember var = mean*mean/alpha
 	static double rtnval;
+	static double beta;
+	beta = mean/static_cast<double>(alpha);
+
 	rtnval=NR::gamdev(alpha,sd);
 	rtnval*=mean/alpha;
+
+	// XX This one needs a short test case to make sure its working
+//	rtnval=gsl_ran_gamma(glob_rng,static_cast<double>(alpha),beta);
+
 	return rtnval;
 };
 
@@ -100,7 +108,8 @@ double SR::ProbabilityOfOneTimeStep(double mean, int alpha, double dt_disc, doub
 	end_time = current_time + dt_disc;
 	while (current_time <= end_time) {
 		t = current_time + dt_int/2;
-		pdf = 1/pow(beta,alpha)/exp(NR::gammln(alpha))*pow(t,(alpha-1))*exp(-t/beta);
+//		pdf = 1/pow(beta,alpha)/exp(NR::gammln(alpha))*pow(t,(alpha-1))*exp(-t/beta);
+		pdf = 1/pow(beta,alpha)/exp(gsl_sf_lngamma(alpha))*pow(t,(alpha-1))*exp(-t/beta);
 		rtnval += pdf*dt_int;
 		current_time += dt_int;
 	}

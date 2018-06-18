@@ -45,11 +45,11 @@ VPATH = $(SRCLIBCPP) $(SRCLIBHEADER) $(SRCLIBMAIN) $(NRCHEADDIR) $(NRCSRCDIR)
 
 # Set standatd compile variables
 ifeq ($(MODE),run)
-CXXFLAGS = -O3 $(INCLUDEDIRS) 
+CXXFLAGS = -O3 $(INCLUDEDIRS) -DRNG=$(RNG)
 else ifeq ($(MODE),debug)
  
 # Possible flags -Wall for all warnings
-CXXFLAGS = -Wall -ggdb $(INCLUDEDIRS) 
+CXXFLAGS = -Wall -ggdb $(INCLUDEDIRS) -DRNG=$(RNG) 
 endif
 
 # Define the object files

@@ -1,5 +1,7 @@
 #include"SR_Kernels.h"
 
+extern gsl_rng * glob_rng;
+
 void SR::SpatialKernel::EagerOneNodeOneHex(SR::EventMatrix &em, SR::Hexagon *ptHex, SR::Node* ptN, SR::ParameterSet &p) {
 	double dblCurrentProbability;
 	vector<int>::iterator ptTargetChar;
@@ -10,7 +12,8 @@ void SR::SpatialKernel::EagerOneNodeOneHex(SR::EventMatrix &em, SR::Hexagon *ptH
 		ptptNodeEnd = ptHex->LastOfChar(*ptTargetChar);
 		while (ptptNodeCurrent != ptptNodeEnd) {
 			dblCurrentProbability = kernKernel(p,ptN,*ptptNodeCurrent,0);
-			if (NR::ran2(p.intSeed)<dblCurrentProbability) {
+//			if (NR::ran2(p.intSeed)<dblCurrentProbability) {
+			if (gsl_rng_uniform(glob_rng) < dblCurrentProbability) {
 				procProcess(p,ptN,*ptptNodeCurrent,em);
 			}
 			ptptNodeCurrent++;
@@ -120,7 +123,8 @@ void SR::Kernel::GenerateEventsOneSourceNodeWithCross(SR::ParameterSet& p, SR::E
 			SR::srerror("Node must be in one of these characteristics.");
 		}
 
-		intRequiredEvents = static_cast<int>(NR::poidev(tmpDbl,p.intSeed));
+//		intRequiredEvents = static_cast<int>(NR::poidev(tmpDbl,p.intSeed));
+		intRequiredEvents = static_cast<int>(gsl_ran_poisson(glob_rng,tmpDbl));
 
 		if (intRequiredEvents > 0) {
 			*ptC *= intRequiredEvents*dblOvercallFactor;
@@ -156,12 +160,16 @@ void SR::SpatialKernel::LazyOneNodeOneHex(SR::EventMatrix &em, SR::Hexagon *ptHe
 	for (unsigned int i=0;i<vecIntTargetCharacteristics.size();++i) {
 		intTotalPoss += ptHex->LastOfChar(vecIntTargetCharacteristics[i]) - ptHex->FirstOfChar(vecIntTargetCharacteristics[i]);
 	}
-	intNumberChosen = static_cast<int>(ignbin(sp,intTotalPoss,p.intSeed));
+
+	// intNumberChosen = static_cast<int>(ignbin(sp,intTotalPoss,p.intSeed));
+	intNumberChosen = static_cast<int>(gsl_ran_binomial(glob_rng, sp, static_cast<unsigned int>(intTotalPoss)));
+
 	if (intNumberChosen > sizeofstack-1) {
 		SR::srerror("Too many events chosen in LazyOneNodeOneHex.\n");
 	}
 	while (intLevelOfStack!=intNumberChosen) {
-		intNodeToTry = static_cast<int>(NR::ran2(p.intSeed)*intTotalPoss);
+//		intNodeToTry = static_cast<int>(NR::ran2(p.intSeed)*intTotalPoss);
+		intNodeToTry = static_cast<int>(gsl_rng_uniform(glob_rng)*intTotalPoss);
 		AddToStack(intNodeToTry);
 	}
 	if(intNumberChosen>1) sort(vecStackOfInts,vecStackOfInts+intLevelOfStack);
@@ -197,7 +205,8 @@ void SR::SpatialKernel::LazyOneNodeOneHex(SR::EventMatrix &em, SR::Hexagon *ptHe
 			probability /= sp;
 			// double debugdistance = (*ptptCurrentNode)->Distance(ptN);
 			// double debugdistance2 = (*ptptCurrentNode)->GetHexagon()->Distance(ptN);
-			if (NR::ran2(p.intSeed) < probability) procProcess(p,ptN,*ptptCurrentNode,em);
+//			if (NR::ran2(p.intSeed) < probability) procProcess(p,ptN,*ptptCurrentNode,em);
+			if (gsl_rng_uniform(glob_rng) < probability) procProcess(p,ptN,*ptptCurrentNode,em);
 			ptInt++;
 		}
 };
@@ -238,7 +247,8 @@ void SR::HouseholdKernel::GenerateEventsOneSourceNode(SR::ParameterSet& p, SR::E
 	static double probability;
 	while (ptptHousemate != ptptEndOfHousemates) {
 		probability = kernKernel(p,*ptptNode,*ptptHousemate,0);
-		if (NR::ran2(p.intSeed) < probability) procProcess(p,*ptptNode,*ptptHousemate,em);
+//		if (NR::ran2(p.intSeed) < probability) procProcess(p,*ptptNode,*ptptHousemate,em);
+		if (gsl_rng_uniform(glob_rng) < probability) procProcess(p,*ptptNode,*ptptHousemate,em);
 		ptptHousemate++;
 	}
 };
@@ -249,7 +259,8 @@ void SR::NeighbourKernel::GenerateEventsOneSourceNode(SR::ParameterSet& p, SR::E
 	static double probability;
 	while (ptptHousemate != ptptEndOfHousemates) {
 		probability = kernKernel(p,*ptptNode,*ptptHousemate,0);
-		if (NR::ran2(p.intSeed) < probability) procProcess(p,*ptptNode,*ptptHousemate,em);
+//		if (NR::ran2(p.intSeed) < probability) procProcess(p,*ptptNode,*ptptHousemate,em);
+		if (gsl_rng_uniform(glob_rng) < probability) procProcess(p,*ptptNode,*ptptHousemate,em);
 		ptptHousemate++;
 	}
 };

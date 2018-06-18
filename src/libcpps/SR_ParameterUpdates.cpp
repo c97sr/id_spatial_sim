@@ -1,5 +1,7 @@
 #include"SR_ParameterUpdates.h"
 
+extern gsl_rng * glob_rng;
+
 SR::ParameterUpdates::ParameterUpdates(SR::ParameterSet& ps_in, string inFileName, string outFileName, string uniqueId_in) :
 paramNames(mp), paramPointers(mp), paramInitial(mp), paramCurrent(mp), paramWeight(mp),
 paramMin(mp), paramMax(mp), paramPropStep(mp),   paramRangeIsLog(mp) {
@@ -81,7 +83,8 @@ void SR::ParameterUpdates::ProposeUpdate() {
 
 	int dbgtest = r->val();
 
-	randomWeight = totalWeight*NR::ran2(ps->intSeed);
+//	randomWeight = totalWeight*NR::ran2(ps->intSeed);
+	randomWeight = totalWeight*gsl_rng_uniform(glob_rng);
 	intNoChosenParam = 0;
 	currentWeight = paramWeight[0];
 	while (randomWeight > currentWeight) {
@@ -101,7 +104,8 @@ void SR::ParameterUpdates::ProposeUpdate() {
 
 	// Calculate the new value for the variable
 	dblMaxJump = paramPropStep[intNoChosenParam];
-	dblJump = NR::ran2(ps->intSeed)*dblMaxJump-dblMaxJump/2.0;
+//	dblJump = NR::ran2(ps->intSeed)*dblMaxJump-dblMaxJump/2.0;
+	dblJump = gsl_rng_uniform(glob_rng)*dblMaxJump-dblMaxJump/2.0;
 	dblParamValue += dblJump;
 	if (dblParamValue < 0) dblParamValue= -1.0*dblParamValue;
 	if (dblParamValue >= 1) dblParamValue=2-dblParamValue;

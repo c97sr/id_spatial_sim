@@ -141,34 +141,34 @@ SR::GridHex::GridHex(SR::ParameterSet& p, SR::Hexagon tmphex, SR::DensityField& 
 	cerr << "Choosing household locations and sizes using variable household density...\n";
 	while (tmpPtNode != vecNodes+sizeVecNodes) { // checking this routine
 
-		// NEED to actually pass the RNG variable to the compiler in the make file!
-#ifndef RNG
-#error not defined
-		#endif
+// NEED to actually pass the RNG variable to the compiler in the make file!
+// #ifndef RNG
+// #error not defined
+// #endif
 
-#if RNG == gsl
-
+// #if RNG == gsl
 		tmpx = gsl_rng_uniform(glob_rng)*GetMaxDx() + minx;
 		tmpy = gsl_rng_uniform(glob_rng)*GetMaxDy() + miny;
-#error one
+// #error one
 
-#elif RNG == nrcpp
+// #elif RNG == nrcpp
 
-		tmpx = NR::ran2(p.intSeed)*GetMaxDx() + minx;
-		tmpy = NR::ran2(p.intSeed)*GetMaxDy() + miny;
+//		tmpx = NR::ran2(p.intSeed)*GetMaxDx() + minx;
+//		tmpy = NR::ran2(p.intSeed)*GetMaxDy() + miny;
 
-#error two
+// #error two
 
-#else
-
-		#error Code inbetween NRCPP and GSL random numbers. One must be specified
-#endif
+// #else
+//		#error Code inbetween NRCPP and GSL random numbers. One must be specified
+// #endif
 
 		// cerr << p.intSeed << " " << tmpx << " " << tmpy << " " << dblMaxRelativeDensity << endl;
 		dblAcceptProbability = homes.Value(tmpx,tmpy)/dblMaxRelativeDensity;
 		// cerr << "here4" << endl;
-		if (NR::ran2(p.intSeed) < dblAcceptProbability) {
-			intHouseholdCounter = 1 + static_cast<int>(NR::poidev(dblPoissonAve,p.intSeed));
+// 		if (NR::ran2(p.intSeed) < dblAcceptProbability) {
+		if (gsl_rng_uniform(glob_rng) < dblAcceptProbability) {
+//			intHouseholdCounter = 1 + static_cast<int>(NR::poidev(dblPoissonAve,p.intSeed));
+			intHouseholdCounter = 1 + static_cast<int>(gsl_ran_poisson(glob_rng,dblPoissonAve));
 			if (vecNodes+sizeVecNodes > tmpPtNode+intHouseholdCounter) tmpPtNodeEndHouse = (tmpPtNode + intHouseholdCounter);
 			else {
 				tmpPtNodeEndHouse = vecNodes+sizeVecNodes;
@@ -925,8 +925,10 @@ double SR::GridHex::CalcExpectedSpatial(SR::ParameterSet& p, SR::KERNEL k) {
 	double cumprob=0,rtnval;
 	int counter=0;
 	for (int i=0;i<nosamples;++i) {
-		pt1 = FirstNode()+static_cast<int>(NR::ran2(tmpSeed)*nonodes);
-		pt2 = FirstNode()+static_cast<int>(NR::ran2(tmpSeed)*nonodes);
+//		pt1 = FirstNode()+static_cast<int>(NR::ran2(tmpSeed)*nonodes);
+//		pt2 = FirstNode()+static_cast<int>(NR::ran2(tmpSeed)*nonodes);
+		pt1 = FirstNode()+static_cast<int>(gsl_rng_uniform(glob_rng)*nonodes);
+		pt2 = FirstNode()+static_cast<int>(gsl_rng_uniform(glob_rng)*nonodes);
 		cumprob+=k(p,pt1,pt2,0);
 		if (++counter%1000000==0) {
 			rtnval = (cumprob/i)*(nonodes-1);

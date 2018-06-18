@@ -1,5 +1,7 @@
 #include"SR_InitialConditions.h"
 
+extern gsl_rng * glob_rng;
+
 SR::InitialConditions::InitialConditions(GridHex& g, ParameterSet& p, int no, int msn, double x_in, double y_in, double r_in, int ms) :
 vecNodes(msn,-1) {
 
@@ -67,7 +69,8 @@ void SR::InitialConditions::Reselect(GridHex& g, ParameterSet& p, int number) {
 	while (currenthits < number && currenttrys < maxsamples) {
 		if (blLocalSeeding) {
 			intCurrentHex=0;
-			intSelectedNode = static_cast<int>(NR::ran2(p.intSeed)*intTotalNodes);
+//			intSelectedNode = static_cast<int>(NR::ran2(p.intSeed)*intTotalNodes);
+			intSelectedNode = static_cast<int>(gsl_rng_uniform(glob_rng)*intTotalNodes);
 			while (intSelectedNode >= ptvecNodesInHexagons[intCurrentHex]) {
 				intSelectedNode-=ptvecNodesInHexagons[intCurrentHex];
 				intCurrentHex++;
@@ -76,7 +79,8 @@ void SR::InitialConditions::Reselect(GridHex& g, ParameterSet& p, int number) {
 			}
 			ptNode = *((g.FirstHexagon()+ptvecListOfHexagons[intCurrentHex])->GetFirstNode()+intSelectedNode);
 		} else {
-			ptNode = g.FirstNode()+static_cast<int>(NR::ran2(p.intSeed)*nonodes);
+//			ptNode = g.FirstNode()+static_cast<int>(NR::ran2(p.intSeed)*nonodes);
+			ptNode = g.FirstNode()+static_cast<int>(gsl_rng_uniform(glob_rng)*nonodes);
 		}
 		if (SR::Distance(ptNode->GetX(),ptNode->GetY(),x,y,1e10,1e10) <= r)  {
 			vector<int>::iterator ptInt = vecNodes.begin();
@@ -110,7 +114,8 @@ void SR::InitialConditions::Trickle(GridHex& g, SR::ParameterSet& p, PROCESS pro
 	static int intNumberRequired;
 	static double *t;
 	t = p.GetPointer("dblCurrentTime");
-	if (trate > 0 && tdur > *t) intNumberRequired = static_cast<int>(NR::poidev(trate,p.intSeed));
+//	if (trate > 0 && tdur > *t) intNumberRequired = static_cast<int>(NR::poidev(trate,p.intSeed));
+	if (trate > 0 && tdur > *t) intNumberRequired = static_cast<int>(gsl_ran_poisson(glob_rng,trate));
 	else intNumberRequired=0;
 	if (intNumberRequired > maxsamples) intNumberRequired = maxsamples;
 	Reselect(g,p,intNumberRequired);
