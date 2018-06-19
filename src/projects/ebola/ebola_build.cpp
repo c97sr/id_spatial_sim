@@ -9,6 +9,7 @@ using namespace std;
 
 extern gsl_rng * glob_rng;
 
+
 // Some globals ONLY ONLY for random numbers
 // I hate globals, but they seem to make sense here
 // gsl_rng * glob_rng;
@@ -164,6 +165,10 @@ int main(int argc, char* argv[]) {
 
 	// Dumping parameters to file
 	SR::OpenNullFile(strOutputFile+"_params.out",ukPars.WriteParams());
+
+	cerr << "Finished.\n";
+
+	gsl_rng_free (glob_rng);
 
 	return 0;
 

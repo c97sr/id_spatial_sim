@@ -4,6 +4,8 @@
 
 #include"ebola.h"
 
+extern gsl_rng * glob_rng;
+
 int main(int argc, char* argv[]) {
   cerr << "\nBuilt on 15/02/2006 at 11:00\n";
 #ifdef SR_PAE_PAGING
@@ -15,6 +17,14 @@ int main(int argc, char* argv[]) {
   cerr << "Built with a 32 bit byte packed node.\n";
 #endif
   
+  // Setup global for rngs
+  const gsl_rng_type * T;
+  gsl_rng_env_setup();
+  T = gsl_rng_default;
+  glob_rng = gsl_rng_alloc (T);
+
+
+
   // Read from command line
   int intNoArgs = 3;
   if (argc<intNoArgs+1) SR::srerror("First three arguments parameter_file_name, binary_file_name, output_file_name. Rest parsed as parameter values.\n");

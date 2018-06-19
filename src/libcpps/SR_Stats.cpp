@@ -40,15 +40,27 @@ double SR::GammaModelDev(double mean, int alpha, int &sd) {
 	// remember var = mean*mean/alpha
 	static double rtnval;
 	static double beta;
+	// static int counter = 0;
+	// static int sumdev = 0;
+	// static int sumsqu = 0;
+
 	beta = mean/static_cast<double>(alpha);
 
-	rtnval=NR::gamdev(alpha,sd);
-	rtnval*=mean/alpha;
+	// rtnval=NR::gamdev(alpha,sd);
+	// rtnval*=mean/alpha;
 
 	// XX This one needs a short test case to make sure its working
-//	rtnval=gsl_ran_gamma(glob_rng,static_cast<double>(alpha),beta);
+	rtnval=gsl_ran_gamma(glob_rng,static_cast<double>(alpha),beta);
+
+	// These were the lines used to check the swap out of NRcpp
+	// counter = counter + 1;
+	// sumdev = sumdev + rtnval;
+	// sumsqu = sumsqu + rtnval * rtnval;
+	// cerr 	<< counter << "\t" << static_cast<double>(sumdev)/static_cast<double>(counter) << " "
+	// 		<< static_cast<double>(sumsqu)/static_cast<double>(counter) << "\n";
 
 	return rtnval;
+
 };
 
 int SR::GammaModelMatrixDelay(double mean, int alpha, int &sd, double dt, int max){
