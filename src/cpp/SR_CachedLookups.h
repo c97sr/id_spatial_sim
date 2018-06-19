@@ -3,7 +3,8 @@
 
 #include<iostream>
 #include<vector>
-#include"nr.h"
+// #include"nr.h"
+#include<complex>
 #include"SR_Parameter.h"
 
 /*

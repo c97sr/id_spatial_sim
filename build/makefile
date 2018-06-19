@@ -13,11 +13,6 @@ CXX = g++
 
 # Set local paths
 SRCLIB = ../src/cpp
-SRCLIBCPP = ../src/libcpps
-SRCLIBHEADER = ../src/libheaders
-SRCLIBMAIN = ../src/projects/ebola
-NRCHEADDIR = ../nrcpptmp/other
-NRCSRCDIR = ../nrcpptmp/recipes
 
 # Set header paths and library paths for gsl if required
 # Note windows options are already on the default compiler paths
@@ -37,7 +32,7 @@ INCLUDEDIRS = -I$(NRCHEADDIR) -I$(SRCLIBHEADER) -I$(GSLHEADER)
 LDFLAGS =   -L$(GSLLIB) -lgsl -lgslcblas
 
 # System variable to tell the compiler where to look for .cpps and .hs
-VPATH = $(SRCLIBCPP) $(SRCLIBHEADER) $(SRCLIBMAIN) $(NRCHEADDIR) $(NRCSRCDIR) $(SRCLIB)
+VPATH = $(SRCLIB)
 
 # Set standatd compile variables
 ifeq ($(MODE),run)
@@ -49,8 +44,7 @@ CXXFLAGS = -Wall -ggdb $(INCLUDEDIRS)
 endif
 
 # Define the object files
-OBJFILES = 	ran1.o ran2.o gamdev.o gammln.o poidev.o \
-			SR_BytePackedInt.o SR_CachedLookups.o SR_DensityField.o SR_EventMatrix.o \
+OBJFILES = 	SR_BytePackedInt.o SR_CachedLookups.o SR_DensityField.o SR_EventMatrix.o \
 			SR_GatherRunInformation.o SR_GridHex.o SR_InitialConditions.o SR_Kernels.o \
 			SR_Label.o SR_PagesForThings.o SR_Parameter.o SR_Stats.o SR_StripComments.o \
 			SR_Utility.o SR_Workplaces.o ebola_common.o

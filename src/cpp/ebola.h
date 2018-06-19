@@ -24,7 +24,7 @@
 #include<bitset>
 
 // Third party includes
-#include"nr.h"
+// #include"nr.h"
 
 // My inlcudes
 #include"SR_CachedLookups.h"

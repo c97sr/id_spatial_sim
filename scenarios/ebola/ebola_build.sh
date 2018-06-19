@@ -1,7 +1,7 @@
 #!/bin/bash
 
 TOP="../../"
-BINDIR=$TOP"g++/"
+BINDIR=$TOP"build/"
 PARSTEM="both"
 BUILD="ebola_build.exe"
 RUN="ebola_run.exe"
