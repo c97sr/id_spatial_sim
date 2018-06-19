@@ -17,6 +17,7 @@ RNG = banana
 CXX = g++
 
 # Set local paths
+SRCLIB = ../src/cpp
 SRCLIBCPP = ../src/libcpps
 SRCLIBHEADER = ../src/libheaders
 SRCLIBMAIN = ../src/projects/ebola
@@ -41,7 +42,7 @@ INCLUDEDIRS = -I$(NRCHEADDIR) -I$(SRCLIBHEADER) -I$(GSLHEADER)
 LDFLAGS =   -L$(GSLLIB) -lgsl -lgslcblas
 
 # System variable to tell the compiler where to look for .cpps and .hs
-VPATH = $(SRCLIBCPP) $(SRCLIBHEADER) $(SRCLIBMAIN) $(NRCHEADDIR) $(NRCSRCDIR)
+VPATH = $(SRCLIBCPP) $(SRCLIBHEADER) $(SRCLIBMAIN) $(NRCHEADDIR) $(NRCSRCDIR) $(SRCLIB)
 
 # Set standatd compile variables
 ifeq ($(MODE),run)
