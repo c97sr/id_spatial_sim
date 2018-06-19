@@ -1,5 +1,7 @@
 #include"SR_EventMatrix.h"
 
+extern gsl_rng * glob_rng;
+
 void SR::EventMatrix::AddEvent(SR::UntimedEvent ue, int delay) {
 	static int initialDelay;
 	if (delay >= intMaxDelay) {
@@ -149,7 +151,8 @@ void SR::EventMatrix::RemoveEventAtRandom(SR::ParameterSet& p) {
 	static vector<SR::UntimedEvent>::iterator ptEvTop,ptEvDelete;
 	static int indexRemoval,indexCurrent=0;
 	if (intTotalEvents == 0) SR::srerror("void SR::EventMatrix::RemoveEventAtRandom(SR::ParameterSet& p)");
-	indexRemoval = static_cast<int>(static_cast<double>(intTotalEvents)*NR::ran1(p.intSeed));
+//	indexRemoval = static_cast<int>(static_cast<double>(intTotalEvents)*NR::ran1(p.intSeed));
+	indexRemoval = static_cast<int>(static_cast<double>(intTotalEvents)*gsl_rng_uniform(glob_rng));
 	while (indexRemoval > vecSizeOfStacks[indexCurrent]) {
 		indexRemoval -= vecSizeOfStacks[indexCurrent];
 		indexCurrent++;

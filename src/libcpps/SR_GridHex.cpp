@@ -1,7 +1,6 @@
 #include"SR_GridHex.h"
 
 gsl_rng * glob_rng;
-const gsl_rng_type * T;
 
 SR::GridHex* SR::Node::ptGridHex=NULL;
 

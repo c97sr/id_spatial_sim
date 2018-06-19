@@ -4,6 +4,7 @@
 #include<iostream>
 #include"nr.h"
 #include"SR_Parameter.h"
+#include<gsl/gsl_rng.h>
 
 /*
 [Enter details]

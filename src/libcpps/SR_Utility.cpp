@@ -1,5 +1,7 @@
 #include"SR_Utility.h"
 
+extern gsl_rng * glob_rng;
+
 bool SR::eqStrictUntimedEvent(const SR::UntimedEvent& ue1, const SR::UntimedEvent& ue2) {
 	if (ue1.ptNode1==ue2.ptNode1 && ue1.ptNode2==ue2.ptNode2 && ue1.ue == ue2.ue) return true;
 	else return false;
@@ -22,7 +24,8 @@ bool SR::AppendStringToFileWithWaitIfRequired(string filename, string data) {
 	double waittime;
 	clock_t delay;
 	while (!SR::AppendStringToFile(filename,data) && currentfails != maxtries) {
-		waittime = NR::ran2(seed)*maxwaittime;
+//		waittime = NR::ran2(seed)*maxwaittime;
+		waittime = gsl_rng_uniform(glob_rng)*maxwaittime;
 		cerr << "Failed on attempt " << currentfails+1 <<  " to append to " << filename;
 		delay = static_cast<long unsigned int>(waittime)+clock();
 		while (delay > clock());

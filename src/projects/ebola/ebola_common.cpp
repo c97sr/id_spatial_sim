@@ -1,5 +1,6 @@
 #include"ebola.h"
 
+extern gsl_rng * glob_rng;
 
 bool evCountSpatialNeighbour(SR::Node* pointer1, SR::Node* pointer2, SR::EventMatrix& em, SR::ParameterSet& p) {
 	pointer1->IncrementNoSpatialNeighbour();
@@ -186,7 +187,9 @@ bool evInfection(SR::Node* pt1, SR::Node* pt2, SR::EventMatrix& em, SR::Paramete
 	if (pt1->GetQuarantineLevel() > 0) return false;
 	if (*t_mv <= *t) {
 		if (pt1->Distance(pt2) > 2*(*r_mv)) {
-			if (NR::ran2(p.intSeed) < *e_mv) {
+			if (gsl_rng_uniform(glob_rng) < *e_mv) {
+//			if (NR::ran2(p.intSeed) < *e_mv) {
+
 				return false;
 			}
 		}
@@ -207,7 +210,8 @@ bool evVaccinate(SR::Node* pt1, SR::Node* pt2, SR::EventMatrix& em, SR::Paramete
 	if (pt2->GetVaccinationClass()==1) return false;
 	pt2->SetVaccinationClass(1);
 	if (pt2->GetCharacteristic() == 0) {
-		if (NR::ran2(p.intSeed) < *p_sus_vac_eff) pt2->MakeCharacteristicEqualTo(5);
+		if (gsl_rng_uniform(glob_rng) < *p_sus_vac_eff) pt2->MakeCharacteristicEqualTo(5);
+// 		if (NR::ran2(p.intSeed) < *p_sus_vac_eff) pt2->MakeCharacteristicEqualTo(5);
 		return true;
 	}
 	if (pt2->GetCharacteristic() == 1) {
@@ -215,7 +219,8 @@ bool evVaccinate(SR::Node* pt1, SR::Node* pt2, SR::EventMatrix& em, SR::Paramete
 		delay = 0;
 		tmpev.ptNode1 = pt1;
 		tmpev.ptNode2 = pt2;
-		delay += static_cast<int>(*lc1_min+static_cast<int>(NR::ran2(p.intSeed)*((*lc1_min-*lc1_max)+1)));
+//		delay += static_cast<int>(*lc1_min+static_cast<int>(NR::ran2(p.intSeed)*((*lc1_min-*lc1_max)+1)));
+		delay += static_cast<int>(*lc1_min+static_cast<int>(gsl_rng_uniform(glob_rng)*((*lc1_min-*lc1_max)+1)));
 		tmpev.ue = evBecomeLatentVaccinatedTwo;
 		em.AddEvent(tmpev,static_cast<int>(delay));
 		return true;
@@ -240,12 +245,14 @@ bool evBecomeInfectious(SR::Node* pt1, SR::Node* pt2, SR::EventMatrix& em, SR::P
 		return true;
 	}
 	if (pt2->GetCharacteristic() == 6) {
-		if (NR::ran2(p.intSeed) < *p_rec_lc1) pt2->MakeCharacteristicEqualTo(5);
+//		if (NR::ran2(p.intSeed) < *p_rec_lc1) pt2->MakeCharacteristicEqualTo(5);
+		if (gsl_rng_uniform(glob_rng) < *p_rec_lc1) pt2->MakeCharacteristicEqualTo(5);
 		else procEnterProdrome(p,pt1,pt2,em);
 		return true;
 	}
 	if (pt2->GetCharacteristic() == 7) {
-		if (NR::ran2(p.intSeed) < *p_rec_lc2) pt2->MakeCharacteristicEqualTo(5);
+//		if (NR::ran2(p.intSeed) < *p_rec_lc2) pt2->MakeCharacteristicEqualTo(5);
+		if (gsl_rng_uniform(glob_rng) < *p_rec_lc2) pt2->MakeCharacteristicEqualTo(5);
 		else procEnterProdrome(p,pt1,pt2,em);
 		return true;
 	}
@@ -379,7 +386,8 @@ void procSubsequentToInfection(SR::ParameterSet &p, SR::Node* pt1, SR::Node* pt2
 	tmpDelay2 = SR::GammaModelMatrixDelay(*er_mean,static_cast<int>(*er_alpha),p.intSeed,*ts,maxDelay);
 
 	delay += tmpDelay;
-	if (NR::ran2(p.intSeed) < *p_rec) tmpev.ue = evDie;
+	// if (NR::ran2(p.intSeed) < *p_rec) tmpev.ue = evDie;
+	if (gsl_rng_uniform(glob_rng) < *p_rec) tmpev.ue = evDie;
 	else tmpev.ue = evRecover;
 	if (delay >= maxDelay) {delay = maxDelay-1;cerr << "Warning: delay too long.\n"; SR::srerror("Delay too long");}
 	em.AddEvent(tmpev,delay);
@@ -467,7 +475,8 @@ void procContactTrace(SR::ParameterSet &p, SR::Node* pt1, SR::Node* pt2, SR::Eve
 	ptptNeighbourStartHouseFinish = ptptCurrent + pt2->GetHouseholdMax();
 	ptptNeighbourFinish = ptptNeighbourStartHouseFinish + pt2->GetNoSpatialNeighbour();
 	while (ptptCurrent != ptptNeighbourStartHouseFinish) {
-		if (NR::ran2(p.intSeed) < *p_house) {
+//		if (NR::ran2(p.intSeed) < *p_house) {
+		if (gsl_rng_uniform(glob_rng) < *p_house) {
 			tmpev.ptNode2 = *ptptCurrent;
 			tmpev2.ptNode2 = *ptptCurrent;
 			delay = SR::GammaModelMatrixDelay(*p_mean_hh_dv,static_cast<int>(*p_alpha_hh_dv),p.intSeed,*ts,maxDelay);
@@ -477,7 +486,8 @@ void procContactTrace(SR::ParameterSet &p, SR::Node* pt1, SR::Node* pt2, SR::Eve
 		ptptCurrent++;
 	}
 	while (ptptCurrent != ptptNeighbourFinish) {
-		if (NR::ran2(p.intSeed) < *p_neighbour) {
+//		if (NR::ran2(p.intSeed) < *p_neighbour) {
+		if (gsl_rng_uniform(glob_rng) < *p_neighbour) {
 			tmpev.ptNode2 = *ptptCurrent;
 			tmpev2.ptNode2 = *ptptCurrent;
 			delay = SR::GammaModelMatrixDelay(*p_mean_pg_dv,static_cast<int>(*p_alpha_pg_dv),p.intSeed,*ts,maxDelay);

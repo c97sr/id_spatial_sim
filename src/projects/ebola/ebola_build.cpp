@@ -33,9 +33,11 @@ int main(int argc, char* argv[]) {
 	gsl_rng_set(glob_rng, 123456);
 	cout << SR::rngtest() << endl;
 	cout << endl << endl;
+	unsigned long int check = gsl_rng_get(glob_rng);
+	gsl_rng_set(glob_rng,check);
     cout << SR::rngtest() << endl;
     cout << endl << endl;
-	gsl_rng_set(glob_rng, 123456);
+	gsl_rng_set(glob_rng, check);
     cout << SR::rngtest() << endl;
 
     // return 0;
@@ -122,6 +124,8 @@ int main(int argc, char* argv[]) {
 
 	// Log seed for later
 	int seedLog = ukPars.intSeed;
+	unsigned long int checkpoint = gsl_rng_get(glob_rng);
+	gsl_rng_set(glob_rng,checkpoint);
 
 	// Set up the network
 	ukPars.intSeed = -seedLog;
@@ -135,6 +139,7 @@ int main(int argc, char* argv[]) {
 
 	// Return to logged seed
 	ukPars.intSeed = -seedLog;
+	gsl_rng_set(glob_rng,checkpoint);
 	SR::GenerateAllNeighbours(ukGridHex,ukPars,procSpatialNeighbourAdd,kernNeighbourSetup,kernIntroSetup,evAddToNeighbourList,ukWorkplaces);
 
 	// Define network characteristics so that they can be checked

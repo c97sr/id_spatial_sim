@@ -30,6 +30,16 @@ namespace SR {
 	double MeanOfModelMatrixDelay(double mean, int alpha, double dt_disc, double dt_int, int max);
 	double ProbabilityOfOneTimeStep(double mean, int alpha, double dt_disc, double dt_int, int timeStep);
 	double rngtest();
+
+	class GslWrapper {
+	private:
+		gsl_rng * glob_rng;
+		const gsl_rng_type * T;
+	public:
+		GslWrapper(int seed);
+		double GetUniform();
+	};
+
 }
 
 #endif

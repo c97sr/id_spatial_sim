@@ -46,8 +46,8 @@ void SR::GenerateAllNeighbours(SR::GridHex& gh, SR::ParameterSet& p, PROCESS pro
 					ptCurrentChoicesFriendA = currentChoices;
 					while (ptCurrentChoicesFriendA!=ptCurrentChoicesFriendB) {
 						probability = kern2(p,*ptCurrentChoicesFriendA,*ptCurrentChoicesFriendB,0);
-						if (NR::ran2(p.intSeed)<probability) eventResult = ue(*ptCurrentChoicesFriendA,*ptCurrentChoicesFriendB,em,p);
-//						if (gsl_rng_uniform(glob_rng)<probability) eventResult = ue(*ptCurrentChoicesFriendA,*ptCurrentChoicesFriendB,em,p);
+//						if (NR::ran2(p.intSeed)<probability) eventResult = ue(*ptCurrentChoicesFriendA,*ptCurrentChoicesFriendB,em,p);
+						if (gsl_rng_uniform(glob_rng)<probability) eventResult = ue(*ptCurrentChoicesFriendA,*ptCurrentChoicesFriendB,em,p);
 						ptCurrentChoicesFriendA++;
 					}
 					ptCurrentChoicesFriendB++;
@@ -67,9 +67,9 @@ void SR::GenerateAllNeighbours(SR::GridHex& gh, SR::ParameterSet& p, PROCESS pro
 		itIntB = w.OnePastLastCollegue(*itIntA);
 		itIntC = itIntA+1;
 		while (itIntC != itIntB) {
-			if (NR::ran2(p.intSeed)<*ptPCIN) {
+//			if (NR::ran2(p.intSeed)<*ptPCIN) {
 //			XXXX for some reason, if I swap in the line below, I start to get seg faults. No idea why.
-//			if ((static_cast<double>(gsl_rng_uniform(glob_rng))) < (*ptPCIN)) {
+			if ((static_cast<double>(gsl_rng_uniform(glob_rng))) < (*ptPCIN)) {
 				eventResult = ue(ptNodeCurrent+*itIntA,ptNodeCurrent+*itIntC,em,p);
 			}
 			itIntC++;
@@ -188,14 +188,14 @@ SR::Workplaces::Workplaces(SR::GridHex& g, SR::ParameterSet& p, SR::DensityField
 	// Initialise all workplaces with an x and y coords. Set counters.  Count numbers of workplaces in each grid space.
 	cerr << "Assigning spatial locations to " << p.GetIntValue("intNumberOfWorkplaces") << " workplaces...\n";
 	while (ptWorkplace!=ptOnePastLastWorkplace) {
-		tmpx = NR::ran2(p.intSeed)*(xmax-xmin)+xmin;
-		tmpy = NR::ran2(p.intSeed)*(ymax-ymin)+ymin;
-//		tmpx = gsl_rng_uniform(glob_rng)*(xmax-xmin)+xmin;
-//		tmpy = gsl_rng_uniform(glob_rng)*(ymax-ymin)+ymin;
+//		tmpx = NR::ran2(p.intSeed)*(xmax-xmin)+xmin;
+//		tmpy = NR::ran2(p.intSeed)*(ymax-ymin)+ymin;
+		tmpx = gsl_rng_uniform(glob_rng)*(xmax-xmin)+xmin;
+		tmpy = gsl_rng_uniform(glob_rng)*(ymax-ymin)+ymin;
 		dblDenseCurrent = wpd.Value(tmpx,tmpy);
 		dblRelProb = dblDenseCurrent / dblDenseMax;
-		if (NR::ran2(p.intSeed) <= dblRelProb) {
-//		if (gsl_rng_uniform(glob_rng) <= dblRelProb) {
+//		if (NR::ran2(p.intSeed) <= dblRelProb) {
+		if (gsl_rng_uniform(glob_rng) <= dblRelProb) {
 			ptWorkplace->x = tmpx;
 			ptWorkplace->y = tmpy;
 			ptWorkplace->totalnodes = 0;
@@ -293,8 +293,8 @@ SR::Workplaces::Workplaces(SR::GridHex& g, SR::ParameterSet& p, SR::DensityField
 	cerr << "  Starting first sweep through nodes to calc mem requirements...";
 	ptHexNode = ptFirstHexNode;
 	while (ptHexNode != ptOnePastLastHexNode) {
-		tmpint = static_cast<int>(NR::ran2(p.intSeed)*sizeVecWorkplaces);
-//		tmpint = static_cast<int>(gsl_rng_uniform(glob_rng)*static_cast<double>(sizeVecWorkplaces));
+//		tmpint = static_cast<int>(NR::ran2(p.intSeed)*sizeVecWorkplaces);
+		tmpint = static_cast<int>(gsl_rng_uniform(glob_rng)*static_cast<double>(sizeVecWorkplaces));
 		vecWorkplaceIntsForEachNode[ptHexNode->GetIndex()]=tmpint;
 		ptWorkplace = ptFirstWorkplace+tmpint;
 		tmpdist = SR::Distance(ptHexNode->GetX(),ptHexNode->GetY(),ptWorkplace->x,ptWorkplace->y,g.GetMaxDx(),g.GetMaxDy());
@@ -321,8 +321,8 @@ SR::Workplaces::Workplaces(SR::GridHex& g, SR::ParameterSet& p, SR::DensityField
 	cerr << "  Starting second sweep through nodes assigning workplaces...";
 	ptHexNode = ptFirstHexNode;
 	while (ptHexNode != ptOnePastLastHexNode) {
-		tmpint = static_cast<int>(NR::ran2(p.intSeed)*sizeVecWorkplaces);
-//		tmpint = static_cast<int>(gsl_rng_uniform(glob_rng)*sizeVecWorkplaces);
+//		tmpint = static_cast<int>(NR::ran2(p.intSeed)*sizeVecWorkplaces);
+		tmpint = static_cast<int>(gsl_rng_uniform(glob_rng)*sizeVecWorkplaces);
 		ptWorkplace = ptFirstWorkplace+tmpint;
 		vecNodeIntsInWorkplaceOrder[ptWorkplace->firstnode+ptWorkplace->currentlyusednodes]=ptHexNode->GetIndex();
 		ptWorkplace->currentlyusednodes++;
@@ -424,8 +424,8 @@ void SR::Workplaces::MCMCUpdate(GridHex& gh, ParameterSet& p, double pdistance(d
 			blMoveAccepted=false;
 
 			// select one node and one (different) workplace
-			indexSelectedNode = static_cast<int>(1.0*gh.GetNoNodes()*NR::ran2(p.intSeed));
-//			indexSelectedNode = static_cast<int>(1.0*gh.GetNoNodes()*gsl_rng_uniform(glob_rng));
+//			indexSelectedNode = static_cast<int>(1.0*gh.GetNoNodes()*NR::ran2(p.intSeed));
+			indexSelectedNode = static_cast<int>(1.0*gh.GetNoNodes()*gsl_rng_uniform(glob_rng));
 			ptSelectedNode = gh.FirstNode()+indexSelectedNode;
 			ptCurrentWorkplace = vecWorkplaces+vecWorkplaceIntsForEachNode[indexSelectedNode];
 			ptProposedWorkplace = ptCurrentWorkplace;
@@ -437,13 +437,13 @@ void SR::Workplaces::MCMCUpdate(GridHex& gh, ParameterSet& p, double pdistance(d
 			intNoNearbyWorkplaces = ptArrNumberNearbyWorkplaces[intTmpNodeGridIndex];
 
 			// Why is line -1 "> 0" and line -3 "!=1"
-			if (intNoNearbyWorkplaces > 0 && NR::ran2(p.intSeed) < dblLocalThreshold) {
-//			if (intNoNearbyWorkplaces > 0 && gsl_rng_uniform(glob_rng) < dblLocalThreshold) {
+//			if (intNoNearbyWorkplaces > 0 && NR::ran2(p.intSeed) < dblLocalThreshold) {
+			if (intNoNearbyWorkplaces > 0 && gsl_rng_uniform(glob_rng) < dblLocalThreshold) {
 				// Choose workplace number
 				while (ptProposedWorkplace == ptCurrentWorkplace && intNoNearbyWorkplaces != 1) {
 					intKingsSquareOffset=0;
-					tmpIndexWorkplace = static_cast<int>(static_cast<double>(intNoNearbyWorkplaces)*NR::ran2(p.intSeed));
-//					tmpIndexWorkplace = static_cast<int>(static_cast<double>(intNoNearbyWorkplaces)*gsl_rng_uniform(glob_rng));
+//					tmpIndexWorkplace = static_cast<int>(static_cast<double>(intNoNearbyWorkplaces)*NR::ran2(p.intSeed));
+					tmpIndexWorkplace = static_cast<int>(static_cast<double>(intNoNearbyWorkplaces)*gsl_rng_uniform(glob_rng));
 					while (tmpIndexWorkplace >= ptArrNumberEachNearbyWorkplaces[intTmpNodeGridIndex*9+intKingsSquareOffset]) {
 						tmpIndexWorkplace -= ptArrNumberEachNearbyWorkplaces[intTmpNodeGridIndex*9+intKingsSquareOffset];
 						intKingsSquareOffset++;
@@ -456,8 +456,8 @@ void SR::Workplaces::MCMCUpdate(GridHex& gh, ParameterSet& p, double pdistance(d
 				while (ptProposedWorkplace==ptCurrentWorkplace) {
 
 					// intNoAllWorkplaces seems badly wrong
-					indexProposedWorkplace = static_cast<int>(1.0*intNoAllWorkplaces*NR::ran2(p.intSeed));
-//					indexProposedWorkplace = static_cast<int>(1.0*intNoAllWorkplaces*gsl_rng_uniform(glob_rng));
+//					indexProposedWorkplace = static_cast<int>(1.0*intNoAllWorkplaces*NR::ran2(p.intSeed));
+					indexProposedWorkplace = static_cast<int>(1.0*intNoAllWorkplaces*gsl_rng_uniform(glob_rng));
 					ptProposedWorkplace = vecWorkplaces+indexProposedWorkplace;
 				}
 			}
@@ -497,8 +497,8 @@ void SR::Workplaces::MCMCUpdate(GridHex& gh, ParameterSet& p, double pdistance(d
 			}
 
 			if (dblAcceptanceProbability >= 1.0) {blMoveAccepted = true;movecount++;}
-			else if (NR::ran2(p.intSeed) < dblAcceptanceProbability) {blMoveAccepted = true;movecount++;}
-//			else if (gsl_rng_uniform(glob_rng) < dblAcceptanceProbability) {blMoveAccepted = true;movecount++;}
+//			else if (NR::ran2(p.intSeed) < dblAcceptanceProbability) {blMoveAccepted = true;movecount++;}
+			else if (gsl_rng_uniform(glob_rng) < dblAcceptanceProbability) {blMoveAccepted = true;movecount++;}
 
 			// update if move accepted
 			if (blMoveAccepted) {
