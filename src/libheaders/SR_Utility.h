@@ -2,7 +2,9 @@
 #define SR_INC_UTILITY
 
 #include<iostream>
-#include"nr.h"
+// #include"nr.h"
+#include <fstream>
+#include <complex>
 #include"SR_Parameter.h"
 #include<gsl/gsl_rng.h>
 

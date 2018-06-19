@@ -2,7 +2,7 @@
 #define SR_INC_STATS
 
 #include<iostream>
-#include"nr.h"
+// #include"nr.h"
 #include"SR_Utility.h"
 #include<gsl/gsl_rng.h>
 #include<gsl/gsl_sf_gamma.h>

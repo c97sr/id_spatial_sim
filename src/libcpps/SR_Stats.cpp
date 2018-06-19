@@ -128,6 +128,8 @@ double SR::ProbabilityOfOneTimeStep(double mean, int alpha, double dt_disc, doub
 	return rtnval;
 };
 
+
+/*
 double SR::ignbin(double pp,int nint, int& sd){
 	// Loads of comments here
 	static double psave = -1.0E37;
@@ -283,6 +285,8 @@ S170:
 	if(floor(ix)!=ix) fprintf(stderr,"*** Non int ignbin ***\n");
 	return ix;
 };
+
+*/
 
 double SR::rngtest() {
 

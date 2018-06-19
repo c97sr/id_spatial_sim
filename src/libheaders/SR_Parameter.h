@@ -8,7 +8,7 @@
 #include<algorithm>
 #include<iomanip>
 #include<time.h>
-#include"nr.h"
+// #include"nr.h"
 // #include"SR_Utility.h"
 #include"SR_Label.h"
 // #include"SR_Utility.h"

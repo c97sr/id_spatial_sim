@@ -4,7 +4,7 @@
 #include<iostream>
 #include<gsl/gsl_rng.h>
 #include<gsl/gsl_randist.h>
-#include"nr.h"
+// #include"nr.h"
 #include"SR_Utility.h"
 #include"SR_BytePackedInt.h"
 #include"SR_DensityField.h"
