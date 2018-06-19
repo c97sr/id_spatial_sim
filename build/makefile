@@ -8,11 +8,6 @@ ifndef $(MODE)
 MODE=debug
 endif
 
-# Compile option for the GSL random numbers
-# RNG = nrcpp
-# RNG = gsl
-RNG = banana
-
 # Set main compile option
 CXX = g++
 
@@ -46,11 +41,11 @@ VPATH = $(SRCLIBCPP) $(SRCLIBHEADER) $(SRCLIBMAIN) $(NRCHEADDIR) $(NRCSRCDIR) $(
 
 # Set standatd compile variables
 ifeq ($(MODE),run)
-CXXFLAGS = -O3 $(INCLUDEDIRS) -DRNG=$(RNG)
+CXXFLAGS = -O3 $(INCLUDEDIRS)
 else ifeq ($(MODE),debug)
  
 # Possible flags -Wall for all warnings
-CXXFLAGS = -Wall -ggdb $(INCLUDEDIRS) -DRNG=$(RNG) 
+CXXFLAGS = -Wall -ggdb $(INCLUDEDIRS)  
 endif
 
 # Define the object files
