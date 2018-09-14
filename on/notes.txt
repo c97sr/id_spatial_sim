@@ -11,4 +11,5 @@ git commit -m "added index.html"
 git push
 
 git pull
- 
+
+"add" 
