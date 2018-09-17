@@ -1,8 +1,0 @@
-# This is a command file to run with GDB
-# start gdb with "gdb -x [the name of this file]"
-# after that, normally, you want the "r" command in gdb
-# for sudden seg faults, try "bt" after the seg fault to see where it occurred
-# lots more at http://www.gnu.org/software/gdb/
-
-file ../../g++/flu_run.exe 
-set args both_run.in ./network/pop ./output/flusars_2
