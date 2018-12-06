@@ -6,7 +6,7 @@
 	intBlockSizeInUnitsOfPointers	1	4096
 
 [Household setup]			
-	intNoNodes	1	10000	[767918, 24881385, 584396]
+	intNoNodes	1	20000	[767918, 24881385, 584396]
 	dblAverageHousehold	1	1.0	[3.3]
 	strHouseholdDensityFile	0	../../data/HKLandScanAscii.txt [Uniform_0_to_199, prd_sim_ascii_n_44384655, westAfricaAscii, monroviaAscii]
 
