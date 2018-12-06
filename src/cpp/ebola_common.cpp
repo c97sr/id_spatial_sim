@@ -206,7 +206,6 @@ bool evInfection(SR::Node* pt1, SR::Node* pt2, SR::EventMatrix& em, SR::Paramete
 		if (pt1->Distance(pt2) > 2*(*r_mv)) {
 			if (gsl_rng_uniform(glob_rng) < *e_mv) {
 //			if (NR::ran2(p.intSeed) < *e_mv) {
-
 				return false;
 			}
 		}
