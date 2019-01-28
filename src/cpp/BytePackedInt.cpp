@@ -16,7 +16,7 @@
     along with id_spatial_sim.  If not, see <https://www.gnu.org/licenses/>.  */
 
 
-#include"SR_BytePackedInt.h"
+#include"BytePackedInt.h"
 #include<limits>
 
 SR::BytePackedInt::BytePackedInt() {
