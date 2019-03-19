@@ -15,7 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with id_spatial_sim.  If not, see <https://www.gnu.org/licenses/>.  */
 
-#include"SR_CachedLookups.h"
+#include"CachedLookups.h"
 
 SR::CachedIntLookup::~CachedIntLookup() {
 	delete [] values;

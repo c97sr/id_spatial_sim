@@ -44,7 +44,7 @@ CXXFLAGS = -Wall -ggdb $(INCLUDEDIRS)
 endif
 
 # Define the object files
-OBJFILES = 	BytePackedInt.o SR_CachedLookups.o SR_DensityField.o SR_EventMatrix.o \
+OBJFILES = 	BytePackedInt.o CachedLookups.o SR_DensityField.o SR_EventMatrix.o \
 			SR_GatherRunInformation.o SR_GridHex.o SR_InitialConditions.o SR_Kernels.o \
 			SR_Label.o SR_PagesForThings.o SR_Parameter.o SR_Stats.o SR_StripComments.o \
 			SR_Utility.o SR_Workplaces.o ebola_common.o
