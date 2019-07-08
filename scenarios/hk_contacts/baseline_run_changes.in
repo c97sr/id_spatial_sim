@@ -1,6 +1,2 @@
-intRealisationsPerParameterSet Start_Time_Contact_Tracing Start_Time_Self_Isolation Vaccine_Probability_Susceptible PARAM_LINE_END
-20	999 999 1
-20       0 0 1
-20	999 999 0
-20       0 0 0
-100      0 0 0 
+intRealisationsPerParameterSet PARAM_LINE_END
+10      
