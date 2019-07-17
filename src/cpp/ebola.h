@@ -89,7 +89,7 @@ void setGZRegionMembership(SR::GridHex &g);
 class GatherUKPoxInfoA : public SR::GatherRunInformation {
 	struct logEvent {
 		double time,x,y,infectx,infecty;
-		int nodeindex,realisation,eventindex,generation,infectorindex;
+		int nodeinde ,realisation,eventindex,generation,infectorindex;
 	};
 	struct coords {
 		double x,y;

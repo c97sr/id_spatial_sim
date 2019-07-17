@@ -22,7 +22,7 @@
 
 #include"ebola.h"
 
-extern gsl_rng * glob_rng;
+exgtern gsl_rng * glob_rng;
 
 int main(int argc, char* argv[]) {
   cerr << "\nBuilt on 15/02/2006 at 11:00\n";

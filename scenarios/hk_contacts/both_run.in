@@ -73,7 +73,7 @@
 	Duration_Quarantine	1	14   [1]
 	Fever_Self_Isolation_Average	1	1
 	Fever_Self_Isolation_Int_Alpha	1	50
-	Rash_Self_Isolation_Average	1	1
+	Rash_Self_Isolation_Average	1	148
 	Rash_Self_Isolation_Int_Alpha	1	50
 	Fever_Self_Isolation_At_Risk_Average	1	1
 	Fever_Self_Isolation_Int_At_Risk_Alpha	1	50
