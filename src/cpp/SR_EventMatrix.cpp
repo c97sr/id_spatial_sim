@@ -2,6 +2,7 @@
 
 extern gsl_rng * glob_rng;
 
+// TODO here . Possible to have delay of -1
 void SR::EventMatrix::AddEvent(SR::UntimedEvent ue, int delay) {
 	static int initialDelay;
 	if (delay >= intMaxDelay) {
@@ -58,6 +59,7 @@ int SR::EventMatrix::EventsPendingAtThisTimeStep() {
 void SR::EventMatrix::ClearAllEvents() {
 	for (int i=0;i<intMaxDelay;++i) {
 		vecSizeOfStacks[i]=0;
+                vecNumberOfConstrainedEvents[i]=0;
 	}
 	intTotalEvents=0;
 };

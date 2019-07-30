@@ -236,7 +236,8 @@ bool evVaccinate(SR::Node* pt1, SR::Node* pt2, SR::EventMatrix& em, SR::Paramete
 		tmpev.ptNode1 = pt1;
 		tmpev.ptNode2 = pt2;
 //		delay += static_cast<int>(*lc1_min+static_cast<int>(NR::ran2(p.intSeed)*((*lc1_min-*lc1_max)+1)));
-		delay += static_cast<int>(*lc1_min+static_cast<int>(gsl_rng_uniform(glob_rng)*((*lc1_min-*lc1_max)+1)));
+		// delay += static_cast<int>(*lc1_min+static_cast<int>(gsl_rng_uniform(glob_rng)*((*lc1_min-*lc1_max)+1)));
+                delay += static_cast<int>(*lc1_min+static_cast<int>(gsl_rng_uniform(glob_rng)*((*lc1_max-*lc1_min)+1)));
 		tmpev.ue = evBecomeLatentVaccinatedTwo;
 		em.AddEvent(tmpev,static_cast<int>(delay));
 		return true;

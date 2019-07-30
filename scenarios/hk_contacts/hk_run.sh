@@ -11,8 +11,8 @@ NETDIR="./network/"
 OUTSTEM="hkc_build_pop"
 #$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_1x
 
-$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_1a Probability_Trace_Household 1 1 Probability_Trace_Neighbour  1 1 Vaccine_Probability_Susceptible 1  1
-$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_1b Probability_Trace_Household 1 1 Probability_Trace_Neighbour  1 1 Vaccine_Probability_Susceptible 1  0
+$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_1a #Probability_Trace_Household 1 1 Probability_Trace_Neighbour  1 1 Vaccine_Probability_Susceptible 1  1
+# $BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_1b Probability_Trace_Household 1 1 Probability_Trace_Neighbour  1 1 Vaccine_Probability_Susceptible 1  0
 #$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_1a Maximum_Number_CT_Vaccinations_Each_Day 1 20000 Probability_Trace_Household 1 1 Probability_Trace_Neighbour  1 1 Start_Time_Contact_Tracing 1  1  Start_Time_Self_Isolation 1 10 Vaccine_Probability_Susceptible 1  1
 #$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_1b Maximum_Number_CT_Vaccinations_Each_Day 1 20000 Probability_Trace_Household 1 1 Probability_Trace_Neighbour  1 1 Start_Time_Contact_Tracing 1  1  Start_Time_Self_Isolation 1 10 Vaccine_Probability_Susceptible 1  0
 
