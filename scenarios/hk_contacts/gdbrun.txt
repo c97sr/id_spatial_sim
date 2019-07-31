@@ -9,9 +9,9 @@ file ../../build/ebola_run.exe
 
 # Up to here
 # set args ./both_setup.in ./network/pop
-set args ./both_run.in ./network/hkc_build_pop ./output/ebola
+set args ./both_run.in ./network/pop ./output/ebola_debug
 # break SR_GridHex.cpp:151
 # break SR_Workplaces.cpp:72
 # break SR_Workplaces.cpp:50
 # break SR_Stats.cpp:77
-break ebola_common.cpp:229
+# break ebola_common.cpp:229

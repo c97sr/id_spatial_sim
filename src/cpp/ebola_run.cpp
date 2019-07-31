@@ -42,7 +42,6 @@ int main(int argc, char* argv[]) {
   glob_rng = gsl_rng_alloc (T);
 
 
-
   // Read from command line
   int intNoArgs = 3;
   if (argc<intNoArgs+1) SR::srerror("First three arguments parameter_file_name, binary_file_name, output_file_name. Rest parsed as parameter values.\n");
@@ -149,78 +148,89 @@ int main(int argc, char* argv[]) {
 	  objParamChanges.UpdateParameterSet(ukPars);
 
 	  // Set up monitoring object
-		GatherUKPoxInfoA gatherA(static_cast<int>(ukPars.GetValue("dblEndTime")/ukPars.GetValue("dblTimeStep")+1),
-			ukPars.GetValue("dblTimeStep"),
-			ukPars.GetIntValue("intRealisationsPerParameterSet"),
-			strRunOutputFile,ukPars.GetIntValue("intEventLogStackSize"),
-			0);
+          GatherUKPoxInfoA gatherA(static_cast<int>(ukPars.GetValue("dblEndTime")/ukPars.GetValue("dblTimeStep")+1),
+                                   ukPars.GetValue("dblTimeStep"),
+                                   ukPars.GetIntValue("intRealisationsPerParameterSet"),
+                                   strRunOutputFile,ukPars.GetIntValue("intEventLogStackSize"),
+                                   0);
 
-		if (ukPars.GetTag("strEventLogging")=="TRUE") gatherA.StartEventLogging();
-		else gatherA.StopEventLogging();
+          if (ukPars.GetTag("strEventLogging")=="TRUE") gatherA.StartEventLogging();
+          else gatherA.StopEventLogging();
 
-		// Have removed cached kernel from below
-		SR::SpatialKernel ukPoxSpatial(
-			SourceCharacteristicAllSpatial,
-			TargetCharacteristic,
-			kernSpatialInfectionOff,
-			procInfection,
-			ukPars.GetIntValue("intInfectionKernelStackSize"),
-			0);
-		SR::HouseholdKernel ukPoxHousehold(
-			SourceCharacteristic,
-			TargetCharacteristic,
-			kernHouseholdInfection,
-			procInfection,
-			0);
-		SR::NeighbourKernel ukPoxNeighbour(
-			SourceCharacteristic,
-			TargetCharacteristic,
-			kernNeighbourInfection,
-			procInfection,
-			0);
-		SR::HouseholdKernel ukPoxHouseholdSymp(
-			SourceCharacteristicAllSymp,
-			TargetCharacteristic,
-			kernHouseholdInfectionSymp,
-			procInfection,
-			0);
-		SR::NeighbourKernel ukPoxNeighbourSymp(
-			SourceCharacteristicEarlySymp,
-			TargetCharacteristic,
-			kernNeighbourInfectionSymp,
-			procInfection,
-			0);
-		SR::HexKernel ukRegionalVaccination(
-			SourceCharacteristicRegionalVaccination,
-			procRegionalVaccination,
-			ukGridHex.GetNoHexagons(),
-			ukPars.GetIntValue("Max_Daily_Global"),
-			ukPars.GetIntValue("Max_Global_Overall"),
-			ukPars.GetValue("Max_Local_Per_Person"));
+          // Have removed cached kernel from below
+          SR::SpatialKernel ukPoxSpatial(
+                                         SourceCharacteristicAllSpatial,
+                                         TargetCharacteristic,
+                                         kernSpatialInfectionOff,
+                                         procInfection,
+                                         ukPars.GetIntValue("intInfectionKernelStackSize"),
+                                         0);
+          SR::HouseholdKernel ukPoxHousehold(
+                                             SourceCharacteristic,
+                                             TargetCharacteristic,
+                                             kernHouseholdInfection,
+                                             procInfection,
+                                             0);
+          SR::NeighbourKernel ukPoxNeighbour(
+                                             SourceCharacteristic,
+                                             TargetCharacteristic,
+                                             kernNeighbourInfection,
+                                             procInfection,
+                                             0);
+          SR::HouseholdKernel ukPoxHouseholdSymp(
+                                                 SourceCharacteristicAllSymp,
+                                                 TargetCharacteristic,
+                                                 kernHouseholdInfectionSymp,
+                                                 procInfection,
+                                                 0);
+          SR::NeighbourKernel ukPoxNeighbourSymp(
+                                                 SourceCharacteristicEarlySymp,
+                                                 TargetCharacteristic,
+                                                 kernNeighbourInfectionSymp,
+                                                 procInfection,
+                                                 0);
+          SR::HexKernel ukRegionalVaccination(
+                                              SourceCharacteristicRegionalVaccination,
+                                              procRegionalVaccination,
+                                              ukGridHex.GetNoHexagons(),
+                                              ukPars.GetIntValue("Max_Daily_Global"),
+                                              ukPars.GetIntValue("Max_Global_Overall"),
+                                              ukPars.GetValue("Max_Local_Per_Person"));
+          
+          blReset = static_cast<bool>(ukPars.GetValue("boolResetICEachRealisation"));
+          double dblMaxNoInfections = ukPars.GetValue("intMaxCumInfections");
+          
+          CalcBetasWithAttackRate(ukPars,ukGridHex,kernSpatialEbola);
 
-		blReset = static_cast<bool>(ukPars.GetValue("boolResetICEachRealisation"));
-		double dblMaxNoInfections = ukPars.GetValue("intMaxCumInfections");
+          // Declare a suitable event matrix and initialize fixed initial node
+          int remMaxDelay=static_cast<int>(ukPars.GetValue("Latent_Vaccinated_One_Maximum_Time")/ukPars.GetValue("dblTimeStep")+1);
+          double maxVaccinesPerday=ukPars.GetIntValue("Max_Daily_Global");
+          int intmaxCTVaccPerDay=ukPars.GetIntValue("Maximum_Number_CT_Vaccinations_Each_Day");
+          SR::EventMatrix ukEm(
+             ukPars.GetIntValue("intMaxDelayTimesteps"),
+             ukPars.GetIntValue("intMaxDailyEvents"),
+             evVaccinate,
+             intmaxCTVaccPerDay             
+             // static_cast<int>(ukPars.GetValue("Maximum_Number_CT_Vaccinations_Each_Day"))
+          );
+          SR::EventMatrix ukRegionalEm(
+             remMaxDelay,
+             static_cast<int>(maxVaccinesPerday*1.1),
+             evVaccinate,
+             static_cast<int>(maxVaccinesPerday));
 
-		CalcBetasWithAttackRate(ukPars,ukGridHex,kernSpatialEbola);
+          int intCurrentRealisation,intCurrentTimeStep;
+          double dblCurrentCumInfections;
+          int intFreqIncRecord = ukPars.GetIntValue("intFrequencyWriteIncidence");
+          int intTotalRealisations = ukPars.GetIntValue("intRealisationsPerParameterSet");
+          if (intFreqIncRecord > intTotalRealisations) intFreqIncRecord = intTotalRealisations;
 
-		// Declare a suitable event matrix and initialize fixed initial node
-		int remMaxDelay=static_cast<int>(ukPars.GetValue("Latent_Vaccinated_One_Maximum_Time")/ukPars.GetValue("dblTimeStep")+1);
-		double maxVaccinesPerday=ukPars.GetIntValue("Max_Daily_Global");
-		SR::EventMatrix ukEm(ukPars.GetIntValue("intMaxDelayTimesteps"),ukPars.GetIntValue("intMaxDailyEvents"),evVaccinate,static_cast<int>(ukPars.GetValue("Maximum_Number_CT_Vaccinations_Each_Day")));
-		SR::EventMatrix ukRegionalEm(remMaxDelay,static_cast<int>(maxVaccinesPerday*1.1),evVaccinate,static_cast<int>(maxVaccinesPerday));
-
-		int intCurrentRealisation,intCurrentTimeStep;
-		double dblCurrentCumInfections;
-		int intFreqIncRecord = ukPars.GetIntValue("intFrequencyWriteIncidence");
-		int intTotalRealisations = ukPars.GetIntValue("intRealisationsPerParameterSet");
-		if (intFreqIncRecord > intTotalRealisations) intFreqIncRecord = intTotalRealisations;
-
-		// Set times for regional intervention
-		double dblStartRV = ukPars.GetValue("Start_Time_Regional_Vaccination");
-		double dblRangeRV = ukPars.GetValue("Range_Regional_Vaccination");
-		double dblMaxSympRV = ukPars.GetValue("Max_Symp_Prev");
-		double dblMaxSusRV = ukPars.GetValue("Max_Sus_Prev");
-
+          // Set times for regional intervention
+          double dblStartRV = ukPars.GetValue("Start_Time_Regional_Vaccination");
+          double dblRangeRV = ukPars.GetValue("Range_Regional_Vaccination");
+          double dblMaxSympRV = ukPars.GetValue("Max_Symp_Prev");
+          double dblMaxSusRV = ukPars.GetValue("Max_Sus_Prev");
+          
 		if (ukPars.GetValue("R0_Overall")<1.0 || ukPars.GetValue("Theta")>ukPars.GetValue("dblThetaMax")) intCurrentRealisation = intTotalRealisations;
 
 		int intCountNumberReachingMaxInfections;
