@@ -12,15 +12,32 @@ OUTSTEM="hkc_build_pop"
 #$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_1x
 
 #<<<<<<< HEAD
-$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_1a Probability_Trace_Household 1 1 Probability_Trace_Neighbour  1 1 Vaccine_Probability_Susceptible 1  1
-$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_1b Probability_Trace_Household 1 1 Probability_Trace_Neighbour  1 1 Vaccine_Probability_Susceptible 1  0
+#$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_1a Probability_Trace_Household 1 1 Probability_Trace_Neighbour  1 1 Vaccine_Probability_Susceptible 1  1
+#$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_1b Probability_Trace_Household 1 1 Probability_Trace_Neighbour  1 1 Vaccine_Probability_Susceptible 1  0
+$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_1a1 Maximum_Number_CT_Vaccinations_Each_Day 1 20000 Probability_Trace_Household 1 1 Probability_Trace_Neighbour  1 1 Start_Time_Contact_Tracing 1  999  Start_Time_Self_Isolation 1 999 Vaccine_Probability_Susceptible 1 0
+$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_1b1 Maximum_Number_CT_Vaccinations_Each_Day 1 20000 Probability_Trace_Household 1 1 Probability_Trace_Neighbour  1 1 Start_Time_Contact_Tracing 1  10  Start_Time_Self_Isolation 1 10 Vaccine_Probability_Susceptible 1 0
+$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_1c1 Maximum_Number_CT_Vaccinations_Each_Day 1 20000 Probability_Trace_Household 1 1 Probability_Trace_Neighbour  1 1 Start_Time_Contact_Tracing 1  15 Start_Time_Self_Isolation 1 15 Vaccine_Probability_Susceptible 1 0
+$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_1d1 Maximum_Number_CT_Vaccinations_Each_Day 1 20000 Probability_Trace_Household 1 1 Probability_Trace_Neighbour  1 1 Start_Time_Contact_Tracing 1  20 Start_Time_Self_Isolation 1 20 Vaccine_Probability_Susceptible 1 0
+
+$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_2a1 Maximum_Number_CT_Vaccinations_Each_Day 1 1 Probability_Trace_Household 1 1 Probability_Trace_Neighbour  1 1 Start_Time_Contact_Tracing 1  999  Start_Time_Self_Isolation 1 999 Vaccine_Probability_Susceptible 1 0
+$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_2b1 Maximum_Number_CT_Vaccinations_Each_Day 1 1 Probability_Trace_Household 1 1 Probability_Trace_Neighbour  1 1 Start_Time_Contact_Tracing 1  10  Start_Time_Self_Isolation 1 10 Vaccine_Probability_Susceptible 1 0
+$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_2c1 Maximum_Number_CT_Vaccinations_Each_Day 1 1 Probability_Trace_Household 1 1 Probability_Trace_Neighbour  1 1 Start_Time_Contact_Tracing 1  15 Start_Time_Self_Isolation 1 15 Vaccine_Probability_Susceptible 1 0
+$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_2d1 Maximum_Number_CT_Vaccinations_Each_Day 1 1 Probability_Trace_Household 1 1 Probability_Trace_Neighbour  1 1 Start_Time_Contact_Tracing 1 20 Start_Time_Self_Isolation 1 20 Vaccine_Probability_Susceptible 1 0
+
+
+
+#$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_1d Maximum_Number_CT_Vaccinations_Each_Day 1 2 Probability_Trace_Household 1 1 Probability_Trace_Neighbour  1 1 Start_Time_Contact_Tracing 1  1  Start_Time_Self_Isolation 1 10 Vaccine_Probability_Susceptible 1  0
+#$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_1e Maximum_Number_CT_Vaccinations_Each_Day 1 2 Probability_Trace_Household 1 0.5 Probability_Trace_Neighbour  1 0.5 Start_Time_Contact_Tracing 1  1  Start_Time_Self_Isolation 1 10 Vaccine_Probability_Susceptible 1  0
+#$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_1f Maximum_Number_CT_Vaccinations_Each_Day 1 2 Probability_Trace_Household 1 0.01 Probability_Trace_Neighbour  1 0.01 Start_Time_Contact_Tracing 1  1  Start_Time_Self_Isolation 1 10 Vaccine_Probability_Susceptible 1  0
+
+
 #$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_1a
 #$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_1b
 
 
 
 =======
-$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_1a #Probability_Trace_Household 1 1 Probability_Trace_Neighbour  1 1 Vaccine_Probability_Susceptible 1  1
+#$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_1a #Probability_Trace_Household 1 1 Probability_Trace_Neighbour  1 1 Vaccine_Probability_Susceptible 1  1
 # $BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_1b Probability_Trace_Household 1 1 Probability_Trace_Neighbour  1 1 Vaccine_Probability_Susceptible 1  0
 #>>>>>>> 72a7778f73d5a9a5adb405ec782fccedb1d871e6
 #$BINDIR$RUN both_run.in $NETDIR${OUTSTEM} ${OUTDIR}ebola_1a Maximum_Number_CT_Vaccinations_Each_Day 1 20000 Probability_Trace_Household 1 1 Probability_Trace_Neighbour  1 1 Start_Time_Contact_Tracing 1  1  Start_Time_Self_Isolation 1 10 Vaccine_Probability_Susceptible 1  1

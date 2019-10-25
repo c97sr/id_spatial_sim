@@ -4,7 +4,7 @@
 	dblEndTime	1	400
 	intRealisationsPerParameterSet	1	1
 	intPowerTenInteractionsSampled	1	3
-	intMaxCumInfections	1	2000
+	intMaxCumInfections	1	1500
 	intMaxGeneration	1	9999
 	blNetworkDumpFileRunCode	0	FALSE
 	strEventLogging	0	TRUE
@@ -64,7 +64,7 @@
 	Start_Time_Self_Isolation	1	10 [10,20,30]
 	Vaccine_Probability_Susceptible	1	0
 	Latent_Vaccinated_One_Minimum_Time	1	1
-	Latent_Vaccinated_One_Maximum_Time	1	10      [3]
+	Latent_Vaccinated_One_Maximum_Time	1	1      [3]
 	Recovery_Probability_Latent_Vaccinated_One	1	1 [0]
 	Recovery_Probability_Latent_Vaccinated_Two	1	1 [0]
 	Probability_Trace_Household	1	1
