@@ -2,6 +2,7 @@
 
 	rm(list=ls())
 	ct_data1a <- read.csv(file="C:/Users/kkokwok/Dropbox/id_spatial_sim/scenarios/hk_contacts/output/ebola_1a_pset_0_Events.out", header=TRUE, sep="")
+        
 	a1 <- table(ct_data1a$Day,ct_data1a$Event)/10
 	ct_data1b <- read.csv(file="C:/Users/kkokwok/Dropbox/id_spatial_sim/scenarios/hk_contacts/output/ebola_1b_pset_0_Events.out", header=TRUE, sep="")
 	b1 <- table(ct_data1b$Day,ct_data1b$Event)/10
@@ -30,14 +31,37 @@
 	
         rm(list=ls())
 	ct_data1a <- read.csv(file="C:/Users/kkokwok/Dropbox/id_spatial_sim/scenarios/hk_contacts/output/ebola_1a1_pset_0_Events.out", header=TRUE, sep="")
-	a1 <- table(ct_data1a$Day,ct_data1a$Event)/10
-	ct_data1b <- read.csv(file="C:/Users/kkokwok/Dropbox/id_spatial_sim/scenarios/hk_contacts/output/ebola_1b1_pset_0_Events.out", header=TRUE, sep="")
-	b1 <- table(ct_data1b$Day,ct_data1b$Event)/10
+#	a1 <- table(ct_data1a$Day,ct_data1a$Event)/50
+        a1 <- table(ct_data1a$Run,ct_data1a$Event)
+        100*table(a1[,1]<1500)/50
+        
+        rm(list=ls())
+        ct_data1b <- read.csv(file="C:/Users/kkokwok/Dropbox/id_spatial_sim/scenarios/hk_contacts/output/ebola_1b1_pset_0_Events.out", header=TRUE, sep="")
+#	b1 <- table(ct_data1b$Day,ct_data1b$Event)/50
+        b1 <- table(ct_data1b$Run,ct_data1b$Event)
+        100*table(b1[,1]<1500)/50
+       
+        rm(list=ls())
+	
 	ct_data1c <- read.csv(file="C:/Users/kkokwok/Dropbox/id_spatial_sim/scenarios/hk_contacts/output/ebola_1c1_pset_0_Events.out", header=TRUE, sep="")
-	c1<- table(ct_data1c$Day,ct_data1c$Event)/10
-	ct_data1d <- read.csv(file="C:/Users/kkokwok/Dropbox/id_spatial_sim/scenarios/hk_contacts/output/ebola_1d1_pset_0_Events.out", header=TRUE, sep="")
-	d1<- table(ct_data1d$Day,ct_data1d$Event)/10
+#	c1<- table(ct_data1c$Day,ct_data1c$Event)/50
+        c1 <- table(ct_data1c$Run,ct_data1c$Event)
+        100*table(c1[,1]<1500)/50
 
+	ct_data1d <- read.csv(file="C:/Users/kkokwok/Dropbox/id_spatial_sim/scenarios/hk_contacts/output/ebola_1d1_pset_0_Events.out", header=TRUE, sep="")
+#	d1<- table(ct_data1d$Day,ct_data1d$Event)/10
+        d1 <- table(ct_data1d$Run,ct_data1d$Event)
+        100*table(c1[,1]<1500)/50
+
+        ct_data1e <- read.csv(file="C:/Users/kkokwok/Dropbox/id_spatial_sim/scenarios/hk_contacts/output/ebola_1e1_pset_0_Events.out", header=TRUE, sep="")
+#	e1<- table(ct_data1e$Day,ct_data1e$Event)/10
+        e1 <- table(ct_data1e$Run,ct_data1e$Event)
+        100*table(e1[,1]<1500)/50
+
+        ct_data1f <- read.csv(file="C:/Users/kkokwok/Dropbox/id_spatial_sim/scenarios/hk_contacts/output/ebola_1f1_pset_0_Events.out", header=TRUE, sep="")
+#	f1<- table(ct_data1e$Day,ct_data1e$Event)/10
+        f1 <- table(ct_data1e$Run,ct_data1e$Event)
+        100*table(f1[,1]<1500)/50
 
         par(mfrow=c(2,1))
 	plot(c(as.numeric(rownames(a1))),a1[,1],xlim=c(0,150),ylim=c(0,350),xlab="Day",ylab="Number of infection",main="Figure 1B: Epidemic Curves under different isolation start times",sub="Unlimited people at max to be traced; 100% contacts traced in household and neighbour; contact tracing time = isolation time; 0% vaccination effective")
@@ -47,14 +71,30 @@
 
         legend("topright", inset=.0005,  c("No intervention","Day 20","Day 25","Day 30"), fill=c("black","red","blue","orange"),bty='n', horiz=FALSE)
 	
+        rm(list=ls())
+	
 	ct_data2a <- read.csv(file="C:/Users/kkokwok/Dropbox/id_spatial_sim/scenarios/hk_contacts/output/ebola_2a1_pset_0_Events.out", header=TRUE, sep="")
-	a2 <- table(ct_data2a$Day,ct_data2a$Event)/10
+#	a2 <- table(ct_data2a$Day,ct_data2a$Event)/10
+        a2 <- table(ct_data2a$Run,ct_data2a$Event)
+        100*table(a2[,1]<1500)/50
+
+
+        rm(list=ls())
 	ct_data2b <- read.csv(file="C:/Users/kkokwok/Dropbox/id_spatial_sim/scenarios/hk_contacts/output/ebola_2b1_pset_0_Events.out", header=TRUE, sep="")
-	b2 <- table(ct_data2b$Day,ct_data2b$Event)/10
+#	b2 <- table(ct_data2b$Day,ct_data2b$Event)/10
+        b2 <- table(ct_data2b$Run,ct_data2b$Event)
+        100*table(b2[,1]<1500)/50
+
+
 	ct_data2c <- read.csv(file="C:/Users/kkokwok/Dropbox/id_spatial_sim/scenarios/hk_contacts/output/ebola_2c1_pset_0_Events.out", header=TRUE, sep="")
-	c2<- table(ct_data2c$Day,ct_data2c$Event)/10
+#	c2<- table(ct_data2c$Day,ct_data2c$Event)/10
+        c2 <- table(ct_data2c$Run,ct_data2c$Event)
+        100*table(c2[,1]<1500)/50
+
 	ct_data2d <- read.csv(file="C:/Users/kkokwok/Dropbox/id_spatial_sim/scenarios/hk_contacts/output/ebola_2d1_pset_0_Events.out", header=TRUE, sep="")
-	d2<- table(ct_data2d$Day,ct_data2d$Event)/10
+#	d2<- table(ct_data2d$Day,ct_data2d$Event)/10
+        d2 <- table(ct_data2d$Run,ct_data2d$Event)
+        100*table(d2[,1]<1500)/50
 
 	plot(c(as.numeric(rownames(a2))),a2[,1],xlim=c(0,150),ylim=c(0,350),xlab="Day",ylab="Number of infection",main="Figure 2B: Epidemic Curves under different isolation start times",sub="0.1 people at max to be traced; 100% contacts traced in household and neighbour; contact tracing time = isolation time; 0% vaccination effective")
 	points(c(as.numeric(rownames(b2))), b2[,1], col="red", pch="*")

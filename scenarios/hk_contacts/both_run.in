@@ -70,7 +70,7 @@
 	Probability_Trace_Household	1	1
 	Probability_Trace_Neighbour	1	1
 	Maximum_Number_CT_Vaccinations_Each_Day	1	10000
-	Duration_Quarantine	1	1   [1]
+	Duration_Quarantine	1	2   [1]
 	Fever_Self_Isolation_Average	1	1
 	Fever_Self_Isolation_Int_Alpha	1	50
 	Rash_Self_Isolation_Average	1	1
