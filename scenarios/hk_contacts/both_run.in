@@ -23,14 +23,14 @@
 	strLogOutputBinary	0	FALSE
 
 [Residency_times]			
-	Latent_Mean	1	4.6
+	Latent_Mean	1	3.2
 	Latent_Int_Alpha	1	2
-	Prodrome_Mean	1	2.53
-	Prodrome_Int_Alpha	1	1
-	Rash_Mean	1	2.53
-	Rash_Int_Alpha	1	1
-	Early_Rash_Mean	1	2.53
-	Early_Rash_Int_Alpha	1	1
+	Prodrome_Mean	1	3.2    [2.9]
+	Prodrome_Int_Alpha	1	2
+	Rash_Mean	1	5.7
+	Rash_Int_Alpha	1	2
+	Early_Rash_Mean	1	5.7
+	Early_Rash_Int_Alpha	1	2
 	Probability_Of_Recovery	1	1
 
 [Spatial transmission]			
@@ -43,16 +43,16 @@
 	dblThetaMax	1	1
 
 [Network/household transmission]			
-	AttackRate	1	0
-	R0_Network	1	2.7
-	Hazard_Rash_Relative_Fever	1	0.02840909
+	AttackRate	1	0 [0]
+	R0_Network	1	2.2
+	Hazard_Rash_Relative_Fever	1	1.5 [0.02840909]
 	Hazard_Home_Relative_Network	1	1 
 
 [Seeding]			
 	Seeding_x	1	114.16		[ Monrovia -10.739424; ]
 	Seeding_y	1	22.29 		[ Monrovia 6.338849; ]
 	Seeding_range	1	100
-	Seeding_number	1	10
+	Seeding_number	1	10 [10]
 	Max_seeding_number	1	50
 	Trickle_rate	1	0
 	Trickle_duration	1	100
