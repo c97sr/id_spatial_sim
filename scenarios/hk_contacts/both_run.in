@@ -44,7 +44,7 @@
 
 [Network/household transmission]			
 	AttackRate	1	0 [0]
-	R0_Network	1	2.2
+	R0_Network	1	2.68
 	Hazard_Rash_Relative_Fever	1	1.5 [0.02840909]
 	Hazard_Home_Relative_Network	1	1 
 

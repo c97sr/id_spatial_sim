@@ -1,105 +1,189 @@
 rm(list=ls())
 
-ct_analysis1 <- function (a, x,y,z) {
+ct_analysis1 <- function (a1,a2,a3,a4,a5,a6, x1,x2,x3,x4,x5,x6, y1,y2,y3,y4,y5,y6,z1,z2,z3,z4,z5,z6) {
 
 #x<-"1i"
-        x <- as.character(x)
-	a<- read.csv(file=paste("C:/Users/kkokwok/Dropbox/id_spatial_sim/scenarios/hk_contacts/output/ebola_",x,"_pset_0_Events.out",sep=""),header=TRUE, sep="")
+        x1 <- as.character(x1)
+        x2 <- as.character(x2)
+        x3 <- as.character(x3)
+        x4 <- as.character(x4)
+        x5 <- as.character(x5)
+        x6 <- as.character(x6)
+#	a<- read.csv(file=paste("C:/Users/kkokwok/Dropbox/id_spatial_sim/scenarios/hk_contacts/output/ncov_1a_200_c01_pset_0_Events.out",sep=""),header=TRUE, sep="")
+	a1<- read.csv(file=paste("E:/id_spatial_sim/scenarios/hk_contacts/output/ncov_",x1,"_pset_0_Events.out",sep=""),header=TRUE, sep="")
+	a2<- read.csv(file=paste("E:/id_spatial_sim/scenarios/hk_contacts/output/ncov_",x2,"_pset_0_Events.out",sep=""),header=TRUE, sep="")
+	a3<- read.csv(file=paste("E:/id_spatial_sim/scenarios/hk_contacts/output/ncov_",x3,"_pset_0_Events.out",sep=""),header=TRUE, sep="")
+	a4<- read.csv(file=paste("E:/id_spatial_sim/scenarios/hk_contacts/output/ncov_",x4,"_pset_0_Events.out",sep=""),header=TRUE, sep="")
+	a5<- read.csv(file=paste("E:/id_spatial_sim/scenarios/hk_contacts/output/ncov_",x5,"_pset_0_Events.out",sep=""),header=TRUE, sep="")
+	a6<- read.csv(file=paste("E:/id_spatial_sim/scenarios/hk_contacts/output/ncov_",x6,"_pset_0_Events.out",sep=""),header=TRUE, sep="")
        
-        y <- table(a$Run,a$Event)
+        y1 <- table(a1$Run,a1$Event)
+        y2 <- table(a2$Run,a2$Event)
+   	y3 <- table(a3$Run,a3$Event)
+   	y4 <- table(a4$Run,a4$Event)
+   	y5 <- table(a5$Run,a5$Event)
+   	y6 <- table(a6$Run,a6$Event)
+   	
    	
        # y <- table(eval(parse(text=paste("ct_data",x,"$Run",sep=""))),eval(parse(text=paste("ct_data",x,"$Event",sep=""))))
        # z <- table(eval(parse(text=paste("ct_data",x,"$Day",sep=""))),eval(parse(text=paste("ct_data",x,"$Event",sep=""))))/50
 
-        z<- table(a$Day,a$Event)/50
-        100*table(y[,1]<1500)/100
-     
+        k1<- table(a1$Day,a1$Event)/100
+	k2<- table(a2$Day,a2$Event)/100
+	k3<- table(a3$Day,a3$Event)/100
+	k4<- table(a4$Day,a4$Event)/100
+	k5<- table(a5$Day,a5$Event)/100
+	k6<- table(a6$Day,a6$Event)/100
+
+	plot(c(as.numeric(rownames(k1))),k1[,1],xlim=c(0,150),ylim=c(0,30),xlab="Day",ylab="Number of infection",main=" Epidemic Curves with different daily number of imported cases",sub="200 persons to be traced; 50% contacts traced in neighbour;")
+	points(c(as.numeric(rownames(k2))), k2[,1], col="red", pch="*")
+	points(c(as.numeric(rownames(k3))), k3[,1], col="blue", pch="#")
+	points(c(as.numeric(rownames(k4))), k4[,1], col="orange", pch="?")
+	points(c(as.numeric(rownames(k5))), k5[,1], col="green", pch="&")
+	points(c(as.numeric(rownames(k6))), k6[,1], col="purple", pch="^")
+
+        legend("topright", inset=.0005, c("1","2","3","4","5","6"), fill=c("black","red","blue","orange","green","purple"),bty='n', horiz=FALSE)
+
+
+        m1 <- 100*table(y1[,1]<1245)/100
+        m2 <- 100*table(y2[,1]<1245)/100
+        m3 <- 100*table(y3[,1]<1245)/100
+        m4 <- 100*table(y4[,1]<1245)/100
+        m5 <- 100*table(y5[,1]<1245)/100
+        m6 <- 100*table(y6[,1]<1245)/100
+
+sum(k1[,1])
+sum(k2[,1])
+sum(k3[,1])
+sum(k4[,1])
+sum(k5[,1])
+sum(k6[,1])
 
 }
 
-######################## Scenario 1 50% neighbouring 
+
+ct_analysis2 <- function (a1, x1, y1,z1,line) {
+
+#x<-"1i"
+        x1 <- as.character(x1)
+   #	a<- read.csv(file=paste("C:/Users/kkokwok/Dropbox/id_spatial_sim/scenarios/hk_contacts/output/ncov_1a_200_c01_pset_0_Events.out",sep=""),header=TRUE, sep="")
+	a1<- read.csv(file=paste("E:/id_spatial_sim/scenarios/hk_contacts/output/ncov_",x1,"_pset_0_Events.out",sep=""),header=TRUE, sep="")
+       
+        y1 <- table(a1$Run,a1$Event)
+   	
+   	
+       # y <- table(eval(parse(text=paste("ct_data",x,"$Run",sep=""))),eval(parse(text=paste("ct_data",x,"$Event",sep=""))))
+       # z <- table(eval(parse(text=paste("ct_data",x,"$Day",sep=""))),eval(parse(text=paste("ct_data",x,"$Event",sep=""))))/50
+
+        k1<- table(a1$Day,a1$Event)/100
+
+	plot(c(as.numeric(rownames(k1))),k1[,1],xlim=c(0,150),ylim=c(0,30),xlab="Day",ylab="Number of infection",main=" Epidemic Curves with different daily number of imported cases",sub="200 persons to be traced; 50% contacts traced in neighbour;")
+     #   legend("topright", inset=.0005, c("1","2","3","4","5","6"), fill=c("black","red","blue","orange","green","purple"),bty='n', horiz=FALSE)
 
 
-ct_analysis1(ct_data1a,"1a",a1,a11)
-ct_analysis1(ct_data1b,"1b",b1,b11)
-ct_analysis1(ct_data1c,"1c",c1,c11)
-ct_analysis1(ct_data1d,"1d",d1,d11)
-ct_analysis1(ct_data1e,"1e",e1,e11)
-ct_analysis1(ct_data1f,"1f",f1,f11)
-ct_analysis1(ct_data1g,"1g",g1,g11)
-ct_analysis1(ct_data1h,"1h",h1,h11)
-ct_analysis1(ct_data1i,"1i",i1,i11)
+        m1 <- 100*table(y1[,1]<1245)/100
+
+sum(k1[,line])
+
+}
+
+ct_analysis2(ct_data1a,"1a_200_c01",a1,a11,1)
 
 
-######################## Scenario 2 10% neighbouring 
+	a1<- read.csv(file=paste("E:/id_spatial_sim/scenarios/hk_contacts/output/ncov_1a_200_c01_pset_0_Events.out",sep=""),header=TRUE, sep="")
 
+######################## Scenario 1 10% neighbouring 
 
-ct_analysis1(ct_data2a,"2a",a2,a22)
-ct_analysis1(ct_data2b,"2b",b2,b22)
-ct_analysis1(ct_data2c,"2c",c2,c22)
-ct_analysis1(ct_data2d,"2d",d2,d22)
-ct_analysis1(ct_data2e,"2e",e2,e22)
-ct_analysis1(ct_data2f,"2f",f2,f22)
-ct_analysis1(ct_data2g,"2g",g2,g22)
-ct_analysis1(ct_data2h,"2h",h2,h22)
-ct_analysis1(ct_data2i,"2i",i2,i22)
-
-######################## Scenario 3 100% neighbouring 
-
-
-ct_analysis1(ct_data3a,"3a",a3,a33)
-ct_analysis1(ct_data3b,"3b",b3,b33)
-ct_analysis1(ct_data3c,"3c",c3,c33)
-ct_analysis1(ct_data3d,"3d",d3,d33)
-ct_analysis1(ct_data3e,"3e",e3,e33)
-ct_analysis1(ct_data3f,"3f",f3,f33)
-ct_analysis1(ct_data3g,"3g",g3,g33)
-ct_analysis1(ct_data3h,"3h",h3,h33)
-ct_analysis1(ct_data3i,"3i",i3,i33)
+ct_analysis1(ct_data1a,ct_data1b,ct_data1c,ct_data1d,ct_data1e,ct_data1f,"1a_200_c01","1b_200_c01","1c_200_c01","1d_200_c01","1e_200_c01","1f_200_c01",a1,b1,c1,d1,e1,f1,a11,b11,c11,d11,e11,f11)
 
 
 
-######################## Scenario 4 30% neighbouring 
 
 
-ct_analysis1(ct_data4a,"4a",a4,a44)
-ct_analysis1(ct_data4b,"4b",b4,b44)
-ct_analysis1(ct_data4c,"4c",c4,c44)
-ct_analysis1(ct_data4d,"4d",d4,d44)
-ct_analysis1(ct_data4e,"4e",e4,e44)
-ct_analysis1(ct_data4f,"4f",f4,f44)
-ct_analysis1(ct_data4g,"4g",g4,g44)
-ct_analysis1(ct_data4h,"4h",h4,h44)
-ct_analysis1(ct_data4i,"4i",i4,i44)
 
 
-######################## Scenario 5 70% neighbouring 
+######################## Scenario 1 10% neighbouring 
 
 
-ct_analysis1(ct_data5a,"5a",a5,a55)
-ct_analysis1(ct_data5b,"5b",b5,b55)
-ct_analysis1(ct_data5c,"5c",c5,c55)
-ct_analysis1(ct_data5d,"5d",d5,d55)
-ct_analysis1(ct_data5e,"5e",e5,e55)
-ct_analysis1(ct_data5f,"5f",f5,f55)
-ct_analysis1(ct_data5g,"5g",g5,g55)
-ct_analysis1(ct_data5h,"5h",h5,h55)
-ct_analysis1(ct_data5h,"5i",i5,i55)
+ct_analysis1(ct_data1a,"1a_u_c01_qd14",a1,a11)
+ct_analysis1(ct_data1b,"1b_u_c01_qd14",b1,b11)
+ct_analysis1(ct_data1c,"1c_u_c01_qd14",c1,c11)
+ct_analysis1(ct_data1d,"1d_u_c01_qd14",d1,d11)
+ct_analysis1(ct_data1e,"1e_u_c01_qd14",e1,e11)
+ct_analysis1(ct_data1f,"1f_u_c01_qd14",f1,f11)
+ct_analysis1(ct_data1g,"1g_u_c01_qd14",g1,g11)
+ct_analysis1(ct_data1h,"1h_u_c01_qd14",h1,h11)
+ct_analysis1(ct_data1i,"1i_u_c01_qd14",i1,i11)
 
 
-######################## Scenario 6 90% neighbouring 
+######################## Scenario 2 30% neighbouring 
 
 
-ct_analysis1(ct_data6a,"6a",a6,a66)
-ct_analysis1(ct_data6b,"6b",b6,b66)
-ct_analysis1(ct_data6c,"6c",c6,c66)
-ct_analysis1(ct_data6d,"6d",d6,d66)
-ct_analysis1(ct_data6e,"6e",e6,e66)
-ct_analysis1(ct_data6f,"6f",f6,f66)
-ct_analysis1(ct_data6g,"6g",g6,g66)
-ct_analysis1(ct_data6h,"6h",h6,h66)
-ct_analysis1(ct_data6h,"6i",i6,i66)
+ct_analysis1(ct_data2a,"2a_uc03_qd14",a2,a22)
+ct_analysis1(ct_data2b,"2b_uc03_qd14",b2,b22)
+ct_analysis1(ct_data2c,"2c_uc03_qd14",c2,c22)
+ct_analysis1(ct_data2d,"2d_uc03_qd14",d2,d22)
+ct_analysis1(ct_data2e,"2e_uc03_qd14",e2,e22)
+ct_analysis1(ct_data2f,"2f_uc03_qd14",f2,f22)
+ct_analysis1(ct_data2g,"2g_uc03_qd14",g2,g22)
+ct_analysis1(ct_data2h,"2h_uc03_qd14",h2,h22)
+ct_analysis1(ct_data2i,"2i_uc03_qd14",i2,i22)
+######################## Scenario 3 50% neighbouring 
 
+
+ct_analysis1(ct_data3a,"3a_uc05_qd14",a3,a33)
+ct_analysis1(ct_data3b,"3b_uc05_qd14",b3,b33)
+ct_analysis1(ct_data3c,"3c_uc05_qd14",c3,c33)
+ct_analysis1(ct_data3d,"3d_uc05_qd14",d3,d33)
+ct_analysis1(ct_data3e,"3e_uc05_qd14",e3,e33)
+ct_analysis1(ct_data3f,"3f_uc05_qd14",f3,f33)
+ct_analysis1(ct_data3g,"3g_uc05_qd14",g3,g33)
+ct_analysis1(ct_data3h,"3h_uc05_qd14",h3,h33)
+ct_analysis1(ct_data3i,"3i_uc05_qd14",i3,i33)
+
+
+######################## Scenario 4 70% neighbouring 
+
+
+ct_analysis1(ct_data4a,"4a_uc07_qd14",a4,a44)
+ct_analysis1(ct_data4b,"4b_uc07_qd14",b4,b44)
+ct_analysis1(ct_data4c,"4c_uc07_qd14",c4,c44)
+ct_analysis1(ct_data4d,"4d_uc07_qd14",d4,d44)
+ct_analysis1(ct_data4e,"4e_uc07_qd14",e4,e44)
+ct_analysis1(ct_data4f,"4f_uc07_qd14",f4,f44)
+ct_analysis1(ct_data4g,"4g_uc07_qd14",g4,g44)
+ct_analysis1(ct_data4h,"4h_uc07_qd14",h4,h44)
+ct_analysis1(ct_data4i,"4i_uc07_qd14",i4,i44)
+
+######################## Scenario 5 90% neighbouring 
+
+
+
+
+ct_analysis1(ct_data5a,"5a_uc09_qd14",a5,a55)
+ct_analysis1(ct_data5b,"5b_uc09_qd14",b5,b55)
+ct_analysis1(ct_data5c,"5c_uc09_qd14",c5,c55)
+ct_analysis1(ct_data5d,"5d_uc09_qd14",d5,d55)
+ct_analysis1(ct_data5e,"5e_uc09_qd14",e5,e55)
+ct_analysis1(ct_data5f,"5f_uc09_qd14",f5,f55)
+ct_analysis1(ct_data5g,"5g_uc09_qd14",g5,g55)
+ct_analysis1(ct_data5h,"5h_uc09_qd14",h5,h55)
+ct_analysis1(ct_data5i,"5i_uc09_qd14",i5,i55)
+
+
+
+######################## Scenario 6 100% neighbouring 
+
+
+ct_analysis1(ct_data6a,"6a_uc09_qd14",a6,a66)
+ct_analysis1(ct_data6b,"6b_uc09_qd14",b6,b66)
+ct_analysis1(ct_data6c,"6c_uc09_qd14",c6,c66)
+ct_analysis1(ct_data6d,"6d_uc09_qd14",d6,d66)
+ct_analysis1(ct_data6e,"6e_uc09_qd14",e6,e66)
+ct_analysis1(ct_data6f,"6f_uc09_qd14",f6,f66)
+ct_analysis1(ct_data6g,"6g_uc09_qd14",g6,g66)
+ct_analysis1(ct_data6h,"6h_uc09_qd14",h6,h66)
+ct_analysis1(ct_data6i,"6i_uc09_qd14",i6,i66)
 
 
 
