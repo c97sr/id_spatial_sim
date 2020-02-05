@@ -58,7 +58,7 @@ for(k in 0:l) {
 		 
 	    	for(j in 1:dim(test_data)[1]) {
 
-		   	if ((test_data$Index[i]==test_data$Index[j]) && (test_data$Event[i]==0) && (test_data$Event[j]==4)){
+		   	if ((test_data$Index[i]==test_data$Index[j]) && (test_data$Event[i]==0) && (test_data$Event[j]==5)){
       			  	county<- county+1  
          
                 	temp1[k+1,county]= temp1[k+1,county] + test_data$Day[j]-test_data$Day[i]

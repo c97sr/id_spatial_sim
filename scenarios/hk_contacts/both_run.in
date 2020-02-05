@@ -23,9 +23,9 @@
 	strLogOutputBinary	0	FALSE
 
 [Residency_times]			
-	Latent_Mean	1	3.2
+	Latent_Mean	1	3.22
 	Latent_Int_Alpha	1	1
-	Prodrome_Mean	1	3.2    [2.9]
+	Prodrome_Mean	1	3.23    [2.9]
 	Prodrome_Int_Alpha	1	1
 	Rash_Mean	1	3
 	Rash_Int_Alpha	1	1
