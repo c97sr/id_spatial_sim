@@ -7,12 +7,12 @@
 
 [Household setup]			
 	intNoNodes	1	7000000	[767918, 24881385, 584396]
-	dblAverageHousehold	1	2.7	[3.3]
+	dblAverageHousehold	1	2.3	[3.3]
 	strHouseholdDensityFile	0	../../data/HKLandScanAscii.txt [Uniform_0_to_199, prd_sim_ascii_n_44384655, westAfricaAscii, monroviaAscii]
 
 [Workplace setup]			
-	dblPropColleguesInNetwork	1	0.1
-	dblAverageWorkplaceSize	1	1000
+	dblPropColleguesInNetwork	1	0.01
+	dblAverageWorkplaceSize	1	521
 	strWorkplaceDensityFile	0 	../../data/HKLandScanAscii.txt [../data/Uniform_0_to_199]
 	dblDistanceAllWorkplacesHistDx	1	10
 	dblDistanceAllWorkplacesGridDx	1	5

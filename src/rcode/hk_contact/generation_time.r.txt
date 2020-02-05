@@ -4,7 +4,8 @@ rm(list=ls())
 ct_data1a <- read.csv(file="../id_spatial_sim/scenarios/hk_contacts/output/ncov_1a_pset_0_Events.out", header=TRUE, sep="")
 
 # Generation time 
-n<-10
+
+n<-200
 l <-n-1
 
 temp <-matrix(0L,nrow=n, ncol=5000)
@@ -37,8 +38,14 @@ for(k in 0:l) {
      }
 c <-rep(0,n)
 for(i in 0:n) 
-   c[i] <- mean(temp[i,][temp[i,]!=0])
+      c[i] <- mean(temp[i,][temp[i,]!=0])
 
+mean(c)
+
+c[which(rank(c)==n*0.95)]
+c[which(rank(c)==n*0.05)]
+
+# Time from infection to symptom
 
 temp1 <-matrix(0L,nrow=n, ncol=dim(test_data)[1])
 
@@ -51,7 +58,7 @@ for(k in 0:l) {
 		 
 	    	for(j in 1:dim(test_data)[1]) {
 
-		   	if ((test_data$Index[i]==test_data$Index[j]) && (test_data$Event[i]==4) && (test_data$Event[j]==5)){
+		   	if ((test_data$Index[i]==test_data$Index[j]) && (test_data$Event[i]==0) && (test_data$Event[j]==4)){
       			  	county<- county+1  
          
                 	temp1[k+1,county]= temp1[k+1,county] + test_data$Day[j]-test_data$Day[i]
