@@ -5,7 +5,7 @@ ct_data1a <- read.csv(file="../id_spatial_sim/scenarios/hk_contacts/output/ncov_
 
 # Generation time 
 
-n<-200
+n<-20
 l <-n-1
 
 temp <-matrix(0L,nrow=n, ncol=5000)
@@ -71,6 +71,9 @@ for(k in 0:l) {
 d <-rep(0,l)
 for(i in 0:l) 
    d[i] <- mean(temp1[i,][temp1[i,]!=0])
+
+d[which(rank(d)==n*0.95)]
+d[which(rank(d)==n*0.05)]
 
 
 
