@@ -61,7 +61,7 @@
 
 [Contact tracing and vaccination]			
 	Start_Time_Contact_Tracing	1	999
-	Start_Time_Self_Isolation	1	999
+	Start_Time_Self_Isolation	1	999g
 	Vaccine_Probability_Susceptible	1	0.95
 	Latent_Vaccinated_One_Minimum_Time	1	5
 	Latent_Vaccinated_One_Maximum_Time	1	7

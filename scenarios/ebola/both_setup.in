@@ -2,7 +2,7 @@
 	dblHexagonWidth	1	0.001	[radians]
 	intNoMaximalNodes	1	1
 	dblMaxSpatialNeighbours	1	100
-	blNetworkDumpFile	0	FALSE
+	blNetworkDumpFile	0	TRUE
 	intBlockSizeInUnitsOfPointers	1	4096
 
 [Household setup]			
@@ -13,7 +13,7 @@
 [Workplace setup]			
 	dblPropColleguesInNetwork	1	0.1
 	dblAverageWorkplaceSize	1	1000
-	strWorkplaceDensityFile	0 	../../data/bikoroSmallAscii.asc [../data/Uniform_0_to_199]
+	strWorkplaceDensityFile	0       ../../data/bikoroSmallAscii.asc [../data/Uniform_0_to_199]
 	dblDistanceAllWorkplacesHistDx	1	10
 	dblDistanceAllWorkplacesGridDx	1	5
 	intMCMCMaxSamplesInMillions	1	0
