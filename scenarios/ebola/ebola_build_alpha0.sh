@@ -1,14 +1,14 @@
 #!/bin/bash
 
 TOP="../../"
-BINDIR=$TOP"g++/"
+BINDIR=$TOP"build/"
 PARSTEM="both"
 BUILD="ebola_build.exe"
 RUN="ebola_run.exe"
 
-OUTDIR="./output_MCMC/"
+OUTDIR="./output/"
 NETDIR="./network/"
-OUTSTEM="ebola_pop_"
+OUTSTEM="ebola_pop"
 
 $BINDIR$BUILD ${PARSTEM}_setup.in $NETDIR${OUTSTEM+"ebola_pop_alpha0_1"}  dblAverageHousehold   1	5.797825337	dblAverageWorkplaceSize 1	18.30168161	dblPropColleguesInNetwork 1	0.741539441	intMCMCMaxSamplesInMillions 1	210	Commute_Power_One_GZ 1 	0	Commute_Power_One_HK 1 	0	Commute_Change_Point_GZ 1 	0.1	Commute_Change_Point_HK 1	0.1
 $BINDIR$BUILD ${PARSTEM}_setup.in $NETDIR${OUTSTEM+"ebola_pop_alpha0_2"}  dblAverageHousehold   1	5.510454414	dblAverageWorkplaceSize 1	27.66524575	dblPropColleguesInNetwork 1	0.637941542	intMCMCMaxSamplesInMillions 1	210	Commute_Power_One_GZ 1 	0	Commute_Power_One_HK 1 	0	Commute_Change_Point_GZ 1 	0.1	Commute_Change_Point_HK 1	0.1

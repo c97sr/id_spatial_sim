@@ -49,8 +49,8 @@
 	Hazard_Home_Relative_Network	1	1 
 
 [Seeding]			
-	Seeding_x	1	18.1399		[ Monrovia -10.739424; ]
-	Seeding_y	1	-0.7317 		[ Monrovia 6.338849; ]
+	Seeding_x	1	-10.739424		[ Monrovia -10.739424; ]
+	Seeding_y	1	6.338849		[ Monrovia 6.338849; ]
 	Seeding_range	1	100
 	Seeding_number	1	10
 	Max_seeding_number	1	50
@@ -61,7 +61,7 @@
 
 [Contact tracing and vaccination]			
 	Start_Time_Contact_Tracing	1	999
-	Start_Time_Self_Isolation	1	999g
+	Start_Time_Self_Isolation	1	999
 	Vaccine_Probability_Susceptible	1	0.95
 	Latent_Vaccinated_One_Minimum_Time	1	5
 	Latent_Vaccinated_One_Maximum_Time	1	7

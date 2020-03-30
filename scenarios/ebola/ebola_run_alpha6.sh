@@ -1,14 +1,14 @@
 #!/bin/bash
 
 TOP="../../"
-BINDIR=$TOP"g++/"
+BINDIR=$TOP"build/"
 PARSTEM="both"
 BUILD="ebola_build.exe"
 RUN="ebola_run.exe"
 
 OUTDIR="./output/"
 NETDIR="./network/"
-OUTSTEM="ebola_pop_monrovia"
+OUTSTEM="ebola_pop"
 
 $BINDIR$RUN both_run.in $NETDIR${OUTSTEM+"ebola_pop_alpha6_1"} ${OUTDIR}ebola_alpha6_1 R0_Network 1	1.857629088
 $BINDIR$RUN both_run.in $NETDIR${OUTSTEM+"ebola_pop_alpha6_2"} ${OUTDIR}ebola_alpha6_2  R0_Network 1	1.79715642
