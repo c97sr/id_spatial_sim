@@ -10,4 +10,6 @@ OUTDIR="./output/"
 NETDIR="./network/"
 OUTSTEM="ebola_pop"
 
+mkdir $OUTDIR
+
 $BINDIR$BUILD ${PARSTEM}_setup.in $NETDIR${OUTSTEM}

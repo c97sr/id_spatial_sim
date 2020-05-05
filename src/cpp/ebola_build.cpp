@@ -165,15 +165,15 @@ int main(int argc, char* argv[]) {
 
 	// Write parameters, gridhex and network to a file
 	ofs.open((strOutputFile+"_params.hex").c_str(),ios::binary);
-	if (ofs.fail()) SR::srerror("You idiot.");
+	if (ofs.fail()) SR::srerror((strOutputFile+"_params.hex - failed to open").c_str());
 	ofs << ukPars;
 	ofs.close();
 	ofs.open((strOutputFile+"_pages.hex").c_str(),ios::binary);
-	if (ofs.fail()) SR::srerror("You idiot.");
+	if (ofs.fail()) SR::srerror((strOutputFile+"_pages.hex - failed to open").c_str());
 	ukEvmemInitial.WriteToBinaryFile(ofs,ukGridHex.FirstNode());
 	ofs.close();
 	ofs.open((strOutputFile+"_gridhex.hex").c_str(),ios::binary);
-	if (ofs.fail()) SR::srerror("You idiot.");
+	if (ofs.fail()) SR::srerror((strOutputFile+"_gridhex.hex - failed to open").c_str());
 	ofs << ukGridHex;
 	ofs.close();
 
