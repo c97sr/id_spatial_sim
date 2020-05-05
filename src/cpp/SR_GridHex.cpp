@@ -471,7 +471,7 @@ bool SR::GridHex::WriteArcsToFile(string fn) {
 		ptptLast = ptptNode+ptNode->GetNoSpatialNeighbour();
 		while (ptptNode!=ptptLast) {
 			ofs << ptNode->GetIndex() << "\t" << ptNode->GetX() << "\t" << ptNode->GetY() << "\n";
-			ofs << (*ptptNode)->GetIndex() << "\t" << (*ptptNode)->GetY() << "\t" << (*ptptNode)->GetY() << "\n\n";
+			ofs << (*ptptNode)->GetIndex() << "\t" << (*ptptNode)->GetX() << "\t" << (*ptptNode)->GetY() << "\n\n";
 			ptptNode++;
 		}
 		ptNode++;
