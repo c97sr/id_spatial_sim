@@ -71,6 +71,7 @@ function oversample {
     households="$1"
     shift
 
+    echo "house number,age"
     tail -n +2 $households | awk -L',' -f oversample.awk
 }
 function arcs-out-to-csv {
