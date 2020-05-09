@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BINDIR="../g++/"
+BINDIR="../build/"
 BUILD="ebola_build.exe"
 RUN="ebola_run.exe"
 
