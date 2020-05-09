@@ -39,13 +39,14 @@ namespace SR {
 #else
 		int intVaccinationClass;	// 1 bit
 		int intCharacteristic;		// 5 bits
-		int generation;				// 6 bits
-		int no1,no2;				// 8 bits each
+		int generation;			// 6 bits
+		int no1,no2;			// 8 bits each
 		int intCurrentPointer;		// 8 bits
 		int intNoLevelsQuarantine;	// 3 bits
-		int intKernelIndex;			// 4 bits for now
+		int intKernelIndex;		// 4 bits for now
 		float fltContactAverage;
 		bool blContactsFlag;
+                int intAge;
 		void IncrementBitwiseCharacteristic() {intCharacteristic++;};
 		void DecrementBitwiseCharacteristic() {intCharacteristic--;};
 #endif
@@ -83,6 +84,8 @@ namespace SR {
 #else
 		inline void SetNoContacts(float h) {fltContactAverage=static_cast<float>(h-std::fmod(h,float(0.01))+0.005);};
 		inline float GetNoContacts() {return fltContactAverage;};
+		inline void SetAge(int a) {intAge=static_cast<int>(a);};
+		inline int GetAge() {return intAge;};
 		inline bool GetContactsFlag() {return blContactsFlag;};
 		inline void SetContactsFlag() {blContactsFlag=1;};
 		inline void UnSetContactsFlag() {blContactsFlag=0;};

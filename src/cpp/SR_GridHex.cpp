@@ -397,6 +397,7 @@ SR::Node::Node(int i,double x,double y) {
 	intNoLevelsQuarantine=0;
 	blContactsFlag=0;
 	fltContactAverage=0;
+        intAge=99;
 #endif
 	dblX=x;
 	dblY=y;
@@ -421,6 +422,7 @@ SR::Node::Node() {
 	intNoLevelsQuarantine=0;
 	blContactsFlag=0;
 	fltContactAverage=0;
+        intAge=99;
 #endif
 	dblX=-1;
 	dblY=-1;
@@ -681,6 +683,7 @@ ofstream& SR::operator<<(ofstream& ofs, Node& n) {
 	SR::BinWrite(ofs,n.intNoLevelsQuarantine);
 	SR::BinWrite(ofs,n.blContactsFlag);
 	SR::BinWrite(ofs,n.fltContactAverage);
+        SR::BinWrite(ofs,n.intAge);
 	SR::BinWrite(ofs,n.intKernelIndex);
 #endif
 	SR::BinWrite(ofs,n.dblX);
@@ -709,6 +712,7 @@ SR::Node SR::ReadNodeBinaryFromFile(ifstream& ifs) {
 	n.intNoLevelsQuarantine = SR::BinRead<int>(ifs);
 	n.blContactsFlag = SR::BinRead<bool>(ifs);
 	n.fltContactAverage = SR::BinRead<float>(ifs);
+        n.intAge = SR::BinRead<int>(ifs);
 	n.intKernelIndex = SR::BinRead<int>(ifs);
 #endif
 	n.dblX = SR::BinRead<float>(ifs);
