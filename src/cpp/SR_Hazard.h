@@ -1,13 +1,6 @@
 #ifndef _SR_INC_HAZARD
 #define _SR_INC_HAZARD
 
-/*
-XXXX
-
-S Riley XXXX
-
-*/
-
 #include<iostream>
 // #include"nr.h"
 #include"SR_Utility.h"

@@ -83,8 +83,8 @@ int main(int argc, char* argv[]) {
 
 	// Mask the nodes in GridHex if needed
 	SR::NodeMask mask1(ukGridHex);
-	// mask1.AgeMask(0,9999,ukGridHex);
-	mask1.NullMask(ukGridHex);
+	mask1.AgeMask(10,19,ukGridHex);
+	// mask1.NullMask(ukGridHex);
 
 	SR::Workplaces ukWorkplaces(ukGridHex, ukPars, WorkplaceDensityField);
 
@@ -101,17 +101,44 @@ int main(int argc, char* argv[]) {
 	ukWorkplaces.GenerateDistributionOfPossibleCommutes(ukGridHex,ukPars,dblDistanceAllWorkplacesGridDx,
 		dblDistanceAllWorkplacesHistDx,strOutputFile+"_distance_all_wps.out");
 
-	ukWorkplaces.MCMCUpdate(ukGridHex, ukPars, fnOffsetPower, strOutputFile+"_target_commutes_function.out",0,maxMCMC,intCurrentMCMC);
+	ukWorkplaces.MCMCUpdate(
+			ukGridHex,
+			ukPars,
+			fnOffsetPower,
+			strOutputFile+"_target_commutes_function.out",
+			mask1,
+			0,
+			maxMCMC,
+			intCurrentMCMC);
 
 	intStableRuns = static_cast<int>(static_cast<double>(intCurrentMCMC)*propStable/2+1);
 	if (intCurrentMCMC==0) intStableRuns=0;
 
-	ukWorkplaces.MCMCUpdate(ukGridHex, ukPars, fnOffsetPower, strOutputFile+"_target_commutes_function.out",intStableRuns,maxMCMC,intCurrentMCMC);
+	ukWorkplaces.MCMCUpdate(
+			ukGridHex,
+			ukPars,
+			fnOffsetPower,
+			strOutputFile+"_target_commutes_function.out",
+			mask1,
+			intStableRuns,
+			maxMCMC,
+			intCurrentMCMC);
+
 	foss << "_commutes_" << intCurrentMCMC << ".out";
 	SR::OpenNullFile(strOutputFile+foss.str(),ukWorkplaces.PrintDistributionOfCommutes());
 	foss.str("");
 	SR::OpenNullFile(strOutputFile+"_halfway_wp_sizes.out",ukWorkplaces.PrintDistributionOfSizes());
-	ukWorkplaces.MCMCUpdate(ukGridHex, ukPars, fnOffsetPower, strOutputFile+"_target_commutes_function.out",intStableRuns,maxMCMC,intCurrentMCMC);
+
+	ukWorkplaces.MCMCUpdate(
+			ukGridHex,
+			ukPars,
+			fnOffsetPower,
+			strOutputFile+"_target_commutes_function.out",
+			mask1,
+			intStableRuns,
+			maxMCMC,
+			intCurrentMCMC);
+
 	foss << "_commutes_" << intCurrentMCMC << ".out";
 	SR::OpenNullFile(strOutputFile+foss.str(),ukWorkplaces.PrintDistributionOfCommutes());
 	foss.str("");
@@ -165,8 +192,8 @@ int main(int argc, char* argv[]) {
 	// Write population density actually used to a file
 
 	if (ukPars.GetTag("blNetworkDumpFile")=="TRUE") {
-		ukGridHex.WriteArcsToFile(strOutputFile+"_arcs.out");
-		ukGridHex.WriteNodeLocationsAndSizesToFile(strOutputFile+"_nodes.out");
+		ukGridHex.WriteArcsToFile(strOutputFile+"_arcs.csv");
+		ukGridHex.WriteNodeLocationsAndSizesToFile(strOutputFile+"_nodes.csv");
 		cerr  <<  "done.\n";
 	}
 

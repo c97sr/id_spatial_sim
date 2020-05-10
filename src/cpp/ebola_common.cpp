@@ -1079,7 +1079,7 @@ double fnOneOverRadiusOffsetPower(double d, SR::ParameterSet& p) {
 };
 
 double distTestDist(double ave, SR::ParameterSet &p) {
-	// XXXX switch this to the inverse power law and have the parameter be the variance of the distribution
+	// switch this to the inverse power law and have the parameter be the variance of the distribution
 	static int intAlpha = static_cast<int>(p.GetValue("dblConditionalDistParam"));
 	return static_cast<double>(SR::GammaModelDev(ave,intAlpha,p.intSeed));
 };

@@ -2,12 +2,12 @@
 	dblHexagonWidth	1	0.001	[radians]
 	intNoMaximalNodes	1	1
 	dblMaxSpatialNeighbours	1	100
-	blNetworkDumpFile	0	FALSE
+	blNetworkDumpFile	0	TRUE
 	intBlockSizeInUnitsOfPointers	1	4096
 
 [Household setup]			
-	intNoNodes	1	584396	[584396,24881385]
-	dblAverageHousehold	1	1.0	[3.3]
+	intNoNodes	1	10000	[584396,24881385]
+	dblAverageHousehold	1	3.3	[3.3]
 	strHouseholdDensityFile	0	../data/monroviaAscii.asc
 
 [Workplace setup]			
@@ -16,7 +16,7 @@
 	strWorkplaceDensityFile	0	../data/monroviaAscii.asc
 	dblDistanceAllWorkplacesHistDx	1	10
 	dblDistanceAllWorkplacesGridDx	1	5
-	intMCMCMaxSamplesInMillions	1	0
+	intMCMCMaxSamplesInMillions	1	12
 	dblMCMCProportionResample	1	0.3
 	dblMCMCGridSize	1	15
 	dblWeightMCMCUpdateLocal	1	0.9

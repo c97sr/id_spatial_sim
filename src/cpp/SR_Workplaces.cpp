@@ -75,7 +75,7 @@ void SR::GenerateAllNeighbours(SR::GridHex& gh, SR::ParameterSet& p, PROCESS pro
 			itIntC++;
 		}
 		itIntA++;
-		if ((itIntA-w.VeryFirstCollegue())%100000==0) cerr << "Node " << itIntA-w.VeryFirstCollegue() << "           \r";
+		if ((itIntA-w.VeryFirstCollegue()) % 100000==0) cerr << "Node " << itIntA-w.VeryFirstCollegue() << "           \r";
 	}
 
 	delete [] currentChoices;
@@ -374,7 +374,15 @@ void SR::Workplaces::WriteCommutesToFile(SR::GridHex& g, string f) {
 	ofs.close();
 };
 
-void SR::Workplaces::MCMCUpdate(GridHex& gh, ParameterSet& p, double pdistance(double,int,double*), string funcfile, int minSamplesMillions, int maxSamplesMillions, int& cn) {
+void SR::Workplaces::MCMCUpdate(
+		GridHex& gh,
+		ParameterSet& p,
+		double pdistance(double,int,double*),
+		string funcfile,
+		NodeMask& nm,
+		int minSamplesMillions,
+		int maxSamplesMillions,
+		int& cn) {
 
 	bool blMoveAccepted;
 	double dblAcceptanceProbability,dblProposalProbability;
@@ -382,7 +390,7 @@ void SR::Workplaces::MCMCUpdate(GridHex& gh, ParameterSet& p, double pdistance(d
 	int *ptIntSourceBin,*ptIntTargetBin;
 	double dblCurrentCommute, dblProposedCommute, dblP_i, dblP_j;
 	bool notYetStable = true;
-	int indexSelectedNode, indexProposedWorkplace, intCount=0;
+	int indexSelectedNode, indexMaskedNode, indexProposedWorkplace, intCount=0;
 	SR::Node *ptSelectedNode;
 	SR::workplace *ptCurrentWorkplace, *ptProposedWorkplace;
 	double aveDeltaRatio = 0;
@@ -397,6 +405,8 @@ void SR::Workplaces::MCMCUpdate(GridHex& gh, ParameterSet& p, double pdistance(d
 
 	int intNoAllWorkplaces = sizeVecWorkplaces;
 	int intNoNearbyWorkplaces;
+
+	int noNodesSeen = nm.GetNoSeenNodes();
 
 	// These might be the wrong indexes... 0 and 1, no?
 	double vecp0[2];
@@ -429,7 +439,8 @@ void SR::Workplaces::MCMCUpdate(GridHex& gh, ParameterSet& p, double pdistance(d
 //			indexSelectedNode = static_cast<int>(1.0*gh.GetNoNodes()*NR::ran2(p.intSeed));
                         // XXXX Up to here 9th May 2020. Think here is one place I need to alter
                         // and then the place they get assigned initially.
-			indexSelectedNode = static_cast<int>(1.0*gh.GetNoNodes()*gsl_rng_uniform(glob_rng));
+			indexMaskedNode = static_cast<int>(1.0*noNodesSeen*gsl_rng_uniform(glob_rng));
+			indexSelectedNode = nm.RevealNode(indexMaskedNode);
 			ptSelectedNode = gh.FirstNode()+indexSelectedNode;
 			ptCurrentWorkplace = vecWorkplaces+vecWorkplaceIntsForEachNode[indexSelectedNode];
 			ptProposedWorkplace = ptCurrentWorkplace;

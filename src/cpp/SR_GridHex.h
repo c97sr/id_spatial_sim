@@ -260,6 +260,9 @@ namespace SR {
 	    void AgeMask(int lbInc, int ubInc, SR::GridHex &GH);
 	    void NullMask(SR::GridHex &GH);
 	    inline int GetNoSeenNodes(){return seenNoNodes;};
+	    inline int RevealNode(int index){
+	    	if (index < 0 || index > seenNoNodes) SR::srerror("index out of range.");
+	    	return vecNodesSeen[index];};
 	};
 
 	void AssignHexagons(SR::Hexagon* ptHexStart, SR::Hexagon* ptHexEnd, GridHex &g);

@@ -448,13 +448,26 @@ bool SR::GridHex::WriteNodeLocationsAndSizesToFile(string fn) {
 	SR::Node* ptEnd = LastNode();
 	ofstream ofs;
 	ofs.open(fn.c_str());
-	int housesize;
+	int housemembersleft, houseindex=0;
 	if (ofs.fail()) return false;
+
+	// Write the header line
+	ofs << "index" << ", " << "coord.x" << ", " <<
+		"coord.y" << ", " << "age" << ", " << "household.index" << "\n";
+
+	// XXXX this loop is just Wrong
+	housemembersleft = ptNode->GetHouseholdMax()+1;
 	while (ptNode!=ptEnd) {
-		housesize = ptNode->GetHouseholdMax()+1;
-		ofs << ptNode->GetIndex() << "\t" << ptNode->GetX() << "\t" << ptNode->GetY() << "\t" << ptNode->GetKernelIndex() << "\t" << housesize << "\n";
-		ptNode+=housesize;
+		ofs << ptNode->GetIndex() << ", " << ptNode->GetX() << ", " <<
+			ptNode->GetY() << ", " << ptNode->GetAge() << ", " << houseindex << "\n";
+		ptNode++;
+		housemembersleft--;
+		if (ptNode != ptEnd && housemembersleft==0) {
+			housemembersleft = ptNode->GetHouseholdMax()+1;
+			houseindex++;
+		}
 	}
+
 	ofs.close();
 	return true;
 };
@@ -469,16 +482,24 @@ bool SR::GridHex::WriteArcsToFile(string fn) {
 	ofs.open(fn.c_str());
 	ofs.precision(stream_precision);
 	if (ofs.fail()) return false;
+
+	// Setup the header file
+	ofs << "a.index" << ", " << "a.coord.x" << ", " << "a.coord.y" << ", " <<
+		"b.index" << ", " << "b.coord.x" << ", " << "b.coord.y" << "\n";
+
+	// Loop through the nodes and non-household links
 	while (ptNode != ptEnd) {
 		ptptNode = ptNode->GetFirstHouseholdMember()+ptNode->GetHouseholdMax();
 		ptptLast = ptptNode+ptNode->GetNoSpatialNeighbour();
 		while (ptptNode!=ptptLast) {
-			ofs << ptNode->GetIndex() << "\t" << ptNode->GetX() << "\t" << ptNode->GetY() << "\n";
-			ofs << (*ptptNode)->GetIndex() << "\t" << (*ptptNode)->GetY() << "\t" << (*ptptNode)->GetY() << "\n\n";
+			ofs << ptNode->GetIndex() << ", " << ptNode->GetX() << ", " << ptNode->GetY() << ", " <<
+				   (*ptptNode)->GetIndex() << ", " << (*ptptNode)->GetY() << ", " << (*ptptNode)->GetY() << "\n";
 			ptptNode++;
 		}
 		ptNode++;
 	}
+
+	// Close off the file
 	ofs.close();
 	return true;
 };
@@ -1001,7 +1022,7 @@ void SR::NodeMask::AgeMask(int lbInc, int ubInc, SR::GridHex &GH) {
 	int checkSize, tmpAge;
 	SR::Node* ptFirstNode;
 	SR::Node* ptTmpNode;
-	seenNoNodes=0;
+	seenNoNodes = 0;
 
 	// Check for obvious incompatibilities
 	checkSize = GH.GetNoNodes();
