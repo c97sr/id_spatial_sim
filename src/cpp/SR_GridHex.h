@@ -22,6 +22,7 @@ namespace SR {
 
 	class Hexagon;
 	class GridHex;
+	class NodeMask;
 
 	class Node {
 		friend class Hexagon;
@@ -245,6 +246,20 @@ namespace SR {
 		double CalcExpectedSpatial(SR::ParameterSet& p, KERNEL k);
 		void MakeAllHexagonsNotInRegionalTreatment();
 		int GetTotalInfectedNotInfectious();
+	};
+
+	class NodeMask {
+	private:
+		bool *mask;
+		int  *vecNodesSeen;
+		int maxNoNodes, seenNoNodes;
+	public:
+	    NodeMask(){SR::srerror("No default constructor for NodeMask");};
+	    NodeMask(SR::GridHex &GH);
+	    ~NodeMask();
+	    void AgeMask(int lbInc, int ubInc, SR::GridHex &GH);
+	    void NullMask(SR::GridHex &GH);
+	    inline int GetNoSeenNodes(){return seenNoNodes;};
 	};
 
 	void AssignHexagons(SR::Hexagon* ptHexStart, SR::Hexagon* ptHexEnd, GridHex &g);

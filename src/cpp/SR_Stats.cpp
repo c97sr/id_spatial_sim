@@ -306,5 +306,32 @@ double SR::rngtest() {
 
 	return 2.3;
 
+	/*
+
+	// Example code for the setup of a global GSL random number generator
+	// Can be pasted into the start of any main in this project.
+	// Setup random number generator before ever used
+	// The pattern of externals in the linked files is not obvious to me
+	// It needs to be an external here and then a simple global in all the otehr files
+	const gsl_rng_type * T;
+	gsl_rng_env_setup();
+	T = gsl_rng_default;
+	glob_rng = gsl_rng_alloc (T);
+
+	gsl_rng_set(glob_rng, 123456);
+	cout << SR::rngtest() << endl;
+	cout << endl << endl;
+	unsigned long int check = gsl_rng_get(glob_rng);
+	gsl_rng_set(glob_rng,check);
+    cout << SR::rngtest() << endl;
+    cout << endl << endl;
+	gsl_rng_set(glob_rng, check);
+    cout << SR::rngtest() << endl;
+
+    return 0;
+
+	*/
+
+
 };
 

@@ -287,6 +287,7 @@ SR::Workplaces::Workplaces(SR::GridHex& g, SR::ParameterSet& p, SR::DensityField
 
 	// Log seed
 	intSeedLog = p.intSeed;
+	unsigned long int checkpoint = gsl_rng_get(glob_rng);
 	p.intSeed = -intSeedLog;
 
 	// Go through nodes assigning them to workplaces.  Increment count and put in pointer in other vector
@@ -317,6 +318,7 @@ SR::Workplaces::Workplaces(SR::GridHex& g, SR::ParameterSet& p, SR::DensityField
 	cerr << "done.\n";
 	// Reset seed
 	p.intSeed = -intSeedLog;
+	gsl_rng_set(glob_rng,checkpoint);
 	// Repeat node pass assigning the node this time
 	cerr << "  Starting second sweep through nodes assigning workplaces...";
 	ptHexNode = ptFirstHexNode;
@@ -425,6 +427,8 @@ void SR::Workplaces::MCMCUpdate(GridHex& gh, ParameterSet& p, double pdistance(d
 
 			// select one node and one (different) workplace
 //			indexSelectedNode = static_cast<int>(1.0*gh.GetNoNodes()*NR::ran2(p.intSeed));
+                        // XXXX Up to here 9th May 2020. Think here is one place I need to alter
+                        // and then the place they get assigned initially.
 			indexSelectedNode = static_cast<int>(1.0*gh.GetNoNodes()*gsl_rng_uniform(glob_rng));
 			ptSelectedNode = gh.FirstNode()+indexSelectedNode;
 			ptCurrentWorkplace = vecWorkplaces+vecWorkplaceIntsForEachNode[indexSelectedNode];
