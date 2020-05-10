@@ -32,5 +32,6 @@
 *.pdf
 *#*
 *~
+*.csv
 .DS_Store
 .Rhistory
