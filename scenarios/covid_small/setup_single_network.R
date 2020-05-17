@@ -1,8 +1,6 @@
-#' # Fast test for the infectious disease spatial simulation library
-#' 
-#' This needs fleshing out, but it should be independent of actual scenarios
-#' as much as possible. As this is currently designed, it will only run on 
-#' linux-like machines. More specifically, it won't run on windows.
+#' # Setup possible networks for covid transmission studies
+#'
+#' This script is designed to run pretty quickly for a small population.
 #' 
 #' First clear the environment of variables
 rm(list=ls(all=TRUE))
@@ -18,8 +16,8 @@ require("devtools")
 ## Install with install_github("c97sr/idd") if needed
 require("idd")
 
-#' And finally load up functions held elsewhere in this repo
-source("../src/rcode/idSimFuncs.R")
+#' Set top-level dir and load currently useful R functions
+source("../../src/rcode/idSimFuncs.R")
 
 #' ## Build synthetic population
 #' 
@@ -30,22 +28,15 @@ source("../src/rcode/idSimFuncs.R")
 #' while because the average population is very low and there is high variability. 
 #' Hence the accept-reject method for assinging nodes has many rejection steps. We assume
 #' that only one individual lives in a household for this population. 
-system(paste(	"../build/ebola_build.exe",
-				"./params/fast_test_build_params.in",
-				"./output/pop1"))
+system(paste(	"../../build/ebola_build.exe",
+				"./params/b_params.in",
+				"./output/ncov_small"))
 
-#' ## Run an epidemic on the population
-#' 
-#' The second line of the batch file runs an outbreak of only two generations 20
-#' times. The outbreak is seeded in the same area as the reported patient zero 
-#' for the 2014 Ebola outbreak. There are 4 iniitally infectious individuals 
-#' at time $t=0$. Transmission is only via the spatial kernel and thus allows 
-#' us to test that the basic reproductive number is parameterized correctly. 
-#' We can also report the serial interval. 
-system(paste(	"../build/ebola_run.exe",
-				"./params/fast_test_run_params.in",
-				"./output/pop1",
-				"./output/pop1_test"))
+#' ## Run an epidemic on the population, to make sure that the thing will run
+system(paste(	"../../build/ebola_run.exe",
+				"./params/r_params.in",
+				"./output/ncov_small",
+				"./output/ncov_small_runs"))
 
 #' We first load the linelist of events from all the realizations. And check the
 #' dimensions of the output. The output was designed before csvs became so
