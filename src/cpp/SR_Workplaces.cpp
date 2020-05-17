@@ -750,10 +750,10 @@ void SR::Workplaces::GenerateDistributionOfPossibleCommutes(GridHex& gh, Paramet
 		cerr << wpXCoord+1 << " of " << noXCoords << " completed        \r";
 	}
 
-	oss << "d\tn\n";
+	oss << "dist.lb, freq\n";
 
 	for (int i=0;i<static_cast<int>(vecWorkPlaceDist.size());i++) {
-		oss << static_cast<double>(i)*hist_dx << "\t" << vecWorkPlaceDist[i] << "\n";
+		oss << static_cast<double>(i)*hist_dx << ", " << vecWorkPlaceDist[i] << "\n";
 	}
 
 	SR::OpenNullFile(funcfile,oss.str());
