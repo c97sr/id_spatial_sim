@@ -5,51 +5,65 @@
 #' First clear the environment of variables
 rm(list=ls(all=TRUE))
 
-#' Then load up packages maintained by others
+#' Then load up stable packages we might need
 require("raster")
 require("scales")
 require("sp")
 require("rgdal")
 require("devtools")
 
-#' And packages maintained by the id_spatial_sim team (or close to)
+#' And SR's sandbox package if needed
 ## Install with install_github("c97sr/idd") if needed
 require("idd")
 
-#' Set top-level dir and load currently useful R functions
-source("../../src/rcode/idSimFuncs.R")
+#' Set top-level dir and file stems for this script. Assuming it
+#' will be run from the top dir of the scenario.
+dirTop <- "../../"
+fnStemNetworks <- "ncov_small_v2"
+fnStemRuns <- paste(fnStemNetworks,"_run",sep="")
+
+#' Source the R functions used here. Should be in a package, that can be
+#' installed using github_install with subdir option.
+source(paste(dirTop,"src/rcode/idSimFuncs.R",sep=""))
 
 #' ## Build synthetic population
 #' 
-#' The first line of the batch file builds a synthetic population with density
-#' proportional the ebola affected region in west Africa, but much smaller. 
-#' With a total population of only 100,000. Each person has, one average, 10 network 
-#' links but these links are distributed entirely randomly in space. This takes a 
-#' while because the average population is very low and there is high variability. 
-#' Hence the accept-reject method for assinging nodes has many rejection steps. We assume
-#' that only one individual lives in a household for this population. 
-system(paste(	"../../build/ebola_build.exe",
-				"./params/b_params.in",
-				"./output/ncov_small"))
+#' This call to the executable should make a single network of 142000 nodes
+#' each assigned to a wrokplace of 300 people at which each node makes 30
+#' connections. The commuting behaviour is assumed to be similar to people
+#' going to work and the propoensity for long journeys is far too high
+#' for schools, especially primary
+system(
+    paste(
+        paste(dirTop,"/src/cpp/ebola_build.exe",sep=""),
+        "./params/b_params.in",
+        paste("./output/",fnStemNetworks,sep="")
+    )
+)
 
-#' ## Run an epidemic on the population, to make sure that the thing will run
-system(paste(	"../../build/ebola_run.exe",
-				"./params/r_params.in",
-				"./output/ncov_small",
-				"./output/ncov_small_runs"))
+#' This chart is the initial random distribution of distances to the workplace
+#' (school), the distribution after 67 million MCMC updates and the
+#' distribution after 100 million updates. The latter 2 are so similar you
+#' cannot see the 67 million update line.
+seqn <- c(0,66,99)
+x1 <- read.csv(paste(
+    "./output/",fnStemNetworks,"_commute_dist_",seqn[1],".csv",sep=""))
+x2 <- read.csv(paste(
+    "./output/",fnStemNetworks,"_commute_dist_",seqn[2],".csv",sep=""))
+x3 <- read.csv(paste(
+    "./output/",fnStemNetworks,"_commute_dist_",seqn[3],".csv",sep=""))
+plot(x1,xlim=c(0,40),ylim=c(0,15000),type="l",lwd=2,col="red")
+points(x2,type="l",lwd=2,col="green")
+points(x3,type="l",lwd=2,col="blue")
 
-#' We first load the linelist of events from all the realizations. And check the
-#' dimensions of the output. The output was designed before csvs became so
-#' dominant!
-dat0 <- read.table(file="./output/pop1_test_pset_0_Events.out",header=TRUE)
-dimDat0 <- dim(dat0)
-noevents <- dimDat0[1]
-nocols <- dimDat0[2]
-
-#' The column headings describe the information captured in the event file
-names(dat0)
-
-#' We can subset these 'data' to look at only infection. Then examine the number 
-#' of infections by generation for each realization.
-tabInfs0 <- dat0[dat0$Event==0,]
-table(tabInfs0$Run,tabInfs0$Generation)
+#' Run an epidemic on this population. This is not used for anthing other
+#' than to make sure the network build code revisions have not broken the
+#' simulation code in an obvious way.
+system(
+    paste(
+        paste(dirTop,"/src/cpp/ebola_run.exe",sep=""),
+        "./params/r_params.in",
+        paste("./output/",fnStemNetworks,sep=""),
+        paste("./output/",fnStemRuns,sep="")
+    )
+)

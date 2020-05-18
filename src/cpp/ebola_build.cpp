@@ -38,6 +38,11 @@ int main(int argc, char* argv[]) {
 	T = gsl_rng_default;
 	glob_rng = gsl_rng_alloc (T);
 
+	// Declare stream objects
+	ofstream ofs;
+	ifstream ifs;
+	ostringstream foss;
+
 	// Read from command line and set up parameter object
 	int intNoArgs = 2;
 	if (argc<intNoArgs+1) SR::srerror("First two arguments parameter_file_name and output_file_name. Rest parsed as parameter values.\n");
@@ -66,11 +71,6 @@ int main(int argc, char* argv[]) {
 	double dblDistanceAllWorkplacesGridDx = ukPars.GetValue("dblDistanceAllWorkplacesGridDx");
 	double dblDistanceAllWorkplacesHistDx = ukPars.GetValue("dblDistanceAllWorkplacesHistDx");
 
-	// Declare stream objects
-        ofstream ofs;
-	ifstream ifs;
-	ostringstream foss;
-
 	// Initialise the ukPars.RunP.intSeed
 	ukPars.intSeed = -1*ukPars.intSeed;
 	gsl_rng_set(glob_rng, ukPars.intSeed);
@@ -79,30 +79,49 @@ int main(int argc, char* argv[]) {
 	SR::Hexagon tmphex(ukPars);
 
 	// Generate a GridHex from the vector of nodes
-	SR::GridHex ukGridHex(ukPars,tmphex, PopulationDensityField);
+	// Error here. Need a pointer to make this work, which may be a pain!
+	SR::GridHex * ukGridHex;
+
+	string strExistingNetworkFile = ukPars.GetTag("fnExistingNetwork");
+	if (strExistingNetworkFile == "FALSE") {
+
+		ukGridHex = new SR::GridHex(ukPars,tmphex, PopulationDensityField);
+
+	} else {
+
+		// Load gridhex from a binary
+		cerr << "Opening binary file for existing gridhex and checking for consistency...\n";
+		ifs.open((strExistingNetworkFile).c_str(),ios::binary);
+		if (ifs.fail()) SR::srerror("Problem opening binary gridhex file.");
+		ukGridHex = new SR::GridHex(ukPars,tmphex,ifs);;
+		ifs.close();
+
+	}
 
 	// Mask the nodes in GridHex if needed
-	SR::NodeMask mask1(ukGridHex);
-	mask1.AgeMask(10,19,ukGridHex);
-	// mask1.NullMask(ukGridHex);
+	SR::NodeMask mask1(*ukGridHex);
+	int intAgeLB = ukPars.GetIntValue("intAgeLowerBound");
+	int intAgeUB = ukPars.GetIntValue("intAgeUpperBound");
+	mask1.AgeMask(intAgeLB,intAgeUB,*ukGridHex);
+	// mask1.NullMask(*ukGridHex);
 
-	SR::Workplaces ukWorkplaces(ukGridHex, ukPars, WorkplaceDensityField);
+	SR::Workplaces ukWorkplaces(*ukGridHex, ukPars, WorkplaceDensityField);
 
 	// Assign regional location to nodes and hexagons
-	setGZRegionMembership(ukGridHex);
+	setGZRegionMembership(*ukGridHex);
 
 	int intCurrentMCMC=0, intStableRuns;
 	int maxMCMC = ukPars.GetIntValue("intMCMCMaxSamplesInMillions")/3;
 	double propStable = ukPars.GetValue("dblMCMCProportionResample");
 
 	// Update the workplaces the required amount
-	SR::OpenNullFile(strOutputFile+"_initial_commutes.out",ukWorkplaces.PrintDistributionOfCommutes());
+	SR::OpenNullFile(strOutputFile+"_commute_dist_0.csv",ukWorkplaces.PrintDistributionOfCommutes());
 	SR::OpenNullFile(strOutputFile+"_initial_wp_sizes.out",ukWorkplaces.PrintDistributionOfSizes());
-	ukWorkplaces.GenerateDistributionOfPossibleCommutes(ukGridHex,ukPars,dblDistanceAllWorkplacesGridDx,
+	ukWorkplaces.GenerateDistributionOfPossibleCommutes(*ukGridHex,ukPars,dblDistanceAllWorkplacesGridDx,
 		dblDistanceAllWorkplacesHistDx,strOutputFile+"_distance_all_wps.out");
 
 	ukWorkplaces.MCMCUpdate(
-			ukGridHex,
+			*ukGridHex,
 			ukPars,
 			fnOffsetPower,
 			strOutputFile+"_target_commutes_function.out",
@@ -115,7 +134,7 @@ int main(int argc, char* argv[]) {
 	if (intCurrentMCMC==0) intStableRuns=0;
 
 	ukWorkplaces.MCMCUpdate(
-			ukGridHex,
+			*ukGridHex,
 			ukPars,
 			fnOffsetPower,
 			strOutputFile+"_target_commutes_function.out",
@@ -124,13 +143,13 @@ int main(int argc, char* argv[]) {
 			maxMCMC,
 			intCurrentMCMC);
 
-	foss << "_commutes_" << intCurrentMCMC << ".out";
+	foss << "_commute_dist_" << intCurrentMCMC << ".csv";
 	SR::OpenNullFile(strOutputFile+foss.str(),ukWorkplaces.PrintDistributionOfCommutes());
 	foss.str("");
 	SR::OpenNullFile(strOutputFile+"_halfway_wp_sizes.out",ukWorkplaces.PrintDistributionOfSizes());
 
 	ukWorkplaces.MCMCUpdate(
-			ukGridHex,
+			*ukGridHex,
 			ukPars,
 			fnOffsetPower,
 			strOutputFile+"_target_commutes_function.out",
@@ -139,7 +158,7 @@ int main(int argc, char* argv[]) {
 			maxMCMC,
 			intCurrentMCMC);
 
-	foss << "_commutes_" << intCurrentMCMC << ".out";
+	foss << "_commute_dist_" << intCurrentMCMC << ".csv";
 	SR::OpenNullFile(strOutputFile+foss.str(),ukWorkplaces.PrintDistributionOfCommutes());
 	foss.str("");
 	SR::OpenNullFile(strOutputFile+"_final_wp_sizes.out",ukWorkplaces.PrintDistributionOfSizes());
@@ -148,7 +167,7 @@ int main(int argc, char* argv[]) {
 
 	if (ukPars.GetTag("blNetworkDumpFile")=="TRUE") {
 			ukWorkplaces.WriteWorkplacesToFile(strOutputFile+"_workplaces.out");
-			ukWorkplaces.WriteCommutesToFile(ukGridHex,strOutputFile+"_commutes.out");
+			ukWorkplaces.WriteCommutesToFile(*ukGridHex,strOutputFile+"_commutes.out");
 	}
 
 	// Log seed for later
@@ -158,22 +177,22 @@ int main(int argc, char* argv[]) {
 
 	// Set up the network
 	ukPars.intSeed = -seedLog;
-	SR::GenerateAllNeighbours(ukGridHex,ukPars,procSpatialNeighbourSetup,kernNeighbourSetup,kernIntroSetup,evCountSpatialNeighbour,ukWorkplaces);
+	SR::GenerateAllNeighbours(*ukGridHex,ukPars,procSpatialNeighbourSetup,kernNeighbourSetup,kernIntroSetup,evCountSpatialNeighbour,ukWorkplaces);
 
 	//Allocate Large memory block
-	ukPars.ChangeValue("intNumberOfBlocks",ukGridHex.CalculateSizeOfNetwork()/ukPars.GetIntValue("intBlockSize")*102/100+30);
+	ukPars.ChangeValue("intNumberOfBlocks",ukGridHex->CalculateSizeOfNetwork()/ukPars.GetIntValue("intBlockSize")*102/100+30);
 	SR::PagesForThings<SR::Node> ukEvmemInitial(ukPars.GetIntValue("intBlockSize"),ukPars.GetIntValue("intNumberOfBlocks"));
-	ukGridHex.ReserveMemoryForNetwork(&ukEvmemInitial);
-	ukGridHex.AssignHouseholds();
+	ukGridHex->ReserveMemoryForNetwork(&ukEvmemInitial);
+	ukGridHex->AssignHouseholds();
 
 	// Return to logged seed
 	ukPars.intSeed = -seedLog;
 	gsl_rng_set(glob_rng,checkpoint);
-	SR::GenerateAllNeighbours(ukGridHex,ukPars,procSpatialNeighbourAdd,kernNeighbourSetup,kernIntroSetup,evAddToNeighbourList,ukWorkplaces);
+	SR::GenerateAllNeighbours(*ukGridHex,ukPars,procSpatialNeighbourAdd,kernNeighbourSetup,kernIntroSetup,evAddToNeighbourList,ukWorkplaces);
 
 	// Define network characteristics so that they can be checked
-	ukPars.ChangeValue("dblAveCalcNeighbours",ukGridHex.CalculateAverageSpatialNeighbours());
-	ukPars.ChangeValue("dblAveCalcHousehold",ukGridHex.CalculateAverageHousehold());
+	ukPars.ChangeValue("dblAveCalcNeighbours",ukGridHex->CalculateAverageSpatialNeighbours());
+	ukPars.ChangeValue("dblAveCalcHousehold",ukGridHex->CalculateAverageHousehold());
 
 	// Write parameters, gridhex and network to a file
 	ofs.open((strOutputFile+"_params.hex").c_str(),ios::binary);
@@ -182,18 +201,18 @@ int main(int argc, char* argv[]) {
 	ofs.close();
 	ofs.open((strOutputFile+"_pages.hex").c_str(),ios::binary);
 	if (ofs.fail()) SR::srerror("You idiot.");
-	ukEvmemInitial.WriteToBinaryFile(ofs,ukGridHex.FirstNode());
+	ukEvmemInitial.WriteToBinaryFile(ofs,ukGridHex->FirstNode());
 	ofs.close();
 	ofs.open((strOutputFile+"_gridhex.hex").c_str(),ios::binary);
 	if (ofs.fail()) SR::srerror("You idiot.");
-	ofs << ukGridHex;
+	ofs << *ukGridHex;
 	ofs.close();
 
 	// Write population density actually used to a file
 
 	if (ukPars.GetTag("blNetworkDumpFile")=="TRUE") {
-		ukGridHex.WriteArcsToFile(strOutputFile+"_arcs.csv");
-		ukGridHex.WriteNodeLocationsAndSizesToFile(strOutputFile+"_nodes.csv");
+		ukGridHex->WriteArcsToFile(strOutputFile+"_arcs.csv");
+		ukGridHex->WriteNodeLocationsAndSizesToFile(strOutputFile+"_nodes.csv");
 		cerr  <<  "done.\n";
 	}
 
@@ -202,7 +221,12 @@ int main(int argc, char* argv[]) {
 
 	cerr << "Finished.\n";
 
+	// Now debug routine to make GridHex roundtrip safe
+
+
+	// None managed garbage collection
 	gsl_rng_free (glob_rng);
+	ukGridHex->~GridHex();
 
 	return 0;
 

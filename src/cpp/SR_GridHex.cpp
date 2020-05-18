@@ -789,6 +789,10 @@ ofstream& SR::operator<<(ofstream& ofs, SR::GridHex& gh) {
 	int tmpint;
 	SR::Node dbgNode;
 	SR::Node* debug;
+	SR::BinWrite(ofs,gh.sizeVecHexagons);
+	SR::BinWrite(ofs,gh.sizeVecNodes);
+	SR::BinWrite(ofs,gh.maxdx);
+	SR::BinWrite(ofs,gh.maxdy);
 	SR::BinWrite(ofs,gh.dblHexagonWidth);
 	SR::BinWrite(ofs,gh.intMinXCoord);
 	SR::BinWrite(ofs,gh.intMinYCoord);
@@ -818,15 +822,19 @@ SR::GridHex::~GridHex() {
 }
 
 SR::GridHex::GridHex(SR::ParameterSet& p, Hexagon tmphex, ifstream& ifs) {
-	sizeVecHexagons = p.GetIntValue("intMaxNoHexagons");
-	sizeVecNodes = p.GetIntValue("intNoNodes");
+	// sizeVecHexagons = p.GetIntValue("intMaxNoHexagons");
+	// sizeVecNodes = p.GetIntValue("intNoNodes");
+	sizeVecHexagons = SR::BinRead<int>(ifs);
+	sizeVecNodes = SR::BinRead<int>(ifs);
 	vecNodes = new SR::Node[sizeVecNodes];
 	vecHexagon = new SR::Hexagon[sizeVecHexagons];
 	for (int i=0;i<sizeVecHexagons;++i) vecHexagon[i]=tmphex;
 	vecPtNodesHexOrder = new SR::Node*[sizeVecNodes];
 	SR::Node dbgNode;
-	maxdx = p.GetValue("dblXGridSize");
-	maxdy = p.GetValue("dblYGridSize");
+	// maxdx = p.GetValue("dblXGridSize");
+	// maxdy = p.GetValue("dblYGridSize");
+	maxdx = SR::BinRead<double>(ifs);
+	maxdy = SR::BinRead<double>(ifs);
 	SR::Node* debug;
 	dblHexagonWidth = SR::BinRead<double>(ifs);
 	intMinXCoord = SR::BinRead<int>(ifs);

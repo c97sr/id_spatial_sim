@@ -118,8 +118,14 @@ double SR::CachedDblLookup::GetCheckedValue(double d) {
 	static int index;
 	static double lb,ub,lx,logd,rtnval;
 	static double epsilon = 1e-10;
-	if ( d < epsilon )
-		SR::srerror("Problem in SR::CachedDblLookup::GetCheckedValue(double d)");
+	if ( d < epsilon ) {
+		if (d < 0 ) {
+			SR::srerror("Problem in SR::CachedDblLookup::GetCheckedValue(double d)");
+		} else {
+			d = epsilon;
+		}
+
+	}
 	if (d > max) {
 		cerr << "Warning: cached kernel distance too long.";
 		d=max;

@@ -638,10 +638,10 @@ int SR::Workplaces::GetDistanceBin(double d) {
 
 string SR::Workplaces::PrintDistributionOfCommutes() {
 	ostringstream oss;
-	oss << "d\tn\n";
+	oss << "dist.lb, freq\n";
 	for (int i=0;i<outputBinNumber;++i) {
 		// oss << pow(10,log10(startscale)+i/static_cast<double>(incsPerOrder)) << "\t" << vecDistFrequencies[i] << "\n";
-		oss << static_cast<double>(i)*outputBinSize << "\t" << vecDistFrequencies[i] << "\n";
+		oss << static_cast<double>(i)*outputBinSize << ", " << vecDistFrequencies[i] << "\n";
 	}
 	return oss.str();
 };
