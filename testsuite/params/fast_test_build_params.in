@@ -9,6 +9,7 @@
 	intNoNodes	1	10000	[584396,24881385]
 	dblAverageHousehold	1	3.3	[3.3]
 	strHouseholdDensityFile	0	../data/monroviaAscii.asc
+	strHouseholdAgeDistributionFile 0 ../data/ons-hh-ages.csv [0]
 
 [Workplace setup]			
 	dblPropColleguesInNetwork	1	0.1

@@ -6,33 +6,6 @@
 #set -o pipefail
 #set -o xtrace
 
-function test {
-
-    cd ../../build
-    make
-    cd -
-    cd ../../testsuite
-    ./fast_test.sh
-    cd -
-
-    echo "applying age distributions..."
-
-    mkdir -p out
-
-    # parse the original ons household distribution into our own intermediate format
-    parse-ons ../../data/ons-hh.csv out/tmp > out/distribution.csv
-    
-    # overlay the distribution on the output of ebola_build.exe, using an accept-reject algorithm
-    accept-reject out/distribution.csv ../../testsuite/output/pop1_nodes.out out/tmp 10 > out/households.csv
-
-    rm out/tmp* out/distribution.csv
-
-    arcs-out-to-csv ../../testsuite/output/pop1_arcs.out > out/hh-connections.csv
-
-    oversample out/households.csv > out/people.csv
-
-    echo "=> out/households.csv, out/hh-connections.csv, out/people.csv"
-}
 function parse-ons {
     ons_csv="$1"
     shift
@@ -73,13 +46,6 @@ function oversample {
 
     echo "house number,age"
     tail -n +2 $households | awk -L',' -f oversample.awk
-}
-function arcs-out-to-csv {
-    nodes_out="$1"
-    shift
-
-    sed '/^$/d' ../../testsuite/output/pop1_arcs.out |
-        awk 'BEGIN{OFS=","; print "hh-i,hh-j"}{ if(NR%2==1){p=$1}else{ print p,$1 }}'
 }
 
 # this calls the function provided as argument one,

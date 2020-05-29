@@ -213,7 +213,7 @@ namespace SR {
 		SR::Node **vecPtNodesHexOrder;
 		IntCoord RealToHexCoords(double x, double y);
 	public:
-		GridHex(SR::ParameterSet& p, Hexagon tmphex, DensityField& houses);
+		GridHex(SR::ParameterSet& p, Hexagon tmphex, DensityField& houses, const std::string& strHouseholdAgeDistributionFile);
 		GridHex(SR::ParameterSet& p, Hexagon tmphex, ifstream& ifs);
 		~GridHex();
 		void ReserveMemoryForNetwork(SR::PagesForThings<SR::Node>* blks);

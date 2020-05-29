@@ -21,6 +21,7 @@
 #include"ebola.h"
 #include<ctime>
 #include<limits>
+#include<memory>
 
 using namespace std;
 
@@ -41,7 +42,7 @@ int main(int argc, char* argv[]) {
 	// Read from command line and set up parameter object
 	int intNoArgs = 2;
 	if (argc<intNoArgs+1) SR::srerror("First two arguments parameter_file_name and output_file_name. Rest parsed as parameter values.\n");
-	string strParamFile, strOutputFile, strHouseholdFile, strWorkplaceFile, strArgs;
+	string strParamFile, strOutputFile, strHouseholdFile, strWorkplaceFile, strArgs, strHouseholdAgeDistributionFile;
 	strParamFile = argv[1];
 	strOutputFile = argv[2];
 	if ((argc-(intNoArgs+1))%3!=0) SR::srerror("An even number of parameter arguments are required.\n");
@@ -49,6 +50,8 @@ int main(int argc, char* argv[]) {
 	SR::ParameterSet ukPars;
 	ukPars.ReadParamsFromFile(strParamFile);
 	if (argc > 4) ukPars.ReadParams(strArgs);
+
+	strHouseholdAgeDistributionFile = ukPars.GetTag("strHouseholdAgeDistributionFile");
 
 	// Set up the population and workplace density files
 	strHouseholdFile = ukPars.GetTag("strHouseholdDensityFile");
@@ -79,7 +82,7 @@ int main(int argc, char* argv[]) {
 	SR::Hexagon tmphex(ukPars);
 
 	// Generate a GridHex from the vector of nodes
-	SR::GridHex ukGridHex(ukPars,tmphex, PopulationDensityField);
+	SR::GridHex ukGridHex(ukPars,tmphex, PopulationDensityField, strHouseholdAgeDistributionFile);
 
 	// Mask the nodes in GridHex if needed
 	SR::NodeMask mask1(ukGridHex);

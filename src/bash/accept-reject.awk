@@ -1,4 +1,5 @@
-
+# this has been ported to ebola_build.exe
+# leaving here for future reference
 function randint(n)
 {
     return int(n * rand())

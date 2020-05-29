@@ -1,4 +1,5 @@
 #include"SR_GridHex.h"
+#include<functional>
 
 gsl_rng * glob_rng;
 
@@ -104,7 +105,69 @@ SR::Node** SR::Hexagon::LastOfChar(int i) {
 	return GetFirstNode()+arrIntCharBoundaries[i];
 };
 
-SR::GridHex::GridHex(SR::ParameterSet& p, SR::Hexagon tmphex, SR::DensityField& homes) {
+SR::GridHex::GridHex(SR::ParameterSet& p, SR::Hexagon tmphex, SR::DensityField& homes,
+					 const std::string& strHouseholdAgeDistributionFile) {
+
+	std::function<void(std::vector<int>&,int)> ageSelector;
+	struct hh_ages {
+		int a0_19=0, a20_64=0, a65_plus=0, freq=0;
+	};
+	std::vector<std::vector<hh_ages>> ages(10); // sorted by frequency
+	std::vector<int> ages_totals(10,0); 
+	std::vector<int> selected_ages;
+	if (strHouseholdAgeDistributionFile=="0"){
+		// uniform distribution of ages from 0-80
+		ageSelector = [](std::vector<int>& ages_out, int num_members) {
+			ages_out.clear();
+			for (int i=0; i<num_members; ++i){
+				ages_out.push_back(static_cast<int>(gsl_rng_uniform(glob_rng)*80.0));
+			}
+		};
+		cerr << "using the uniform age selector\n";
+	}else{
+		// distribution from ons data, oversampled with uniform distribution up to age 85.
+		cerr << "using the accept-reject age selector\n";
+		ifstream ifs;
+		char c; // comma
+		ifs.open(strHouseholdAgeDistributionFile.c_str());
+		if (ifs.fail()) SR::srerror("Problem opening strHouseholdAgeDistributionFile");
+		ifs.ignore(512,'\n');
+		while(!ifs.eof()){
+			int hh_size;
+			ifs >> hh_size;
+			if (hh_size>10) SR::srerror("Hardcoded household size limit of 10.");
+			ages[hh_size-1].push_back({});
+			auto& e = ages[hh_size-1].back();
+			ifs >>c>> e.a0_19 >>c>> e.a20_64 >>c>> e.a65_plus >>c>> e.freq;
+			ages_totals[hh_size-1]+=e.freq;
+		};
+		ifs.close();
+
+		ageSelector = [&](std::vector<int>& ages_out, int num_members) {
+			if (num_members>10) SR::srerror("Hardcoded household size limit of 10.");
+			ages_out.clear();
+			auto sum=0u;
+			auto ages_total = ages_totals[num_members-1];
+			uint64_t rnd = (uint64_t)(gsl_rng_uniform(glob_rng)*double(ages_total));
+			auto j=0;
+			auto& ages_n = ages[num_members-1];
+			while(sum<rnd){
+				sum+=ages_n[j].freq;
+				j++;
+			}
+			std::array<std::array<int,3>,3> age_buckets = {{
+				{0,19,ages_n[j-1].a0_19},
+				{20,64,ages_n[j-1].a20_64},
+				{65,85,ages_n[j-1].a65_plus},
+			}};
+			for ( auto a : age_buckets ){
+				for (int i=0; i<a[2]; ++i){
+					int age = a[0] + (int)(.5f + gsl_rng_uniform(glob_rng)*float(a[1]-a[0]));
+					ages_out.push_back(age);
+				}
+			}
+		};
+	}
 
 	sizeVecHexagons = p.GetIntValue("intMaxNoHexagons");
 	sizeVecNodes = p.GetIntValue("intNoNodes");
@@ -174,6 +237,9 @@ SR::GridHex::GridHex(SR::ParameterSet& p, SR::Hexagon tmphex, SR::DensityField& 
 				tmpPtNodeEndHouse = vecNodes+sizeVecNodes;
 				intHouseholdCounter = vecNodes + sizeVecNodes - tmpPtNode;
 			}
+			ageSelector(selected_ages,intHouseholdCounter);	
+			int i=0;
+			if (selected_ages.size()!=intHouseholdCounter) SR::srerror("ageSelector didn't return the correct number of ages.");
 			while (tmpPtNode != tmpPtNodeEndHouse) {
 				tmpPtNode->ptGridHex = this;
 				tmpPtNode->SetHouseholdMax(intHouseholdCounter-1);
@@ -181,8 +247,9 @@ SR::GridHex::GridHex(SR::ParameterSet& p, SR::Hexagon tmphex, SR::DensityField& 
 				tmpPtNode->SetY(tmpy);
 				if (tmpPtNode->GetIndex()%10000==0) cerr << "Nodes assigned: " << tmpPtNode->GetIndex() << "                                  \r";
 				tmpPtNode->SetCharacteristic(0);
-				tmpPtNode->SetAge(static_cast<int>(gsl_rng_uniform(glob_rng)*80.0));
+				tmpPtNode->SetAge(selected_ages[i]);
 				tmpPtNode++;
+				i++;
 			}
 		}
 	}
