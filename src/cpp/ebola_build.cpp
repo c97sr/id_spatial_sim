@@ -24,40 +24,19 @@
 
 using namespace std;
 
+// Effectively a global for the random number generator
+// There is a job to find all the uses of this and then add explicit arguments for the random number
+// object to be passed up and down the call stack. But for now, its not the end of the world to
+// have it as a global
 extern gsl_rng * glob_rng;
-
-
-// Some globals ONLY ONLY for random numbers
-// I hate globals, but they seem to make sense here
-// gsl_rng * glob_rng;
-
-// Probably need an object for multiple travel behaviors that can handle many different zones
-// First thing is a multiple cached dbl object
-
-// This function needs to recreate a numerical recepies
 
 int main(int argc, char* argv[]) {
 
-    // Example code for the setup of a global GSL random number generator
-	// Setup random number generator before ever used
-	// The pattern of externals in the linked files is not obvious to me
-	// It needs to be an external here and then a simple global in all the otehr files
+	// Setup the global random number generator
 	const gsl_rng_type * T;
 	gsl_rng_env_setup();
 	T = gsl_rng_default;
 	glob_rng = gsl_rng_alloc (T);
-
-	gsl_rng_set(glob_rng, 123456);
-	cout << SR::rngtest() << endl;
-	cout << endl << endl;
-	unsigned long int check = gsl_rng_get(glob_rng);
-	gsl_rng_set(glob_rng,check);
-    cout << SR::rngtest() << endl;
-    cout << endl << endl;
-	gsl_rng_set(glob_rng, check);
-    cout << SR::rngtest() << endl;
-
-    // return 0;
 
 	// Read from command line and set up parameter object
 	int intNoArgs = 2;
@@ -101,6 +80,12 @@ int main(int argc, char* argv[]) {
 
 	// Generate a GridHex from the vector of nodes
 	SR::GridHex ukGridHex(ukPars,tmphex, PopulationDensityField);
+
+	// Mask the nodes in GridHex if needed
+	SR::NodeMask mask1(ukGridHex);
+	mask1.AgeMask(10,19,ukGridHex);
+	// mask1.NullMask(ukGridHex);
+
 	SR::Workplaces ukWorkplaces(ukGridHex, ukPars, WorkplaceDensityField);
 
 	// Assign regional location to nodes and hexagons
@@ -116,17 +101,44 @@ int main(int argc, char* argv[]) {
 	ukWorkplaces.GenerateDistributionOfPossibleCommutes(ukGridHex,ukPars,dblDistanceAllWorkplacesGridDx,
 		dblDistanceAllWorkplacesHistDx,strOutputFile+"_distance_all_wps.out");
 
-	ukWorkplaces.MCMCUpdate(ukGridHex, ukPars, fnOffsetPower, strOutputFile+"_target_commutes_function.out",0,maxMCMC,intCurrentMCMC);
+	ukWorkplaces.MCMCUpdate(
+			ukGridHex,
+			ukPars,
+			fnOffsetPower,
+			strOutputFile+"_target_commutes_function.out",
+			mask1,
+			0,
+			maxMCMC,
+			intCurrentMCMC);
 
 	intStableRuns = static_cast<int>(static_cast<double>(intCurrentMCMC)*propStable/2+1);
 	if (intCurrentMCMC==0) intStableRuns=0;
 
-	ukWorkplaces.MCMCUpdate(ukGridHex, ukPars, fnOffsetPower, strOutputFile+"_target_commutes_function.out",intStableRuns,maxMCMC,intCurrentMCMC);
+	ukWorkplaces.MCMCUpdate(
+			ukGridHex,
+			ukPars,
+			fnOffsetPower,
+			strOutputFile+"_target_commutes_function.out",
+			mask1,
+			intStableRuns,
+			maxMCMC,
+			intCurrentMCMC);
+
 	foss << "_commutes_" << intCurrentMCMC << ".out";
 	SR::OpenNullFile(strOutputFile+foss.str(),ukWorkplaces.PrintDistributionOfCommutes());
 	foss.str("");
 	SR::OpenNullFile(strOutputFile+"_halfway_wp_sizes.out",ukWorkplaces.PrintDistributionOfSizes());
-	ukWorkplaces.MCMCUpdate(ukGridHex, ukPars, fnOffsetPower, strOutputFile+"_target_commutes_function.out",intStableRuns,maxMCMC,intCurrentMCMC);
+
+	ukWorkplaces.MCMCUpdate(
+			ukGridHex,
+			ukPars,
+			fnOffsetPower,
+			strOutputFile+"_target_commutes_function.out",
+			mask1,
+			intStableRuns,
+			maxMCMC,
+			intCurrentMCMC);
+
 	foss << "_commutes_" << intCurrentMCMC << ".out";
 	SR::OpenNullFile(strOutputFile+foss.str(),ukWorkplaces.PrintDistributionOfCommutes());
 	foss.str("");
@@ -180,8 +192,8 @@ int main(int argc, char* argv[]) {
 	// Write population density actually used to a file
 
 	if (ukPars.GetTag("blNetworkDumpFile")=="TRUE") {
-		ukGridHex.WriteArcsToFile(strOutputFile+"_arcs.out");
-		ukGridHex.WriteNodeLocationsAndSizesToFile(strOutputFile+"_nodes.out");
+		ukGridHex.WriteArcsToFile(strOutputFile+"_arcs.csv");
+		ukGridHex.WriteNodeLocationsAndSizesToFile(strOutputFile+"_nodes.csv");
 		cerr  <<  "done.\n";
 	}
 

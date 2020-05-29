@@ -181,6 +181,7 @@ SR::GridHex::GridHex(SR::ParameterSet& p, SR::Hexagon tmphex, SR::DensityField& 
 				tmpPtNode->SetY(tmpy);
 				if (tmpPtNode->GetIndex()%10000==0) cerr << "Nodes assigned: " << tmpPtNode->GetIndex() << "                                  \r";
 				tmpPtNode->SetCharacteristic(0);
+				tmpPtNode->SetAge(static_cast<int>(gsl_rng_uniform(glob_rng)*80.0));
 				tmpPtNode++;
 			}
 		}
@@ -397,6 +398,7 @@ SR::Node::Node(int i,double x,double y) {
 	intNoLevelsQuarantine=0;
 	blContactsFlag=0;
 	fltContactAverage=0;
+    intAge=99;
 #endif
 	dblX=x;
 	dblY=y;
@@ -421,6 +423,7 @@ SR::Node::Node() {
 	intNoLevelsQuarantine=0;
 	blContactsFlag=0;
 	fltContactAverage=0;
+    intAge=99;
 #endif
 	dblX=-1;
 	dblY=-1;
@@ -445,13 +448,26 @@ bool SR::GridHex::WriteNodeLocationsAndSizesToFile(string fn) {
 	SR::Node* ptEnd = LastNode();
 	ofstream ofs;
 	ofs.open(fn.c_str());
-	int housesize;
+	int housemembersleft, houseindex=0;
 	if (ofs.fail()) return false;
+
+	// Write the header line
+	ofs << "index" << ", " << "coord.x" << ", " <<
+		"coord.y" << ", " << "age" << ", " << "household.index" << "\n";
+
+	// XXXX this loop is just Wrong
+	housemembersleft = ptNode->GetHouseholdMax()+1;
 	while (ptNode!=ptEnd) {
-		housesize = ptNode->GetHouseholdMax()+1;
-		ofs << ptNode->GetIndex() << "\t" << ptNode->GetX() << "\t" << ptNode->GetY() << "\t" << ptNode->GetKernelIndex() << "\t" << housesize << "\n";
-		ptNode+=housesize;
+		ofs << ptNode->GetIndex() << ", " << ptNode->GetX() << ", " <<
+			ptNode->GetY() << ", " << ptNode->GetAge() << ", " << houseindex << "\n";
+		ptNode++;
+		housemembersleft--;
+		if (ptNode != ptEnd && housemembersleft==0) {
+			housemembersleft = ptNode->GetHouseholdMax()+1;
+			houseindex++;
+		}
 	}
+
 	ofs.close();
 	return true;
 };
@@ -466,16 +482,24 @@ bool SR::GridHex::WriteArcsToFile(string fn) {
 	ofs.open(fn.c_str());
 	ofs.precision(stream_precision);
 	if (ofs.fail()) return false;
+
+	// Setup the header file
+	ofs << "a.index" << ", " << "a.coord.x" << ", " << "a.coord.y" << ", " <<
+		"b.index" << ", " << "b.coord.x" << ", " << "b.coord.y" << "\n";
+
+	// Loop through the nodes and non-household links
 	while (ptNode != ptEnd) {
 		ptptNode = ptNode->GetFirstHouseholdMember()+ptNode->GetHouseholdMax();
 		ptptLast = ptptNode+ptNode->GetNoSpatialNeighbour();
 		while (ptptNode!=ptptLast) {
-			ofs << ptNode->GetIndex() << "\t" << ptNode->GetX() << "\t" << ptNode->GetY() << "\n";
-			ofs << (*ptptNode)->GetIndex() << "\t" << (*ptptNode)->GetX() << "\t" << (*ptptNode)->GetY() << "\n\n";
+			ofs << ptNode->GetIndex() << ", " << ptNode->GetX() << ", " << ptNode->GetY() << ", " <<
+				   (*ptptNode)->GetIndex() << ", " << (*ptptNode)->GetX() << ", " << (*ptptNode)->GetY() << "\n";
 			ptptNode++;
 		}
 		ptNode++;
 	}
+
+	// Close off the file
 	ofs.close();
 	return true;
 };
@@ -681,6 +705,7 @@ ofstream& SR::operator<<(ofstream& ofs, Node& n) {
 	SR::BinWrite(ofs,n.intNoLevelsQuarantine);
 	SR::BinWrite(ofs,n.blContactsFlag);
 	SR::BinWrite(ofs,n.fltContactAverage);
+    SR::BinWrite(ofs,n.intAge);
 	SR::BinWrite(ofs,n.intKernelIndex);
 #endif
 	SR::BinWrite(ofs,n.dblX);
@@ -709,6 +734,7 @@ SR::Node SR::ReadNodeBinaryFromFile(ifstream& ifs) {
 	n.intNoLevelsQuarantine = SR::BinRead<int>(ifs);
 	n.blContactsFlag = SR::BinRead<bool>(ifs);
 	n.fltContactAverage = SR::BinRead<float>(ifs);
+        n.intAge = SR::BinRead<int>(ifs);
 	n.intKernelIndex = SR::BinRead<int>(ifs);
 #endif
 	n.dblX = SR::BinRead<float>(ifs);
@@ -972,4 +998,67 @@ int SR::GridHex::GetTotalInfectedNotInfectious() {
 		ptHexLocal++;
 	}
 	return rtnval;
+};
+
+SR::NodeMask::NodeMask(SR::GridHex &GH) {
+
+	maxNoNodes = GH.GetNoNodes();
+	mask = new bool[maxNoNodes];
+	vecNodesSeen = new int[maxNoNodes];
+	int seenNoNodes = 0;
+
+};
+
+SR::NodeMask::~NodeMask() {
+
+	delete [] mask;
+	delete [] vecNodesSeen;
+
+};
+
+
+void SR::NodeMask::AgeMask(int lbInc, int ubInc, SR::GridHex &GH) {
+
+	int checkSize, tmpAge;
+	SR::Node* ptFirstNode;
+	SR::Node* ptTmpNode;
+	seenNoNodes = 0;
+
+	// Check for obvious incompatibilities
+	checkSize = GH.GetNoNodes();
+	if (checkSize != maxNoNodes) SR::srerror("Stopping because mask and gridhex are not compatible");
+	ptFirstNode = GH.FirstNode();
+
+	for (int i=0; i<maxNoNodes; ++i) {
+
+		// Check for ages and then add to the bool mask and the lookup mask
+		ptTmpNode = ptFirstNode + i;
+		tmpAge = ptTmpNode->GetAge();
+
+		if (tmpAge >= lbInc && tmpAge <= ubInc) {
+			vecNodesSeen[seenNoNodes] = i;
+			seenNoNodes++;
+			mask[i] = true;
+		} else {
+			mask[i] = false;
+		}
+
+	}
+
+};
+
+void SR::NodeMask::NullMask(SR::GridHex &GH) {
+
+	// Check for obvious incompatibilities
+	int checkSize;
+	checkSize = GH.GetNoNodes();
+	if (checkSize != maxNoNodes) SR::srerror("Stopping because mask and gridhex are not compatible");
+
+	seenNoNodes = checkSize;
+
+	for (int i=0; i<maxNoNodes; ++i) {
+		vecNodesSeen[i] = i;
+		mask[i] = true;
+	}
+
 };
