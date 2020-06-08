@@ -238,5 +238,7 @@ util_eventImage <- function(data,popgrid,ev,st,et,sr,er) {
 	rtnval	
 }
 
-
+load.plot.commute <- function("fnCommutes",plot=TRUE) {
+  
+}
 

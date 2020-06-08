@@ -221,8 +221,17 @@ int main(int argc, char* argv[]) {
 
 	cerr << "Finished.\n";
 
-	// Now debug routine to make GridHex roundtrip safe
+	// Now debug routine to test whether GridHex binary writing
+	// is round trip safe round trip safe
+	// Load gridhex from a binary
+	cerr << "Opening binary file for existing gridhex and checking for roundtrip\n";
+	ifs.open((strOutputFile+"_gridhex.hex").c_str(),ios::binary);
+	if (ifs.fail()) SR::srerror("Problem opening binary gridhex file.");
+	SR::GridHex ukGridHexTmp(ukPars,tmphex,ifs);;
+	ifs.close();
 
+	// Test uf ukGridHex and ukGridHex tmp are the same
+	// check this OutputNodeToLine
 
 	// None managed garbage collection
 	gsl_rng_free (glob_rng);
