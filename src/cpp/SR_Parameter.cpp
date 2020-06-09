@@ -208,7 +208,7 @@ SR::ParameterValueSet::ParameterValueSet(string filename) {
 
 	int dbgtmp = noChanges;
 
-	paramlabels = new (string(*[dbgtmp]));
+	paramlabels = new string*[dbgtmp];
 	paramvalues = new double[noChanges];
 	setnumbers = new int[noChanges];
 
@@ -249,7 +249,7 @@ SR::ParameterValueSetB::ParameterValueSetB(string filename) {
 
 	int dbgtmp = noParams;
 
-	paramlabels = new (string(*[dbgtmp]));
+	paramlabels = new string*[dbgtmp];
 	paramvalues = new double[noChanges*noParams];
 
 	ifstream ifs2(filename.c_str());
