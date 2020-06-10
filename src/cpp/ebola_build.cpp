@@ -43,23 +43,46 @@ int main(int argc, char* argv[]) {
 	ifstream ifs;
 	ostringstream foss;
 
+	//Set-up GridHex reload testing. Move this to parameters later
+	bool test_start = false;
+	bool test_end = true;
+
+
 	// Read from command line and set up parameter object
 	int intNoArgs = 2;
-	if (argc<intNoArgs+1) SR::srerror("First two arguments parameter_file_name and output_file_name. Rest parsed as parameter values.\n");
+	if (argc<intNoArgs+1)
+	{
+		SR::srerror("First two arguments parameter_file_name and output_file_name. Rest parsed as parameter values.\n");
+	}
+
 	string strParamFile, strOutputFile, strHouseholdFile, strWorkplaceFile, strArgs;
 	strParamFile = argv[1];
 	strOutputFile = argv[2];
-	if ((argc-(intNoArgs+1))%3!=0) SR::srerror("An even number of parameter arguments are required.\n");
-	for (int i=intNoArgs+1;i<argc;i=i+3){strArgs+=argv[i];strArgs+="\t";strArgs+=argv[i+1];strArgs+="\t";strArgs+=argv[i+2];strArgs+="\t";};
+
+	if ((argc-(intNoArgs+1))%3!=0)
+	{
+		SR::srerror("An even number of parameter arguments are required.\n");
+	}
+
+	for (int i=intNoArgs+1;i<argc;i=i+3)
+	{
+		strArgs+=argv[i];strArgs+="\t";strArgs+=argv[i+1];strArgs+="\t";strArgs+=argv[i+2];strArgs+="\t";
+	}
+
 	SR::ParameterSet ukPars;
 	ukPars.ReadParamsFromFile(strParamFile);
-	if (argc > 4) ukPars.ReadParams(strArgs);
+	if (argc > 4)
+	{
+		ukPars.ReadParams(strArgs);
+	}
 
 	// Set up the population and workplace density files
 	strHouseholdFile = ukPars.GetTag("strHouseholdDensityFile");
 	strWorkplaceFile = ukPars.GetTag("strWorkplaceDensityFile");
 	SR::DensityField PopulationDensityField(strHouseholdFile);
-	// PopulationDensityField.WriteAsciiGrid("tmpAsciiDump.out");
+	//PopulationDensityField.WriteAsciiGrid("tmpAsciiDump.out");
+
+
 	SR::DensityField WorkplaceDensityField(strWorkplaceFile);
 	ukPars.AddValue("dblXGridMin",PopulationDensityField.GetMinX());
 	ukPars.AddValue("dblXGridSize",PopulationDensityField.GetMaxX()-PopulationDensityField.GetMinX());
@@ -78,32 +101,58 @@ int main(int argc, char* argv[]) {
 	// Initialise basic hexagon and density structures
 	SR::Hexagon tmphex(ukPars);
 
-	// Generate a GridHex from the vector of nodes
-	// Error here. Need a pointer to make this work, which may be a pain!
+	SR::GridHex * ukGridHexGenerate;
 	SR::GridHex * ukGridHex;
 
-	string strExistingNetworkFile = ukPars.GetTag("fnExistingNetwork");
-	if (strExistingNetworkFile == "FALSE") {
+	//Make Grid
+	ukGridHexGenerate = new SR::GridHex(ukPars,tmphex, PopulationDensityField);
 
-		ukGridHex = new SR::GridHex(ukPars,tmphex, PopulationDensityField);
+	if(test_start)
+	{
+		cerr << "Testing reload immediately following GridHex generation\n";
 
-	} else {
+		ofs.open((strOutputFile+"_grid_initialised").c_str());
+		if (ofs.fail()) SR::srerror("You idiot.");
+		ofs << ukGridHexGenerate->OutputGridHexToMultipleLines();
+		ofs.close();
 
-		// Load gridhex from a binary
-		cerr << "Opening binary file for existing gridhex and checking for consistency...\n";
+		//Save grid
+		ofs.open((strOutputFile+"_gridhex.hex").c_str(),ios::binary);
+		if (ofs.fail()) SR::srerror("You idiot.");
+		ofs << *ukGridHexGenerate;
+		ofs.close();
+
+
+		ukGridHexGenerate->~GridHex();
+		ukGridHex = new SR::GridHex();
+
+		//Load Grid
+		string strExistingNetworkFile = ukPars.GetTag("fnExistingNetwork");
 		ifs.open((strExistingNetworkFile).c_str(),ios::binary);
 		if (ifs.fail()) SR::srerror("Problem opening binary gridhex file.");
-		ukGridHex = new SR::GridHex(ukPars,tmphex,ifs);;
+		ifs >> *ukGridHex;
 		ifs.close();
 
+		ofs.open((strOutputFile+"_grid_initialised_reloaded").c_str());
+		if (ofs.fail()) SR::srerror("You idiot.");
+		ofs << ukGridHex->OutputGridHexToMultipleLines();
+		ofs.close();
 	}
+	else
+	{
+		ukGridHex = ukGridHexGenerate;
+	}
+
+
+
+
 
 	// Mask the nodes in GridHex if needed
 	SR::NodeMask mask1(*ukGridHex);
-	int intAgeLB = ukPars.GetIntValue("intAgeLowerBound");
-	int intAgeUB = ukPars.GetIntValue("intAgeUpperBound");
-	mask1.AgeMask(intAgeLB,intAgeUB,*ukGridHex);
-	// mask1.NullMask(*ukGridHex);
+	//int intAgeLB = ukPars.GetIntValue("intAgeLowerBound");
+	//int intAgeUB = ukPars.GetIntValue("intAgeUpperBound");
+	//mask1.AgeMask(intAgeLB,intAgeUB,*ukGridHex);
+	mask1.NullMask(*ukGridHex);
 
 	SR::Workplaces ukWorkplaces(*ukGridHex, ukPars, WorkplaceDensityField);
 
@@ -131,7 +180,10 @@ int main(int argc, char* argv[]) {
 			intCurrentMCMC);
 
 	intStableRuns = static_cast<int>(static_cast<double>(intCurrentMCMC)*propStable/2+1);
-	if (intCurrentMCMC==0) intStableRuns=0;
+	if (intCurrentMCMC==0)
+	{
+		intStableRuns=0;
+	}
 
 	ukWorkplaces.MCMCUpdate(
 			*ukGridHex,
@@ -165,7 +217,8 @@ int main(int argc, char* argv[]) {
 
 	ukPars.ChangeValue("intMCMCMaxSamplesInMillions",intCurrentMCMC);
 
-	if (ukPars.GetTag("blNetworkDumpFile")=="TRUE") {
+	if (ukPars.GetTag("blNetworkDumpFile")=="TRUE")
+	{
 			ukWorkplaces.WriteWorkplacesToFile(strOutputFile+"_workplaces.out");
 			ukWorkplaces.WriteCommutesToFile(*ukGridHex,strOutputFile+"_commutes.out");
 	}
@@ -179,11 +232,13 @@ int main(int argc, char* argv[]) {
 	ukPars.intSeed = -seedLog;
 	SR::GenerateAllNeighbours(*ukGridHex,ukPars,procSpatialNeighbourSetup,kernNeighbourSetup,kernIntroSetup,evCountSpatialNeighbour,ukWorkplaces);
 
+
 	//Allocate Large memory block
 	ukPars.ChangeValue("intNumberOfBlocks",ukGridHex->CalculateSizeOfNetwork()/ukPars.GetIntValue("intBlockSize")*102/100+30);
 	SR::PagesForThings<SR::Node> ukEvmemInitial(ukPars.GetIntValue("intBlockSize"),ukPars.GetIntValue("intNumberOfBlocks"));
 	ukGridHex->ReserveMemoryForNetwork(&ukEvmemInitial);
 	ukGridHex->AssignHouseholds();
+
 
 	// Return to logged seed
 	ukPars.intSeed = -seedLog;
@@ -207,35 +262,69 @@ int main(int argc, char* argv[]) {
 	if (ofs.fail()) SR::srerror("You idiot.");
 	ofs << *ukGridHex;
 	ofs.close();
-
 	// Write population density actually used to a file
 
-	if (ukPars.GetTag("blNetworkDumpFile")=="TRUE") {
+
+
+	if (ukPars.GetTag("blNetworkDumpFile")=="TRUE")
+	{
 		ukGridHex->WriteArcsToFile(strOutputFile+"_arcs.csv");
 		ukGridHex->WriteNodeLocationsAndSizesToFile(strOutputFile+"_nodes.csv");
 		cerr  <<  "done.\n";
 	}
-
 	// Dumping parameters to file
 	SR::OpenNullFile(strOutputFile+"_params.out",ukPars.WriteParams());
 
 	cerr << "Finished.\n";
 
-	// Now debug routine to test whether GridHex binary writing
-	// is round trip safe round trip safe
-	// Load gridhex from a binary
-	cerr << "Opening binary file for existing gridhex and checking for roundtrip\n";
-	ifs.open((strOutputFile+"_gridhex.hex").c_str(),ios::binary);
-	if (ifs.fail()) SR::srerror("Problem opening binary gridhex file.");
-	SR::GridHex ukGridHexTmp(ukPars,tmphex,ifs);;
-	ifs.close();
 
-	// Test uf ukGridHex and ukGridHex tmp are the same
-	// check this OutputNodeToLine
+	if(test_end)
+		{
+			string suffix_ukGridHex = "";
+			string suffix_ukGridHexReloadTest = "";
+
+			if (test_start)
+			{
+				cerr << "Testing reload after completing build on initially reloaded GridHex\n";
+				suffix_ukGridHex = "_grid_initialised_reloaded_built";
+				suffix_ukGridHexReloadTest = "_grid_initialised_reloaded_built_reloaded";
+			}
+			else
+			{
+				cerr << "Testing reload after completing build\n";
+				suffix_ukGridHex = "_grid_initialised_built";
+				suffix_ukGridHexReloadTest = "_grid_initialised_built_reloaded";
+			}
+
+			ofs.open((strOutputFile+suffix_ukGridHex).c_str());
+			if (ofs.fail()) SR::srerror("You idiot.");
+			ofs << ukGridHex->OutputGridHexToMultipleLines();
+			ofs.close();
+
+
+			SR::GridHex *ukGridHexReloadTest;
+			ukGridHexReloadTest = new SR::GridHex();
+
+			//Load Grid
+			string strExistingNetworkFile = ukPars.GetTag("fnExistingNetwork");
+			ifs.open((strExistingNetworkFile).c_str(),ios::binary);
+			if (ifs.fail()) SR::srerror("Problem opening binary gridhex file.");
+			ifs >> *ukGridHexReloadTest;
+			ifs.close();
+
+			ofs.open((strOutputFile+suffix_ukGridHexReloadTest).c_str());
+			if (ofs.fail()) SR::srerror("You idiot.");
+			ofs << ukGridHexReloadTest->OutputGridHexToMultipleLines();
+			ofs.close();
+
+			ukGridHexReloadTest->~GridHex();
+		}
+
 
 	// None managed garbage collection
 	gsl_rng_free (glob_rng);
 	ukGridHex->~GridHex();
+
 
 	return 0;
 

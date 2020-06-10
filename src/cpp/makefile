@@ -40,7 +40,7 @@ CXXFLAGS = -O3 $(INCLUDEDIRS)
 else ifeq ($(MODE),debug)
  
 # Possible flags -Wall for all warnings
-CXXFLAGS = -Wall -ggdb $(INCLUDEDIRS)  
+CXXFLAGS = -W -ggdb $(INCLUDEDIRS)  
 endif
 
 # Define the object files

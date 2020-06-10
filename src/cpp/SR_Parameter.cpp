@@ -40,7 +40,7 @@ void SR::ParameterSet::AddValue(string s, string t) {
 	vector<ParameterDash>::iterator it = FindName(s);
 	it->Set(t);
 	if (it-p.begin()<n) {
-		if (it->IsNumeric()) SR::srerror("Expecting an alpha value in void SR::ParameterSet::AddValue(string s, double d)");
+		if (it->IsNumeric()) SR::srerror("Expecting an alpha value in void SR::ParameterSet::AddValue(string s, string t)");
 		cerr << "Overwriting value of " << s << ". Old value: " << it->Value() << ". New value: " << t << "\n";
 	} else {
 		it->SetNumeric(false);
