@@ -45,7 +45,7 @@ system(
 #' (school), the distribution after 67 million MCMC updates and the
 #' distribution after 100 million updates. The latter 2 are so similar you
 #' cannot see the 67 million update line.
-seqn <- c(0,66,99)
+seqn <- c(0,6,9)
 x1 <- read.csv(paste(
     "./output/",fnStemNetworks,"_commute_dist_",seqn[1],".csv",sep=""))
 x2 <- read.csv(paste(

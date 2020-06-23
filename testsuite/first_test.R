@@ -30,7 +30,7 @@ source("../src/rcode/idSimFuncs.R")
 #' while because the average population is very low and there is high variability. 
 #' Hence the accept-reject method for assinging nodes has many rejection steps. We assume
 #' that only one individual lives in a household for this population. 
-system(paste(	"../build/ebola_build.exe",
+system(paste(	"../src/cpp/ebola_build.exe",
 				"./params/fast_test_build_params.in",
 				"./output/pop1"))
 
@@ -42,7 +42,7 @@ system(paste(	"../build/ebola_build.exe",
 #' at time $t=0$. Transmission is only via the spatial kernel and thus allows 
 #' us to test that the basic reproductive number is parameterized correctly. 
 #' We can also report the serial interval. 
-system(paste(	"../build/ebola_run.exe",
+system(paste(	"../src/cpp/ebola_run.exe",
 				"./params/fast_test_run_params.in",
 				"./output/pop1",
 				"./output/pop1_test"))
@@ -50,7 +50,7 @@ system(paste(	"../build/ebola_run.exe",
 #' We first load the linelist of events from all the realizations. And check the
 #' dimensions of the output. The output was designed before csvs became so
 #' dominant!
-dat0 <- read.table(file="./output/pop1_test_pset_0_Events.out",header=TRUE)
+dat0 <- read.table(file="./output/pop1_test_pset_2_Events.out",header=TRUE)
 dimDat0 <- dim(dat0)
 noevents <- dimDat0[1]
 nocols <- dimDat0[2]
@@ -62,3 +62,4 @@ names(dat0)
 #' of infections by generation for each realization.
 tabInfs0 <- dat0[dat0$Event==0,]
 table(tabInfs0$Run,tabInfs0$Generation)
+

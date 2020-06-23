@@ -108,7 +108,7 @@ SR::DensityField::DensityField(string filename) {
 		for (int j=0;j<nox;++j) {
 			ifs >> tmp;
 			if (tmp == nullData) tmp = 0;
-			//Add total += tmp; here to track total?
+			//total += tmp; //Add here to track total?
 			vals[j*noy+(noy-i-1)]=tmp;
 		}
 	}

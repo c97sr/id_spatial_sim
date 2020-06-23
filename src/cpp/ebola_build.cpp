@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
 	ostringstream foss;
 
 	//Set-up GridHex reload testing. Move this to parameters later
-	bool test_start = false;
+	bool test_start = true;
 	bool test_end = true;
 
 
@@ -76,27 +76,23 @@ int main(int argc, char* argv[]) {
 		ukPars.ReadParams(strArgs);
 	}
 
-	// Set up the population and workplace density files
+	// Set up the population density file
 	strHouseholdFile = ukPars.GetTag("strHouseholdDensityFile");
-	strWorkplaceFile = ukPars.GetTag("strWorkplaceDensityFile");
 	SR::DensityField PopulationDensityField(strHouseholdFile);
 	//PopulationDensityField.WriteAsciiGrid("tmpAsciiDump.out");
-
-
-	SR::DensityField WorkplaceDensityField(strWorkplaceFile);
 	ukPars.AddValue("dblXGridMin",PopulationDensityField.GetMinX());
 	ukPars.AddValue("dblXGridSize",PopulationDensityField.GetMaxX()-PopulationDensityField.GetMinX());
 	ukPars.AddValue("dblYGridMin",PopulationDensityField.GetMinY());
 	ukPars.AddValue("dblYGridSize",PopulationDensityField.GetMaxY()-PopulationDensityField.GetMinY());
 
-	SetUpExtraParameters(ukPars);
-
-	double dblDistanceAllWorkplacesGridDx = ukPars.GetValue("dblDistanceAllWorkplacesGridDx");
-	double dblDistanceAllWorkplacesHistDx = ukPars.GetValue("dblDistanceAllWorkplacesHistDx");
 
 	// Initialise the ukPars.RunP.intSeed
 	ukPars.intSeed = -1*ukPars.intSeed;
 	gsl_rng_set(glob_rng, ukPars.intSeed);
+
+	cerr << ukPars.intSeed << "\n";
+
+	SetUpExtraParameters(ukPars);
 
 	// Initialise basic hexagon and density structures
 	SR::Hexagon tmphex(ukPars);
@@ -144,15 +140,18 @@ int main(int argc, char* argv[]) {
 	}
 
 
-
-
-
 	// Mask the nodes in GridHex if needed
 	SR::NodeMask mask1(*ukGridHex);
-	//int intAgeLB = ukPars.GetIntValue("intAgeLowerBound");
-	//int intAgeUB = ukPars.GetIntValue("intAgeUpperBound");
+	//int intAgeLB = 16;//ukPars.GetIntValue("intAgeLowerBound");
+	//int intAgeUB = 60;//ukPars.GetIntValue("intAgeUpperBound");
 	//mask1.AgeMask(intAgeLB,intAgeUB,*ukGridHex);
 	mask1.NullMask(*ukGridHex);
+
+	// Set up the workplace density file
+	strWorkplaceFile = ukPars.GetTag("strWorkplaceDensityFile");
+	double dblDistanceAllWorkplacesGridDx = ukPars.GetValue("dblDistanceAllWorkplacesGridDx");
+	double dblDistanceAllWorkplacesHistDx = ukPars.GetValue("dblDistanceAllWorkplacesHistDx");
+	SR::DensityField WorkplaceDensityField(strWorkplaceFile);
 
 	SR::Workplaces ukWorkplaces(*ukGridHex, ukPars, WorkplaceDensityField);
 
@@ -262,10 +261,9 @@ int main(int argc, char* argv[]) {
 	if (ofs.fail()) SR::srerror("You idiot.");
 	ofs << *ukGridHex;
 	ofs.close();
+
+
 	// Write population density actually used to a file
-
-
-
 	if (ukPars.GetTag("blNetworkDumpFile")=="TRUE")
 	{
 		ukGridHex->WriteArcsToFile(strOutputFile+"_arcs.csv");

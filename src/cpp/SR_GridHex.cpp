@@ -199,7 +199,6 @@ SR::GridHex::GridHex(SR::ParameterSet& p, SR::Hexagon tmphex, SR::DensityField& 
 	tmpIntCoord = RealToHexCoords(GetMaxDx(),GetMaxDy());
 
 	// SR 20140930 these changed line below from +1 to +2. Some approximation in hexagons needs looking at
-	// Should this be +!?
 	intNoXCoords = tmpIntCoord.x + 2;
 	intNoYCoords = tmpIntCoord.y + 2;
 
@@ -497,7 +496,7 @@ bool SR::GridHex::WriteArcsToFile(string fn) {
 		ptptLast = ptptNode+ptNode->GetNoSpatialNeighbour();
 		while (ptptNode!=ptptLast) {
 			ofs << ptNode->GetIndex() << ", " << ptNode->GetX() << ", " << ptNode->GetY() << ", " <<
-				   (*ptptNode)->GetIndex() << ", " << (*ptptNode)->GetY() << ", " << (*ptptNode)->GetY() << "\n";
+				   (*ptptNode)->GetIndex() << ", " << (*ptptNode)->GetX() << ", " << (*ptptNode)->GetY() << "\n";
 			ptptNode++;
 		}
 		ptNode++;
@@ -811,7 +810,6 @@ ifstream& SR::operator>>(ifstream& ifs, SR::Hexagon& h)
 	}
 	for (int i=0;i<h.usedmn;++i)
 	{
-		//Does this end up duplicating nodes since this cannot see GridHex and is not in vecNodes?
 		ifs >> h.arrMaximalNodes[i];
 	}
 	return ifs;
@@ -876,9 +874,9 @@ ifstream& SR::operator>>(ifstream& ifs, SR::GridHex& gh)
 		gh.vecHexagon[i].SetPtGrid(&gh);
 		for (int j=0;j<gh.vecHexagon[i].GetUsedMn();++j)
 		{
-			//?? Doesn't this get set by hexagon?
-			//?? Doesn't seem to return to original value
-			//gh.vecHexagon[i].SetMaximalNode(gh.vecNodes,j);
+			//This resets arrMaximalNodes
+			//Once arrMaximalNodes is in use this is no longer round trip safe
+			gh.vecHexagon[i].SetMaximalNode(gh.vecNodes,j);
 		}
 	}
 

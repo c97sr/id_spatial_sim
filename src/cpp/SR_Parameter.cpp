@@ -107,7 +107,7 @@ void SR::ParameterSet::ReadParams(string s) {
 		}
 	}
 	// Every parameter file needs to have an intSeed
-	// if (seednotpresent) cerr << "Warning: seed not initialised during ReadParams\n";	
+	//if (seednotpresent) cerr << "Warning: seed not initialised during ReadParams\n";
 };
 
 string SR::ParameterSet::WriteParams() {
@@ -164,6 +164,7 @@ ifstream& SR::operator>>(ifstream& ifs, ParameterDash& p) {
 
 ofstream& SR::operator<<(ofstream& ofs, ParameterSet& ps) {
 	static char *filePointer;
+	ofs << ps.intSeed;
 	filePointer = (char*)(&ps.n); ofs.write(filePointer,sizeof(int));
 	filePointer = (char*)(&ps.locked); ofs.write(filePointer,sizeof(bool));
 	for (int i=0;i<ps.max;++i) ofs << ps.p[i];
@@ -172,10 +173,12 @@ ofstream& SR::operator<<(ofstream& ofs, ParameterSet& ps) {
 
 ifstream& SR::operator>>(ifstream& ifs, ParameterSet& ps) {
 	static char *filePointer;
+	ifs >> ps.intSeed;
 	filePointer = (char*)(&ps.n); ifs.read(filePointer,sizeof(int));
 	filePointer = (char*)(&ps.locked); ifs.read(filePointer,sizeof(bool));
 	for (int i=0;i<ps.max;++i) ifs >> ps.p[i];
 	ps.locked = false;
+
 	return ifs;
 };	
 
