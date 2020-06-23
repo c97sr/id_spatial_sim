@@ -824,6 +824,7 @@ void SetUpExtraParameters(SR::ParameterSet &p) {
 	p.ReadParams("intNumberOfWorkplaces 1 0");
 	p.ChangeValue("intNumberOfWorkplaces",static_cast<int>(static_cast<double>(p.GetValue("intNoNodes")) / p.GetValue("dblAverageWorkplaceSize")));
 	p.ReadParams("intMaxNoHexagons 1 0");
+	//Change these to +1 to fix vecHexagons being too big?
 	p.ChangeValue("intMaxNoHexagons", static_cast<int>(p.GetValue("dblXGridSize")/(1.5*p.GetValue("dblHexagonWidth"))+2)*static_cast<int>(p.GetValue("dblYGridSize")/(0.866025*p.GetValue("dblHexagonWidth"))+2));
 	p.ReadParams("intNumberOfBlocks 1 0");
 	p.ReadParams("dblAveCalcNeighbours 1 0");

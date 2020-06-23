@@ -82,7 +82,7 @@ SR::DensityField::DensityField(string filename) {
 
 	static int nullData;
 	ifstream ifs;
-	double tmp,total=0;
+	double tmp,total=0; //This is never increased?
 	string junk;
 	vector<double>::iterator ptVecDbl;
 	ifs.open(filename.c_str());
@@ -108,6 +108,7 @@ SR::DensityField::DensityField(string filename) {
 		for (int j=0;j<nox;++j) {
 			ifs >> tmp;
 			if (tmp == nullData) tmp = 0;
+			//total += tmp; //Add here to track total?
 			vals[j*noy+(noy-i-1)]=tmp;
 		}
 	}

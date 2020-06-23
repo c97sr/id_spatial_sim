@@ -107,6 +107,7 @@ SR::Node** SR::Hexagon::LastOfChar(int i) {
 SR::GridHex::GridHex(SR::ParameterSet& p, SR::Hexagon tmphex, SR::DensityField& homes) {
 
 	sizeVecHexagons = p.GetIntValue("intMaxNoHexagons");
+	cerr << sizeVecHexagons << "\n";
 	sizeVecNodes = p.GetIntValue("intNoNodes");
 	vecNodes = new SR::Node[sizeVecNodes];
 	vecHexagon = new SR::Hexagon[sizeVecHexagons];
@@ -202,7 +203,9 @@ SR::GridHex::GridHex(SR::ParameterSet& p, SR::Hexagon tmphex, SR::DensityField& 
 	intNoYCoords = tmpIntCoord.y + 2;
 
 	lastHexagon = vecHexagon+intNoXCoords*intNoYCoords;
-	if (lastHexagon >= vecHexagon+sizeVecHexagons) SR::srerror("Error in calculation of area of hexagon.");
+	cerr << intNoXCoords << "\n";
+	cerr << intNoYCoords << "\n";
+	if (lastHexagon > vecHexagon+sizeVecHexagons) SR::srerror("Error in calculation of area of hexagon.");
 
 	// Generate all required hexagons (ordering of x,y,node checked by example)
 	// Is this section still OK though?
@@ -493,7 +496,7 @@ bool SR::GridHex::WriteArcsToFile(string fn) {
 		ptptLast = ptptNode+ptNode->GetNoSpatialNeighbour();
 		while (ptptNode!=ptptLast) {
 			ofs << ptNode->GetIndex() << ", " << ptNode->GetX() << ", " << ptNode->GetY() << ", " <<
-				   (*ptptNode)->GetIndex() << ", " << (*ptptNode)->GetY() << ", " << (*ptptNode)->GetY() << "\n";
+				   (*ptptNode)->GetIndex() << ", " << (*ptptNode)->GetX() << ", " << (*ptptNode)->GetY() << "\n";
 			ptptNode++;
 		}
 		ptNode++;
@@ -690,6 +693,20 @@ void SR::GridHex::AssignHouseholds() {
 	}
 };
 
+SR::GridHex::~GridHex() {
+	delete [] vecNodes;
+	delete [] vecHexagon;
+	delete [] vecPtNodesHexOrder;
+}
+
+
+
+
+//==================================== READ from/WRITE to binary ===============================
+
+
+
+
 ofstream& SR::operator<<(ofstream& ofs, Node& n) {
 	// static char *filePointer;
 #ifdef SR_BYTEPACKED
@@ -716,6 +733,170 @@ ofstream& SR::operator<<(ofstream& ofs, Node& n) {
 	SR::BinWrite(ofs,n.ptSelfInt);
 	return ofs;
 };
+
+ifstream& SR::operator>>(ifstream& ifs, SR::Node& n)
+{
+
+	#ifdef SR_BYTEPACKED
+		tmp = SR::BinRead<unsigned int>(ifs); n.bp1.SetBasicInt(tmp);
+		tmp = SR::BinRead<unsigned int>(ifs); n.bp2.SetBasicInt(tmp);
+	#else
+		n.intVaccinationClass = SR::BinRead<int>(ifs);
+		n.intCharacteristic = SR::BinRead<int>(ifs);
+		n.generation = SR::BinRead<int>(ifs);
+		n.no1 = SR::BinRead<int>(ifs);
+		n.no2 = SR::BinRead<int>(ifs);
+		n.intCurrentPointer = SR::BinRead<int>(ifs);
+		n.intNoLevelsQuarantine = SR::BinRead<int>(ifs);
+		n.blContactsFlag = SR::BinRead<bool>(ifs);
+		n.fltContactAverage = SR::BinRead<float>(ifs);
+	    n.intAge = SR::BinRead<int>(ifs);
+		n.intKernelIndex = SR::BinRead<int>(ifs);
+	#endif
+		n.dblX = SR::BinRead<float>(ifs);
+		n.dblY = SR::BinRead<float>(ifs);
+		n.ptFirstHouseholdMember.SetPageIndex(SR::BinRead<int>(ifs));
+		n.ptFirstHouseholdMember.SetPtThing(SR::BinRead<int>(ifs));
+		n.ptHexInt = SR::BinRead<int>(ifs);
+		n.ptSelfInt = SR::BinRead<int>(ifs);
+
+	return ifs;
+}
+
+
+ofstream& SR::operator<<(ofstream& ofs, Hexagon& h) {
+	static int nochars;
+	static int nomaximals;
+	nochars = h.usedcb;
+	nomaximals = h.usedmn;
+	SR::BinWrite(ofs,nochars);
+	SR::BinWrite(ofs,nomaximals);
+	SR::BinWrite(ofs,h.blMembersAltered);
+	SR::BinWrite(ofs,h.dblCenX);
+	SR::BinWrite(ofs,h.dblCenY);
+	SR::BinWrite(ofs,h.intCoordX);
+	SR::BinWrite(ofs,h.intCoordY);
+	SR::BinWrite(ofs,h.ptptFirstNode);
+	SR::BinWrite(ofs,h.ptptLastNode);
+	SR::BinWrite(ofs,h.intRegionalTreatmentStatus);
+	for (int i=0;i<h.usedcb;++i)
+	{
+		SR::BinWrite(ofs,h.arrIntCharBoundaries[i]);
+	}
+	for (int i=0;i<h.usedmn;++i)
+	{
+		ofs << h.arrMaximalNodes[i];
+	}
+
+	return ofs;
+};
+
+ifstream& SR::operator>>(ifstream& ifs, SR::Hexagon& h)
+{
+	h.usedcb = SR::BinRead<int>(ifs);
+	h.usedmn = SR::BinRead<int>(ifs);
+	h.blMembersAltered = SR::BinRead<bool>(ifs);
+	h.dblCenX = SR::BinRead<double>(ifs);
+	h.dblCenY = SR::BinRead<double>(ifs);
+	h.intCoordX = SR::BinRead<int>(ifs);
+	h.intCoordY = SR::BinRead<int>(ifs);
+	h.ptptFirstNode = SR::BinRead<int>(ifs);
+	h.ptptLastNode = SR::BinRead<int>(ifs);
+	h.intRegionalTreatmentStatus = SR::BinRead<int>(ifs);
+
+	for (int i=0;i<h.usedcb;++i)
+	{
+		h.arrIntCharBoundaries[i]=SR::BinRead<int>(ifs);
+	}
+	for (int i=0;i<h.usedmn;++i)
+	{
+		ifs >> h.arrMaximalNodes[i];
+	}
+	return ifs;
+}
+
+
+ofstream& SR::operator<<(ofstream& ofs, SR::GridHex& gh) {
+
+	SR::BinWrite(ofs,gh.sizeVecHexagons);
+	SR::BinWrite(ofs,gh.sizeVecNodes);
+	SR::BinWrite(ofs,gh.maxdx);
+	SR::BinWrite(ofs,gh.maxdy);
+	SR::BinWrite(ofs,gh.dblHexagonWidth);
+	SR::BinWrite(ofs,gh.intMinXCoord);
+	SR::BinWrite(ofs,gh.intMinYCoord);
+	SR::BinWrite(ofs,gh.intNoXCoords);
+	SR::BinWrite(ofs,gh.intNoYCoords);
+
+	for (int i=0;i<gh.sizeVecNodes;++i)
+	{
+		ofs << gh.vecNodes[i];
+	}
+	for (int i=0;i<gh.LastHexagon()-gh.FirstHexagon();++i)
+	{
+		ofs << gh.vecHexagon[i];
+	}
+
+	int tmpint;
+	for (int i=0;i<gh.sizeVecNodes;++i)
+	{
+		tmpint = gh.vecPtNodesHexOrder[i]-gh.vecNodes;
+		SR::BinWrite(ofs,tmpint);
+	}
+	return ofs;
+};
+
+
+ifstream& SR::operator>>(ifstream& ifs, SR::GridHex& gh)
+{
+	gh.sizeVecHexagons = SR::BinRead<int>(ifs);
+	gh.sizeVecNodes = SR::BinRead<int>(ifs);
+	gh.maxdx = SR::BinRead<double>(ifs);
+	gh.maxdy = SR::BinRead<double>(ifs);
+	gh.dblHexagonWidth = SR::BinRead<double>(ifs);
+	gh.intMinXCoord = SR::BinRead<int>(ifs);
+	gh.intMinYCoord = SR::BinRead<int>(ifs);
+	gh.intNoXCoords = SR::BinRead<int>(ifs);
+	gh.intNoYCoords = SR::BinRead<int>(ifs);
+
+	gh.vecNodes = new SR::Node[gh.sizeVecNodes];
+	for (int i=0;i<gh.sizeVecNodes;++i)
+	{
+		ifs >> gh.vecNodes[i];
+		gh.vecNodes[i].SetPtGridHex(&gh);
+	}
+
+	gh.vecHexagon = new SR::Hexagon[gh.sizeVecHexagons];
+	gh.lastHexagon = gh.vecHexagon+(gh.intNoXCoords*gh.intNoYCoords);
+	for (int i=0;i<gh.LastHexagon()-gh.FirstHexagon();++i)
+	{
+		ifs >> gh.vecHexagon[i];
+		gh.vecHexagon[i].SetPtGrid(&gh);
+		for (int j=0;j<gh.vecHexagon[i].GetUsedMn();++j)
+		{
+			//This resets arrMaximalNodes
+			//Once arrMaximalNodes is in use this is no longer round trip safe
+			gh.vecHexagon[i].SetMaximalNode(gh.vecNodes,j);
+		}
+	}
+
+	gh.vecPtNodesHexOrder = new SR::Node*[gh.sizeVecNodes];
+	int tmpint;
+	for (int i=0;i<gh.sizeVecNodes;++i)
+	{
+		tmpint = SR::BinRead<int>(ifs);
+		gh.vecPtNodesHexOrder[i] = gh.vecNodes+tmpint;
+	}
+
+	//This needs reseting?
+	gh.Blocks=0;
+
+	return ifs;
+}
+
+
+
+
 
 SR::Node SR::ReadNodeBinaryFromFile(ifstream& ifs) {
 	// static char *filePointer;
@@ -746,27 +927,6 @@ SR::Node SR::ReadNodeBinaryFromFile(ifstream& ifs) {
 	return n;
 };
 
-ofstream& SR::operator<<(ofstream& ofs, Hexagon& h) {
-	// static char* filePointer;
-	static int nochars;
-	static int nomaximals;
-	nochars = h.usedcb;
-	nomaximals = h.usedmn;
-	SR::BinWrite(ofs,nochars);
-	SR::BinWrite(ofs,nomaximals);
-	SR::BinWrite(ofs,h.blMembersAltered);
-	SR::BinWrite(ofs,h.dblCenX);
-	SR::BinWrite(ofs,h.dblCenY);
-	SR::BinWrite(ofs,h.intCoordX);
-	SR::BinWrite(ofs,h.intCoordY);
-	SR::BinWrite(ofs,h.ptptFirstNode);
-	SR::BinWrite(ofs,h.ptptLastNode);
-	SR::BinWrite(ofs,h.intRegionalTreatmentStatus);
-	for (int i=0;i<h.usedcb;++i) SR::BinWrite(ofs,h.arrIntCharBoundaries[i]);
-	for (int i=0;i<h.usedmn;++i) ofs << h.arrMaximalNodes[i];
-	return ofs;
-};
-
 SR::Hexagon SR::ReadHexagonBinaryFromFile(ifstream& ifs) {
 	int tmpNoC, tmpNoM;
 	tmpNoC = SR::BinRead<int>(ifs);
@@ -784,42 +944,6 @@ SR::Hexagon SR::ReadHexagonBinaryFromFile(ifstream& ifs) {
 	for (int i=0;i<h.usedmn;++i) h.arrMaximalNodes[i]=SR::ReadNodeBinaryFromFile(ifs);
 	return h;
 };
-
-ofstream& SR::operator<<(ofstream& ofs, SR::GridHex& gh) {
-	int tmpint;
-	SR::Node dbgNode;
-	SR::Node* debug;
-	SR::BinWrite(ofs,gh.sizeVecHexagons);
-	SR::BinWrite(ofs,gh.sizeVecNodes);
-	SR::BinWrite(ofs,gh.maxdx);
-	SR::BinWrite(ofs,gh.maxdy);
-	SR::BinWrite(ofs,gh.dblHexagonWidth);
-	SR::BinWrite(ofs,gh.intMinXCoord);
-	SR::BinWrite(ofs,gh.intMinYCoord);
-	SR::BinWrite(ofs,gh.intNoXCoords);
-	SR::BinWrite(ofs,gh.intNoYCoords);
-	SR::Node* dbit;
-	for (int i=0;i<gh.sizeVecNodes;++i) {
-		ofs << gh.vecNodes[i];
-		dbit = &gh.vecNodes[i];
-		dbgNode = gh.vecNodes[i];
-		// cerr << gh.vecNodes[i].GetHexagon() << "\n";
-	}
-	for (int i=0;i<gh.LastHexagon()-gh.FirstHexagon();++i) ofs << gh.vecHexagon[i];
-	for (int i=0;i<gh.sizeVecNodes;++i) {
-		tmpint = gh.vecPtNodesHexOrder[i]-gh.vecNodes;
-		SR::BinWrite(ofs,tmpint);
-		debug = gh.vecPtNodesHexOrder[i];
-		debug += 1;
-	}
-	return ofs;
-};
-
-SR::GridHex::~GridHex() {
-	delete [] vecNodes;
-	delete [] vecHexagon;
-	delete [] vecPtNodesHexOrder;
-}
 
 SR::GridHex::GridHex(SR::ParameterSet& p, Hexagon tmphex, ifstream& ifs) {
 	// sizeVecHexagons = p.GetIntValue("intMaxNoHexagons");
@@ -889,7 +1013,7 @@ string SR::Hexagon::OutputHexagonToMultipleLines() {
 string SR::GridHex::OutputGridHexToMultipleLines() {
 	ostringstream oss;
 	oss << dblHexagonWidth << "\t" << intMinXCoord << "\t" << intMinYCoord << "\t" << intNoXCoords << "\t" << intNoYCoords << "\n";
-	oss << "L\t" << lastHexagon << "\tB\t" << Blocks << "\n";
+	oss << "L\t" << lastHexagon << "\tB\t" << Blocks << "\t" << sizeVecHexagons << "\t" << GetNoHexagons() << "\n";
 	oss << "vecNodes:\n";
 	for (int i=0;i<sizeVecNodes;++i) oss << "\t" << &vecNodes[i] << vecNodes[i].OutputNodeToLine();
 	oss << "vecHexagons:\n";

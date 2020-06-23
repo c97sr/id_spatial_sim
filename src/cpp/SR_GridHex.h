@@ -132,6 +132,7 @@ namespace SR {
 		inline void SetX(double x) {dblX=x;};
 		inline void SetY(double y) {dblY=y;};
 		friend ofstream& operator<<(ofstream& ofs, Node& n);
+		friend ifstream& operator>>(ifstream& ifs, Node& n);
 		friend SR::Node ReadNodeBinaryFromFile(ifstream& ifs);
 		string OutputNodeToLine();
 		inline GridHex* GetPtGridHex(){return ptGridHex;};
@@ -167,6 +168,7 @@ namespace SR {
 		inline int GetCoordY() {return intCoordY;}
 		void SetCoordX(int x) {intCoordX=x;}
 		void SetCoordY(int y) {intCoordY=y;}
+		int GetUsedMn() {return usedmn;}
 		Hexagon(){};
 		Hexagon(SR::ParameterSet& p);
 		Hexagon(int chs, int mn);
@@ -185,6 +187,7 @@ namespace SR {
 		inline GridHex* GetPtGrid() {return ptGrid;};
 		inline void SetPtGrid(GridHex* g) {ptGrid=g;};
 		friend ofstream& operator<<(ofstream& ofs, Hexagon& h);
+		friend ifstream& operator>>(ifstream& ifs, Hexagon& h);
 		friend Hexagon ReadHexagonBinaryFromFile(ifstream& ifs);
 		string OutputHexagonToMultipleLines();
 		inline void IncrementLastNode() {ptptLastNode++;};
@@ -213,6 +216,7 @@ namespace SR {
 		SR::Node **vecPtNodesHexOrder;
 		IntCoord RealToHexCoords(double x, double y);
 	public:
+		GridHex() {};
 		GridHex(SR::ParameterSet& p, Hexagon tmphex, DensityField& houses);
 		GridHex(SR::ParameterSet& p, Hexagon tmphex, ifstream& ifs);
 		~GridHex();
@@ -239,6 +243,7 @@ namespace SR {
 		inline PagesForThings<SR::Node>* GetPtBlocks() {return Blocks;};
 		inline SR::Node** GetFirstOfVecPtsHexagon() {return vecPtNodesHexOrder;};
 		friend ofstream& operator<<(ofstream& ofs, GridHex& gh);
+		friend ifstream& operator>>(ifstream& ifs, GridHex& gh);
 		string OutputGridHexToMultipleLines();
 		inline double GetMaxDx() {return maxdx;};
 		inline double GetMaxDy() {return maxdy;};
