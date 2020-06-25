@@ -1,4 +1,6 @@
 [Workplace setup]			
+	intAgeUpperBound	1	10
+	intAgeLowerBound	1	20
 	dblPropColleguesInNetwork	1	0.1
 	dblAverageWorkplaceSize	1	100
 	strWorkplaceDensityFile	0	../data/monroviaAscii.asc

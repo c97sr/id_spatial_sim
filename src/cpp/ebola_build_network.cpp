@@ -27,12 +27,13 @@ int main(int argc, char* argv[]) {
 		SR::srerror("First two arguments parameter_file_name and output_file_name. Rest parsed as parameter values.\n");
 	}
 
-	string strParamFile, strOutputFile, strWorkplaceFile, strArgs;
+	string strParamFile, strOutputFile, strWorkplaceFile, strArgs, strInputFile;
 	strParamFile = argv[1];
-	strOutputFile = argv[2];
+	strInputFile = argv[2];
+	strOutputFile = argv[3];
 
 	//Load Grid
-	ifs.open((strOutputFile+"_initial_gridhex.hex").c_str(),ios::binary);
+	ifs.open((strInputFile+"_initial_gridhex.hex").c_str(),ios::binary);
 	if (ifs.fail()) SR::srerror("Problem opening binary gridhex file.");
 	SR::GridHex * ukGridHex;
 	ukGridHex = new SR::GridHex();
@@ -40,19 +41,21 @@ int main(int argc, char* argv[]) {
 	ifs.close();
 
 	//Load Parameters
-	ifs.open((strOutputFile+"_initial_params.hex").c_str(),ios::binary);
+	ifs.open((strInputFile+"_initial_params.hex").c_str(),ios::binary);
 	if (ifs.fail()) SR::srerror("Problem opening binary parameter file.");
 	SR::ParameterSet ukPars;
 	ifs >> ukPars;
 	ifs.close();
 
+
+
 	//Load network generation parameters into ukPars
-	if ((argc-(intNoArgs+1))%3!=0)
+	if ((argc-(intNoArgs+2))%3!=0)
 	{
 		SR::srerror("An even number of parameter arguments are required.\n");
 	}
 
-	for (int i=intNoArgs+1;i<argc;i=i+3)
+	for (int i=intNoArgs+2;i<argc;i=i+3)
 	{
 		strArgs+=argv[i];strArgs+="\t";strArgs+=argv[i+1];strArgs+="\t";strArgs+=argv[i+2];strArgs+="\t";
 	}
@@ -65,10 +68,11 @@ int main(int argc, char* argv[]) {
 
 	// Mask the nodes in GridHex if needed
 	SR::NodeMask mask1(*ukGridHex);
-	//int intAgeLB = 10;//ukPars.GetIntValue("intAgeLowerBound");
-	//int intAgeUB = 50;//ukPars.GetIntValue("intAgeUpperBound");
+	//int intAgeLB = ukPars.GetIntValue("intAgeLowerBound");
+	//int intAgeUB = ukPars.GetIntValue("intAgeUpperBound");
 	//mask1.AgeMask(intAgeLB,intAgeUB,*ukGridHex);
 	mask1.NullMask(*ukGridHex);
+
 
 	// Set up the workplace density file
 	strWorkplaceFile = ukPars.GetTag("strWorkplaceDensityFile");
@@ -77,6 +81,8 @@ int main(int argc, char* argv[]) {
 	SR::DensityField WorkplaceDensityField(strWorkplaceFile);
 
 	SR::Workplaces ukWorkplaces(*ukGridHex, ukPars, WorkplaceDensityField);
+
+	//ukWorkplaces.MakeWorkplacesConsistentWithNodes(*ukGridHex, ukPars);
 
 	// Assign regional location to nodes and hexagons
 	setGZRegionMembership(*ukGridHex);
@@ -152,6 +158,7 @@ int main(int argc, char* argv[]) {
 
 	// Set up the network
 	ukPars.intSeed = -seedLog;
+	//I think this is where the seed issues arise, same behaviour not guaranteed on next run
 	SR::GenerateAllNeighbours(*ukGridHex,ukPars,procSpatialNeighbourSetup,kernNeighbourSetup,kernIntroSetup,evCountSpatialNeighbour,ukWorkplaces);
 
 
