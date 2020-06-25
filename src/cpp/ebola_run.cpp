@@ -368,7 +368,7 @@ int main(int argc, char* argv[]) {
 		ofs << ukPars;
 		ofs << ukGridHex;
 		ukEvmemInitial.WriteToBinaryFile(ofs,ukGridHex.FirstNode());
-		if (ofs.fail()) SR::srerror("You idiot.");
+		if (ofs.fail()) SR::srerror((strOutputFile+"_out.hex - failed to open or write to.").c_str());
 		ofs.close();
 		cerr  <<  "done.\n";
 	};

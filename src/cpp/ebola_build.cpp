@@ -21,6 +21,7 @@
 #include"ebola.h"
 #include<ctime>
 #include<limits>
+#include<memory>
 
 using namespace std;
 
@@ -50,12 +51,14 @@ int main(int argc, char* argv[]) {
 
 	// Read from command line and set up parameter object
 	int intNoArgs = 2;
+
 	if (argc<intNoArgs+1)
 	{
 		SR::srerror("First two arguments parameter_file_name and output_file_name. Rest parsed as parameter values.\n");
 	}
 
-	string strParamFile, strOutputFile, strHouseholdFile, strWorkplaceFile, strArgs;
+	string strParamFile, strOutputFile, strHouseholdFile, strWorkplaceFile, strArgs, strHouseholdAgeDistributionFile;
+
 	strParamFile = argv[1];
 	strOutputFile = argv[2];
 
@@ -76,7 +79,11 @@ int main(int argc, char* argv[]) {
 		ukPars.ReadParams(strArgs);
 	}
 
-	// Set up the population density file
+
+	// Set up the population age distribution file
+	strHouseholdAgeDistributionFile = ukPars.GetTag("strHouseholdAgeDistributionFile");
+
+	// Set up the population and workplace density files
 	strHouseholdFile = ukPars.GetTag("strHouseholdDensityFile");
 	SR::DensityField PopulationDensityField(strHouseholdFile);
 	//PopulationDensityField.WriteAsciiGrid("tmpAsciiDump.out");
@@ -101,7 +108,7 @@ int main(int argc, char* argv[]) {
 	SR::GridHex * ukGridHex;
 
 	//Make Grid
-	ukGridHexGenerate = new SR::GridHex(ukPars,tmphex, PopulationDensityField);
+	ukGridHexGenerate = new SR::GridHex(ukPars,tmphex, PopulationDensityField, strHouseholdAgeDistributionFile);
 
 	if(test_start)
 	{
@@ -250,15 +257,15 @@ int main(int argc, char* argv[]) {
 
 	// Write parameters, gridhex and network to a file
 	ofs.open((strOutputFile+"_params.hex").c_str(),ios::binary);
-	if (ofs.fail()) SR::srerror("You idiot.");
+	if (ofs.fail()) SR::srerror((strOutputFile+"_params.hex - failed to open").c_str());
 	ofs << ukPars;
 	ofs.close();
 	ofs.open((strOutputFile+"_pages.hex").c_str(),ios::binary);
-	if (ofs.fail()) SR::srerror("You idiot.");
+	if (ofs.fail()) SR::srerror((strOutputFile+"_pages.hex - failed to open").c_str());
 	ukEvmemInitial.WriteToBinaryFile(ofs,ukGridHex->FirstNode());
 	ofs.close();
 	ofs.open((strOutputFile+"_gridhex.hex").c_str(),ios::binary);
-	if (ofs.fail()) SR::srerror("You idiot.");
+	if (ofs.fail()) SR::srerror((strOutputFile+"_gridhex.hex - failed to open").c_str());
 	ofs << *ukGridHex;
 	ofs.close();
 

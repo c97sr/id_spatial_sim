@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
 		SR::srerror("First two arguments parameter_file_name and output_file_name. Rest parsed as parameter values.\n");
 	}
 
-	string strParamFile, strOutputFile, strHouseholdFile, strArgs;
+	string strParamFile, strOutputFile, strHouseholdFile, strArgs, strHouseholdAgeDistributionFile;
 	strParamFile = argv[1];
 	strOutputFile = argv[2];
 
@@ -48,6 +48,9 @@ int main(int argc, char* argv[]) {
 		ukPars.ReadParams(strArgs);
 	}
 
+	// Set up the population age distribution file
+	strHouseholdAgeDistributionFile = ukPars.GetTag("strHouseholdAgeDistributionFile");
+
 	// Set up the population density file
 	strHouseholdFile = ukPars.GetTag("strHouseholdDensityFile");
 	SR::DensityField PopulationDensityField(strHouseholdFile);
@@ -67,7 +70,7 @@ int main(int argc, char* argv[]) {
 	SR::GridHex * ukGridHexGenerate;
 
 	//Make Grid
-	ukGridHexGenerate = new SR::GridHex(ukPars,tmphex, PopulationDensityField);
+	ukGridHexGenerate = new SR::GridHex(ukPars,tmphex, PopulationDensityField, strHouseholdAgeDistributionFile);
 
 	//Save Grid
 	ofs.open((strOutputFile+"_initial_gridhex.hex").c_str(),ios::binary);

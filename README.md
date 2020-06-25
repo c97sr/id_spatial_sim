@@ -69,3 +69,13 @@ RpincGen2(yCell,cCell)
 Plots peak size/final size against clustering of each order, with linear fit and 95% confidence intervals. Inputs are n by 1 (or 1 by n) cell arrays with one entry per network. yCell{i}=[p,z] where p is a column vector of mean peak sizes and z a column vector of mean final sizes. cCell{i} is a 1 by a cell (a=number of alpha values), and each cell entry is a set of Cm summary statistics. **This was used to produce figures 4B and 4C.**
 
 **Note: plotting figures 1 and 2 is a straightforward task from the outputs of postProcessing.R**
+
+## ONS household age distribution ##
+
+ons-hh-ages.csv can be regenerated from the original download (ons-hh.csv) with the following command:
+
+```
+./src/bash/thing.bash parse-ons ./data/ons-hh.csv > ./data/ons-hh-ages.csv
+```
+
+It can then be referenced in the paramters as `strHouseholdAgeDistributionFile`
