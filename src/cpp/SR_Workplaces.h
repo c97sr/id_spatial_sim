@@ -68,7 +68,7 @@ namespace SR {
 		void WriteWorkplacesToFile(string f);
 		void WriteCommutesToFile(SR::GridHex& g, string f);
 		inline workplace* GetWorkplaceOfNode(int i);
-		void MCMCUpdate(GridHex& gh, ParameterSet& p,double pdistance(double,int,double*), string funcfile, NodeMask& nm, int minSamplesMillions, int maxSamplesMillions, int& cn);
+		void MCMCUpdate(GridHex& gh, ParameterSet& p,double pdistance(double,int,double*), string funcfile, int minSamplesMillions, int maxSamplesMillions, int& cn);
 		void GenerateDistributionOfPossibleCommutes(GridHex& gh, ParameterSet& p, double grid_dx, double hist_dx, string funcfile);
 		int* FirstCollegue(int n);
 		int* OnePastLastCollegue(int n);

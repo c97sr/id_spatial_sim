@@ -23,6 +23,7 @@ namespace SR {
 	class Hexagon;
 	class GridHex;
 	class NodeMask;
+	class GroupDistribution;
 
 	class Node {
 		friend class Hexagon;
@@ -214,6 +215,7 @@ namespace SR {
 		SR::Hexagon *vecHexagon;
 		int sizeVecHexagons;
 		SR::Node **vecPtNodesHexOrder;
+		SR::NodeMask *mask;
 		IntCoord RealToHexCoords(double x, double y);
 	public:
 		GridHex() {};
@@ -251,6 +253,8 @@ namespace SR {
 		double CalcExpectedSpatial(SR::ParameterSet& p, KERNEL k);
 		void MakeAllHexagonsNotInRegionalTreatment();
 		int GetTotalInfectedNotInfectious();
+		inline SR::NodeMask* GetMaskPtr() {return mask;};
+		void GenerateMasksFromStochasticMatrix(int noGroups, int *ages, double** probabilities, SR::NodeMask *masks);
 	};
 
 	class NodeMask {
@@ -259,15 +263,36 @@ namespace SR {
 		int  *vecNodesSeen;
 		int maxNoNodes, seenNoNodes;
 	public:
-	    NodeMask(){SR::srerror("No default constructor for NodeMask");};
+		friend ofstream& operator<<(ofstream& ofs, NodeMask& nm);
+		friend ifstream& operator>>(ifstream& ifs, NodeMask& nm);
+	    NodeMask(){/*SR::srerror("No default constructor for NodeMask");*/};
 	    NodeMask(SR::GridHex &GH);
 	    ~NodeMask();
+	    void CloneMask(SR::NodeMask* nm, SR::GridHex &gh);
+	    void ArrayMask(bool* m, SR::GridHex &gh);
 	    void AgeMask(int lbInc, int ubInc, SR::GridHex &GH);
 	    void NullMask(SR::GridHex &GH);
 	    inline int GetNoSeenNodes(){return seenNoNodes;};
 	    inline int RevealNode(int index){
 	    	if (index < 0 || index > seenNoNodes) SR::srerror("index out of range.");
 	    	return vecNodesSeen[index];};
+	};
+
+	class GroupDistribution {
+	private:
+		const int maxAge = 100;
+		int noAgeGroups;
+		int noMasks;
+		int* maxAges;
+		double** probability_distribution;
+		SR::NodeMask** masks;
+		void GenerateMasks(SR::GridHex* gh);
+		void initialize(int noAgeGroups, int noMasks, SR::GridHex* gh);
+	public:
+		GroupDistribution(ifstream& ifs, SR::GridHex* gh);
+		~GroupDistribution();
+		void WriteMask(ofstream &ofs, int i);
+		int GetNoMasks() {return noMasks;};
 	};
 
 	void AssignHexagons(SR::Hexagon* ptHexStart, SR::Hexagon* ptHexEnd, GridHex &g);

@@ -49,16 +49,19 @@ OBJFILES = BytePackedInt.o CachedLookups.o SR_DensityField.o SR_EventMatrix.o \
 			SR_Label.o SR_PagesForThings.o SR_Parameter.o SR_Stats.o SR_StripComments.o \
 			SR_Utility.o SR_Workplaces.o ebola_common.o
 
-all : ebola_build_grid.exe ebola_build_network.exe ebola_run.exe
+all : build_grid.exe build_network.exe build_strata.exe ebola_run.exe
 
 ebola_run.exe : $(OBJFILES) ebola_run.o  
 	$(CXX) $(OBJFILES) ebola_run.o -o $@ $(LDFLAGS) 
 
-ebola_build_grid.exe : $(OBJFILES) ebola_build_grid.o  
-	$(CXX) $(OBJFILES) ebola_build_grid.o -o $@ $(LDFLAGS)
+build_grid.exe : $(OBJFILES) build_grid.o  
+	$(CXX) $(OBJFILES) build_grid.o -o $@ $(LDFLAGS)
 	
-ebola_build_network.exe : $(OBJFILES) ebola_build_network.o  
-	$(CXX) $(OBJFILES) ebola_build_network.o -o $@ $(LDFLAGS)
+build_network.exe : $(OBJFILES) build_network.o  
+	$(CXX) $(OBJFILES) build_network.o -o $@ $(LDFLAGS)
+
+build_strata.exe : $(OBJFILES) build_strata.o  
+	$(CXX) $(OBJFILES) build_strata.o -o $@ $(LDFLAGS)
 
 clean:
 	rm *.o *.exe

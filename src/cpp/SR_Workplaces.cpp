@@ -63,7 +63,8 @@ void SR::GenerateAllNeighbours(SR::GridHex& gh, SR::ParameterSet& p, PROCESS pro
 	itIntA = w.VeryFirstCollegue();
 	ptNodeCurrent = gh.FirstNode();
 	cerr << "Generating neighbours from workplaces...\n";
-	while (itIntA != w.OnePastVeryLastCollegue()) {
+	//DO SOMETHING LESS FRAGILE THAN THIS MAGIC NUMBER
+	while (*itIntA > 0 && itIntA != w.OnePastVeryLastCollegue()) {
 		itIntB = w.OnePastLastCollegue(*itIntA);
 		itIntC = itIntA+1;
 		while (itIntC != itIntB) {
@@ -86,6 +87,7 @@ void SR::GenerateAllNeighbours(SR::GridHex& gh, SR::ParameterSet& p, PROCESS pro
 
 void SR::Workplaces::MakeWorkplacesConsistentWithNodes(SR::GridHex& g, SR::ParameterSet& p) {
 	int currentNode,tmpint;
+	NodeMask *nm = g.GetMaskPtr();
 	SR::workplace* ptFirstWorkplace = vecWorkplaces;
 	SR::workplace* ptOnePastLastWorkplace = vecWorkplaces+sizeVecWorkplaces;
 	SR::workplace* ptWorkplace;
@@ -106,8 +108,9 @@ void SR::Workplaces::MakeWorkplacesConsistentWithNodes(SR::GridHex& g, SR::Param
 
 	// Repeat node pass assigning the node this time
 	cerr << "  Starting second sweep through nodes assigning workplaces...";
-	ptHexNode = ptFirstHexNode;
-	while (ptHexNode != ptOnePastLastHexNode) {
+
+	for(int i=0; i<nm->GetNoSeenNodes(); i++) {
+		ptHexNode = g.FirstNode() + nm->RevealNode(i);
 		currentNode = ptHexNode->GetIndex();
 		tmpint = vecWorkplaceIntsForEachNode[currentNode];
 		ptWorkplace = ptFirstWorkplace+tmpint;
@@ -132,13 +135,13 @@ SR::Workplaces::~Workplaces() {
 	delete [] ptArrNumberEachNearbyWorkplaces;
 }
 
-SR::Workplaces::Workplaces(SR::GridHex& g, SR::ParameterSet& p, SR::DensityField& wpd) {//, SR::NodeMask nm) {
+SR::Workplaces::Workplaces(SR::GridHex& g, SR::ParameterSet& p, SR::DensityField& wpd) {
 
 	cerr << "Entering workplaces contructor...\n";
 
 	// Old inheritance bits
-	sizeVecNodeIntsInWorkplaceOrder = p.GetIntValue("intNoNodes");//nm.GetNoSeenNodes();
-	sizeVecWorkplaceIntsForEachNode = p.GetIntValue("intNoNodes");//nm.GetNoSeenNodes();
+	sizeVecNodeIntsInWorkplaceOrder = p.GetIntValue("intNoNodes");
+	sizeVecWorkplaceIntsForEachNode = p.GetIntValue("intNoNodes");
 	sizeVecWorkplaces = p.GetIntValue("intNumberOfWorkplaces");
 	sizeVecDistFrequencies = outputBinNumber;
 
@@ -157,7 +160,7 @@ SR::Workplaces::Workplaces(SR::GridHex& g, SR::ParameterSet& p, SR::DensityField
 	outputBinSize=1.0;
 	startscale=0.001;
 	dblGridSize = p.GetValue("dblMCMCGridSize");
-	intNoNodes = g.GetNoNodes(); //nm.GetNoSeenNodes();
+	intNoNodes = g.GetNoNodes();
 	intNoWorkplaces = p.GetIntValue("intNumberOfWorkplaces");
 	intNoXWorkplaceGrids = static_cast<int>(p.GetValue("dblXGridSize")/dblGridSize+1);
 	intNoYWorkplaceGrids = static_cast<int>(p.GetValue("dblYGridSize")/dblGridSize+1);
@@ -288,68 +291,34 @@ SR::Workplaces::Workplaces(SR::GridHex& g, SR::ParameterSet& p, SR::DensityField
 
 	}
 
-	// Log seed
-	intSeedLog = p.intSeed;
-	unsigned long int checkpoint = gsl_rng_get(glob_rng);
-	p.intSeed = -intSeedLog;
-
-	// Go through nodes assigning them to workplaces.  Increment count and put in pointer in other vector
-	cerr << "  Starting first sweep through nodes to calc mem requirements...\n";
-	ptHexNode = ptFirstHexNode;
-	while (ptHexNode != ptOnePastLastHexNode) {
+	NodeMask *nm = g.GetMaskPtr();
+	for(int i=0; i<nm->GetNoSeenNodes(); i++) {
+		//cerr << nm->RevealNode(i);
+		ptHexNode = g.FirstNode() + nm->RevealNode(i);
 		tmpint = static_cast<int>(gsl_rng_uniform(glob_rng)*static_cast<double>(sizeVecWorkplaces));
 		vecWorkplaceIntsForEachNode[ptHexNode->GetIndex()]=tmpint;
 
-		//DEBUG
-		//cerr << "Node:" << ptHexNode->GetIndex() << " WP:" << tmpint << "\n";
 
 		ptWorkplace = ptFirstWorkplace+tmpint;
 		tmpdist = SR::Distance(ptHexNode->GetX(),ptHexNode->GetY(),ptWorkplace->x,ptWorkplace->y,g.GetMaxDx(),g.GetMaxDy());
 		tmpint = GetDistanceBin(tmpdist);
 		vecDistFrequencies[tmpint]++;
 		(ptWorkplace->totalnodes)++;
-		ptHexNode++;
 	}
 	cerr << "  ...done.\n";
 
 	MakeWorkplacesConsistentWithNodes(g, p);
 
-/* OLD
-	// Allocate space by setting counter ints
-	cerr << "  Starting sweep through workplaces...";
-	ptWorkplace = ptFirstWorkplace;
-	tmpint = 0;
-	while (ptWorkplace!=ptOnePastLastWorkplace) {
-		ptWorkplace->firstnode = tmpint;
-		tmpint += ptWorkplace->totalnodes;
-		ptWorkplace++;
-	}
-	cerr << "done.\n";
-	// Reset seed
-	p.intSeed = -intSeedLog;
-	gsl_rng_set(glob_rng,checkpoint);
-	// Repeat node pass assigning the node this time
-	cerr << "  Starting second sweep through nodes assigning workplaces...\n";
-	ptHexNode = ptFirstHexNode;
-	while (ptHexNode != ptOnePastLastHexNode) {
-		tmpint = static_cast<int>(gsl_rng_uniform(glob_rng)*sizeVecWorkplaces);
-
-		ptWorkplace = ptFirstWorkplace+tmpint;
-		vecNodeIntsInWorkplaceOrder[ptWorkplace->firstnode+ptWorkplace->currentlyusednodes]=ptHexNode->GetIndex();
-
-		cerr << "Node:" << ptHexNode->GetIndex() << " WP:" << tmpint << "\n";
-
-		ptWorkplace->currentlyusednodes++;
-		ptHexNode++;
-	}*/
 	delete [] tmpWorkPlaceGrid;
 
-
 	cerr << "done\n... leaving workplaces contructor.\n";
-	/* DEBUG
-	tmpint = 0;
+
+
+	// DEBUG
+	/*tmpint = 0;
 	int sum = 0;
-	cerr << "STATE OF vecNodeIntsInWorkplaceOrder\n";
+	cerr <<"\n\n\n";
+	cerr << "STATE OF vecNodeIntsInWorkplaceOrder";
 	for(int i = 0; i < sizeVecNodeIntsInWorkplaceOrder; i++)
 	{
 		if (i >= sum) {
@@ -365,7 +334,9 @@ SR::Workplaces::Workplaces(SR::GridHex& g, SR::ParameterSet& p, SR::DensityField
 	{
 		cerr << "Node:" << i << " WP:" << vecWorkplaceIntsForEachNode[i] << "\n";
 	}
+
 */
+
 };
 
 SR::workplace* SR::Workplaces::GetWorkplaceOfNode(int ni) {
@@ -413,11 +384,11 @@ void SR::Workplaces::MCMCUpdate(
 		ParameterSet& p,
 		double pdistance(double,int,double*),
 		string funcfile,
-		NodeMask& nm,
 		int minSamplesMillions,
 		int maxSamplesMillions,
 		int& cn) {
 
+	NodeMask *nm = gh.GetMaskPtr();
 	bool blMoveAccepted;
 	double dblAcceptanceProbability,dblProposalProbability;
 	int intSourceBinIndex,intTargetBinIndex;
@@ -440,7 +411,7 @@ void SR::Workplaces::MCMCUpdate(
 	int intNoAllWorkplaces = sizeVecWorkplaces;
 	int intNoNearbyWorkplaces;
 
-	int noNodesSeen = nm.GetNoSeenNodes();
+	int noNodesSeen = nm->GetNoSeenNodes();
 
 	// These might be the wrong indexes... 0 and 1, no?
 	double vecp0[2];
@@ -450,7 +421,6 @@ void SR::Workplaces::MCMCUpdate(
 	double vecp1[2];
 	vecp1[0] = p.GetValue("Commute_Power_One_HK");
 	vecp1[1] = p.GetValue("Commute_Change_Point_HK");
-
 	SR::CachedDblLookup cached_pdistance_0(pdistance,startscale,incsPerOrder,noOrders,2,vecp0);
 	SR::CachedDblLookup cached_pdistance_1(pdistance,startscale,incsPerOrder,noOrders,2,vecp1);
 
@@ -474,8 +444,10 @@ void SR::Workplaces::MCMCUpdate(
                         // XXXX Up to here 9th May 2020. Think here is one place I need to alter
                         // and then the place they get assigned initially.
 			indexMaskedNode = static_cast<int>(1.0*noNodesSeen*gsl_rng_uniform(glob_rng));
-			indexSelectedNode = nm.RevealNode(indexMaskedNode);
+			indexSelectedNode = nm->RevealNode(indexMaskedNode);
 			ptSelectedNode = gh.FirstNode()+indexSelectedNode;
+
+
 			ptCurrentWorkplace = vecWorkplaces+vecWorkplaceIntsForEachNode[indexSelectedNode];
 			ptProposedWorkplace = ptCurrentWorkplace;
 
@@ -559,6 +531,7 @@ void SR::Workplaces::MCMCUpdate(
 			}
 
 		}
+
 
 		intCount++;
 		cn++;

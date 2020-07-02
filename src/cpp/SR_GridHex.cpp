@@ -135,7 +135,7 @@ SR::GridHex::GridHex(SR::ParameterSet& p, SR::Hexagon tmphex, SR::DensityField& 
 		while(!ifs.eof()){
 			int hh_size;
 			ifs >> hh_size;
-			if (hh_size>10) SR::srerror("Hardcoded household size limit of 10.");
+			if (hh_size>10) SR::srerror("This Hardcoded household size limit of 10.");
 			ages[hh_size-1].push_back({});
 			auto& e = ages[hh_size-1].back();
 			ifs >>c>> e.a0_19 >>c>> e.a20_64 >>c>> e.a65_plus >>c>> e.freq;
@@ -164,7 +164,9 @@ SR::GridHex::GridHex(SR::ParameterSet& p, SR::Hexagon tmphex, SR::DensityField& 
 				for (int i=0; i<a[2]; ++i){
 					int age = a[0] + (int)(.5f + gsl_rng_uniform(glob_rng)*float(a[1]-a[0]));
 					ages_out.push_back(age);
+					if (ages_out.size() == num_members) break;
 				}
+				if (ages_out.size() == num_members) break;
 			}
 		};
 	}
@@ -233,6 +235,11 @@ SR::GridHex::GridHex(SR::ParameterSet& p, SR::Hexagon tmphex, SR::DensityField& 
 		if (gsl_rng_uniform(glob_rng) < dblAcceptProbability) {
 //			intHouseholdCounter = 1 + static_cast<int>(NR::poidev(dblPoissonAve,p.intSeed));
 			intHouseholdCounter = 1 + static_cast<int>(gsl_ran_poisson(glob_rng,dblPoissonAve));
+			//Households have at most size 10
+			while(intHouseholdCounter > 10) {
+				cerr << "RESELECT";
+				intHouseholdCounter = 1 + static_cast<int>(gsl_ran_poisson(glob_rng,dblPoissonAve));
+			}
 			if (vecNodes+sizeVecNodes > tmpPtNode+intHouseholdCounter) tmpPtNodeEndHouse = (tmpPtNode + intHouseholdCounter);
 			else {
 				tmpPtNodeEndHouse = vecNodes+sizeVecNodes;
@@ -240,7 +247,11 @@ SR::GridHex::GridHex(SR::ParameterSet& p, SR::Hexagon tmphex, SR::DensityField& 
 			}
 			ageSelector(selected_ages,intHouseholdCounter);	
 			int i=0;
-			if (selected_ages.size()!=intHouseholdCounter) SR::srerror("ageSelector didn't return the correct number of ages.");
+			while (selected_ages.size()!=intHouseholdCounter){
+				cerr << "\n.\n.\nSELECTOR ERROR:\n Indended size: "<< intHouseholdCounter << " - Generated Size: " << selected_ages.size() << "\n.\n.\n";
+				ageSelector(selected_ages,intHouseholdCounter);
+				//SR::srerror("ageSelector didn't return the correct number of ages.");
+			}
 			while (tmpPtNode != tmpPtNodeEndHouse) {
 				tmpPtNode->ptGridHex = this;
 				tmpPtNode->SetHouseholdMax(intHouseholdCounter-1);
@@ -336,7 +347,7 @@ SR::GridHex::GridHex(SR::ParameterSet& p, SR::Hexagon tmphex, SR::DensityField& 
 	};
 
 	// Once memory structures are static (i.e. past here) assign the self pointers and hex pointers
-	cerr << "Assigning nodes to hexagons (second hexagon sweep)...";
+	cerr << "Assigning nodes to hexagons (second hexagon sweep)....";
 	ptHexagon = vecHexagon;
 	while (ptHexagon != LastHexagon()) {
 		ptHexagon->SetLastNode(ptHexagon->GetLastNode()); // Bit strange, but some extras are done in setlastnode
@@ -370,6 +381,8 @@ SR::GridHex::GridHex(SR::ParameterSet& p, SR::Hexagon tmphex, SR::DensityField& 
 	cerr << "done.\n";
 
 	Blocks = 0;
+	mask = new SR::NodeMask(*this);
+	mask->NullMask(*this);
 	cerr << "...leaving gridhex constructor.\n";
 };
 
@@ -764,6 +777,7 @@ SR::GridHex::~GridHex() {
 	delete [] vecNodes;
 	delete [] vecHexagon;
 	delete [] vecPtNodesHexOrder;
+	delete mask;
 }
 
 
@@ -957,7 +971,8 @@ ifstream& SR::operator>>(ifstream& ifs, SR::GridHex& gh)
 
 	//This needs reseting?
 	gh.Blocks=0;
-
+	gh.mask = new SR::NodeMask(gh);
+	gh.mask->NullMask(gh);
 	return ifs;
 }
 
@@ -1215,6 +1230,65 @@ SR::NodeMask::~NodeMask() {
 
 };
 
+ofstream& SR::operator<<(ofstream& ofs, NodeMask& nm) {
+	SR::BinWrite(ofs,nm.maxNoNodes);
+	SR::BinWrite(ofs,nm.seenNoNodes);
+
+
+	for(int i = 0; i < nm.maxNoNodes; i++) {
+		SR::BinWrite(ofs,nm.vecNodesSeen[i]);
+
+	}
+	for(int i = 0; i < nm.maxNoNodes; i++) {
+		SR::BinWrite(ofs,nm.mask[i]);
+	}
+
+	return ofs;
+}
+
+ifstream& SR::operator>>(ifstream& ifs, NodeMask& nm) {
+	int mnn = SR::BinRead<int>(ifs);;
+	if(mnn != nm.maxNoNodes) cerr << "INCOMPATIBLE MASK\n";
+	nm.seenNoNodes = SR::BinRead<int>(ifs);
+
+	for(int i = 0; i < nm.maxNoNodes; i++) {
+		nm.vecNodesSeen[i] = SR::BinRead<int>(ifs);
+	}
+	for(int i = 0; i < nm.maxNoNodes; i++) {
+		nm.mask[i] = SR::BinRead<bool>(ifs);
+	}
+
+	return ifs;
+}
+
+void SR::NodeMask::CloneMask(SR::NodeMask* nm, SR::GridHex &gh) {
+	ArrayMask(nm->mask, gh);
+}
+
+
+void SR::NodeMask::ArrayMask(bool* m, SR::GridHex &gh) {
+
+	int checkSize;
+	SR::Node* ptFirstNode;
+	SR::Node* ptTmpNode;
+	seenNoNodes = 0;
+
+	// Check for obvious incompatibilities
+	checkSize = gh.GetNoNodes();
+	if (checkSize != maxNoNodes) SR::srerror("Stopping because mask and gridhex are not compatible");
+
+	for (int i=0; i<maxNoNodes; ++i) {
+
+		if (m[i]) {
+			vecNodesSeen[seenNoNodes] = i;
+			seenNoNodes++;
+			mask[i] = true;
+		} else {
+			mask[i] = false;
+		}
+
+	}
+}
 
 void SR::NodeMask::AgeMask(int lbInc, int ubInc, SR::GridHex &GH) {
 
@@ -1261,3 +1335,126 @@ void SR::NodeMask::NullMask(SR::GridHex &GH) {
 	}
 
 };
+
+SR::GroupDistribution::GroupDistribution(ifstream& ifs, SR::GridHex* gh) {
+
+	int noAgeGroups;
+	ifs >> noAgeGroups;
+	int noMasks;
+	ifs >> noMasks;
+
+	initialize(noAgeGroups, noMasks, gh);
+	for(int i=0; i<noAgeGroups-1; i++) {
+		ifs >> maxAges[i];
+		cerr << maxAges[i] << " ";
+	}
+	cerr << "\n";
+	for(int i=0; i<noAgeGroups; i++) {
+		for(int j=0; j<noMasks; j++) {
+			ifs >> probability_distribution[i][j];
+			cerr << probability_distribution[i][j] << " ";
+		}
+		cerr << "\n";
+	}
+	GenerateMasks(gh);
+}
+
+SR::GroupDistribution::~GroupDistribution() {
+	for(int i = 0; i < noAgeGroups; i++) {
+		delete[] probability_distribution[i];
+	}
+	delete[] probability_distribution;
+
+	for(int i = 0; i < noMasks; i++) {
+		delete masks[i];
+	}
+	delete[] masks;
+	delete[] maxAges;
+}
+
+void SR::GroupDistribution::initialize(int noAG, int noM, SR::GridHex* gh) {
+
+	noAgeGroups = noAG;
+	noMasks = noM;
+	maxAges = new int[noAgeGroups];
+	probability_distribution = new double*[noAgeGroups];
+
+	for(int i = 0; i < noAgeGroups; i++) {
+		probability_distribution[i] = new double[noMasks];
+		for(int j = 0; j < noMasks; j++) {
+			probability_distribution[i][j] = 0;
+		}
+		maxAges[i] = 0;
+	}
+	maxAges[noAgeGroups - 1] = maxAge;
+
+	masks = new SR::NodeMask*[noMasks];
+	for(int i = 0; i < noMasks; i++) {
+		masks[i] = new SR::NodeMask(*gh);
+	}
+
+
+}
+
+void SR::GroupDistribution::GenerateMasks(SR::GridHex *gh) {
+
+	bool *mask_bools[noMasks];
+	for(int i = 0; i < noMasks; i++) {
+		mask_bools[i] = new bool[gh->GetNoNodes()];
+	}
+	SR::Node* nodePtr = gh->FirstNode();
+	SR::Node* lastNodePtr = gh->LastNode();
+	int nodeNo = 0;
+
+	while(nodePtr != lastNodePtr)
+	{
+		int age_group = -1;
+		int mask_group = -1;
+
+		int age = nodePtr->GetAge();
+		while(age > maxAges[++age_group]) {}
+		//cerr <<"A " << age << " "<< age_group << "\n";
+
+		double r = gsl_rng_uniform(glob_rng);
+		do {
+			if(++mask_group == noMasks) {
+				//This intentionally sets mask_group to -1 in some cases if matrix is sub-stochastic
+				//i.e. Masked in every network
+				r = -1;
+				mask_group = -1;
+			} else {
+				r -= probability_distribution[age_group][mask_group];
+			}
+			//cerr << r << "\n";
+		} while (r > 0);
+
+		//cerr <<"M "<< mask_group << "\n";
+
+		for(int i = 0; i < noMasks; i++) {
+			if(i == mask_group) {
+				//cerr << i<< "\n";
+				mask_bools[i][nodeNo] = true;
+			} else {
+				mask_bools[i][nodeNo] = false;
+			}
+		}
+
+		nodeNo++;
+		nodePtr++;
+	}
+
+	for(int i=0; i<noMasks; i++) {
+		masks[i]->ArrayMask(mask_bools[i], *gh);
+		delete[] mask_bools[i];
+	}
+}
+
+void SR::GroupDistribution::WriteMask(ofstream &ofs, int i) {
+
+	if(i < 0 || i >= noMasks) {
+		cerr <<"No mask with index " << i << "\n";
+	} else {
+		ofs << *masks[i];
+	}
+	return;
+}

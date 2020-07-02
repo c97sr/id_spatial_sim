@@ -1,9 +1,8 @@
 [Workplace setup]			
-	intAgeUpperBound	1	10
-	intAgeLowerBound	1	20
+	intAgeUpperBound	1	100
+	intAgeLowerBound	1	50
 	dblPropColleguesInNetwork	1	0.1
-	dblAverageWorkplaceSize	1	100
-	strWorkplaceDensityFile	0	../data/monroviaAscii.asc
+	strWorkplaceDensityFile	0	../data/MidWestAscii3.asc
 	dblDistanceAllWorkplacesHistDx	1	10
 	dblDistanceAllWorkplacesGridDx	1	5
 	intMCMCMaxSamplesInMillions	1	12
