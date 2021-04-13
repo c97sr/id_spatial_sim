@@ -25,7 +25,6 @@
 extern gsl_rng * glob_rng;
 
 int main(int argc, char* argv[]) {
-  cerr << "\nBuilt on 15/02/2006 at 11:00\n";
 #ifdef SR_PAE_PAGING
   cerr << "MS Windows Advanced Server or better required";
   cerr << "to run this version.\n";

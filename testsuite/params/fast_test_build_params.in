@@ -1,4 +1,5 @@
 [General setup]
+	intSeed 1 123456789
 	dblHexagonWidth	1	0.001	[radians]
 	intNoMaximalNodes	1	1
 	dblMaxSpatialNeighbours	1	100

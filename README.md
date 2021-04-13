@@ -1,3 +1,17 @@
+## Getting Started
+
+### Prerequisites
+
+You will need to have the `g++`, the `Gnu Scientific Library` and `Make` installed before beginning.
+
+Enter the build folder and execute `make`.
+
+### Guidance for starting
+
+Enter the `testsuite` folder and execute `fast_test.sh`. This should work out of the box. Examine this script to learn more about how the program works.
+
+## Code Information
+
 **R code:**
 
 **Script: postProcessing.R**

@@ -19,7 +19,7 @@ require("devtools")
 require("idd")
 
 #' And finally load up functions held elsewhere in this repo
-source("../src/R/idSimFuncs.R")
+source("../src/rcode/idSimFuncs.R")
 
 #' ## Build synthetic population
 #' 
